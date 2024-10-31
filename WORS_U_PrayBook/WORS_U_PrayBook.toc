@@ -1,0 +1,8 @@
+## Interface: 30300
+## Title: WORS U Pray Book
+## Notes: A custom prayer book addon for managing prayers based on reputation.
+## Author: YourName
+## Version: 1.0
+## SavedVariables: WORS_U_PrayBookSettings
+
+WORS_U_PrayBook.lua
