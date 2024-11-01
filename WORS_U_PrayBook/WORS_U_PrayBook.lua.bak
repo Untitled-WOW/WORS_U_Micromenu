@@ -270,9 +270,6 @@ local function SetupPrayerButtons()
 
         table.insert(prayerButtons, prayerButton)
     end
-	
-	-- Load the saved variable transparency value when the frame is created
-	LoadTransparency()
 end
 
 -- Create the prayer book frame
@@ -292,7 +289,8 @@ WORS_U_PrayBook.frame:RegisterForDrag("LeftButton")
 WORS_U_PrayBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
 WORS_U_PrayBook.frame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
 
-
+-- Load the saved transparency value when the frame is created
+LoadTransparency()
 
 -- Save settings on logout
 local function OnLogout()
