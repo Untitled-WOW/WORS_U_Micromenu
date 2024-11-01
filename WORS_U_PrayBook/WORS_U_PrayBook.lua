@@ -316,16 +316,39 @@ local function UpdateButtonBackground()
 end
 
 
--- OnClick to toggle the prayer book and update the button’s background
-WORS_U_PrayBook.toggleButton:SetScript("OnClick", function()
-    if WORS_U_PrayBook.frame:IsShown() then
-        WORS_U_PrayBook.frame:Hide()
-    else
-        InitializePrayerLevel()
-        SetupPrayerButtons()
-        WORS_U_PrayBook.frame:Show()
+-- Transparency levels and initial index
+local transparencyLevels = {1, 0.75, 0.5, 0.25}
+local transparencyIndex = 1
+
+-- OnClick to toggle the prayer book and update transparency when Alt is held
+WORS_U_PrayBook.toggleButton:SetScript("OnClick", function(self, button)
+    if InCombatLockdown() then
+        print("Cannot open Prayer Book while in combat. Retrying...")
+        -- Wait 1 second and try again
+        C_Timer.After(1, function()
+            WORS_U_PrayBook.toggleButton:GetScript("OnClick")(self, button) -- Reinvoke the OnClick
+        end)
+        return
     end
-    UpdateButtonBackground()
+
+    if IsAltKeyDown() then
+        -- Cycle through transparency levels
+        WORS_U_PrayBook.frame:Show()
+        transparencyIndex = transparencyIndex % #transparencyLevels + 1
+        local alpha = transparencyLevels[transparencyIndex]
+        WORS_U_PrayBook.frame:SetAlpha(alpha)
+        print("Prayer Book Transparency:", alpha * 100 .. "%")
+    else
+        -- Regular toggle functionality
+        if WORS_U_PrayBook.frame:IsShown() then
+            WORS_U_PrayBook.frame:Hide()
+        else
+            InitializePrayerLevel()
+            SetupPrayerButtons()
+            WORS_U_PrayBook.frame:Show()
+        end
+        UpdateButtonBackground()
+    end
 end)
 
 
@@ -333,7 +356,7 @@ end)
 -- Initial highlight update
 
 PrayerMicroButton:Hide()
-UpdateButtonHighlight()
+UpdateButtonBackground()
 WORS_U_PrayBook.toggleButton:SetPoint(unpack(WORS_U_PrayBookButtonPosition or {"CENTER"}))
 
 SLASH_WORSUPRAYBOOK1 = "/worsupraybook"

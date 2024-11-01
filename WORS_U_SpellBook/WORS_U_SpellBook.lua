@@ -343,16 +343,38 @@ local function UpdateButtonBackground()
 end
 
 -- OnClick to toggle the spell book and update the button's background
-WORS_U_SpellBook.toggleButton:SetScript("OnClick", function()
-    if WORS_U_SpellBook.frame:IsShown() then
-        WORS_U_SpellBook.frame:Hide()
-    else
-        InitializeMagicLevel()  -- Refresh magic level before showing frame
-        SetupMagicButtons()      -- Ensure buttons are set up based on current magic level
-        WORS_U_SpellBook.frame:Show()
+local transparencyLevels = {1, 0.75, 0.5, 0.25}
+local currentTransparencyIndex = 1
+
+WORS_U_SpellBook.toggleButton:SetScript("OnClick", function(self)
+    if InCombatLockdown() then
+        print("Cannot open Spell Book during combat. Will check again in 1 second.")
+        C_Timer.After(1, function()
+            WORS_U_SpellBook.toggleButton:GetScript("OnClick")(self)  -- Re-check the click logic after 1 second
+        end)
+        return
     end
-    UpdateButtonBackground()
+
+    if IsAltKeyDown() then
+        -- Cycle through transparency levels
+        WORS_U_SpellBook.frame:Show()
+        currentTransparencyIndex = currentTransparencyIndex % #transparencyLevels + 1
+        WORS_U_SpellBook.frame:SetAlpha(transparencyLevels[currentTransparencyIndex])
+        print("Spell Book Transparency:", transparencyLevels[currentTransparencyIndex] * 100, "%")
+    else
+        -- Standard toggle functionality
+        if WORS_U_SpellBook.frame:IsShown() then
+            WORS_U_SpellBook.frame:Hide()
+        else
+            InitializeMagicLevel()  -- Refresh magic level before showing frame
+            SetupMagicButtons()      -- Ensure buttons are set up based on current magic level
+            WORS_U_SpellBook.frame:Show()
+        end
+        UpdateButtonBackground()
+    end
 end)
+
+
 
 -- Initial highlight update
 SpellbookMicroButton:Hide()
