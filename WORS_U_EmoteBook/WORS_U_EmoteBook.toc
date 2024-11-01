@@ -1,0 +1,9 @@
+## Interface: 30300
+## Title: WORS U Emote Book
+## Notes: A customizable emote book add-on for WORS.
+## Author: YourName
+## Version: 1.0
+## SavedVariables: WORS_U_EmoteBookSettings
+
+
+WORS_U_EmoteBook.lua
