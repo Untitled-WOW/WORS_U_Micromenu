@@ -1,9 +1,0 @@
-## Interface: 30300
-## Title: WORS U Music Book
-## Notes: A customizable music player add-on for WORS.
-## Author: YourName
-## Version: 1.0
-## SavedVariables: WORS_U_MusicBookSettings
-
-
-WORS_U_Music Book.lua

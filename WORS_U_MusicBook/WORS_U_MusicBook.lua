@@ -98,44 +98,17 @@ end
 -- Define the function to update the background color of the toggle button
 local function UpdateButtonBackground()
     if WORS_U_MusicBook.musicPlayer:IsShown() then
-        WORS_U_MusicBook.toggleButton:SetBackdropColor(1, 0, 0, 1)  -- Red background when open
-    else
-        WORS_U_MusicBook.toggleButton:SetBackdropColor(1, 1, 1, 1)  -- Default white background when closed
-    end
+        --WORS_U_MusicBook.toggleButton:SetBackdropColor(1, 0, 0, 1)  -- Red background when open
+        MusicMicroButton:GetNormalTexture():SetVertexColor(1, 0, 0) -- Set the color red
+	else
+        --WORS_U_MusicBook.toggleButton:SetBackdropColor(1, 1, 1, 1)  -- Default white background when closed
+        MusicMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
+
+	end
 	LoadTransparency()
 end
 
--- Create the toggle button only if it doesn't exist
-if not WORS_U_MusicBook.toggleButton then
-    WORS_U_MusicBook.toggleButton = CreateFrame("Button", "WORS_U_MusicBookToggleButton", UIParent)
-    WORS_U_MusicBook.toggleButton:SetSize(30, 35)
-    WORS_U_MusicBook.toggleButton:SetMovable(true)
-    WORS_U_MusicBook.toggleButton:SetClampedToScreen(true)
-    WORS_U_MusicBook.toggleButton:EnableMouse(true)
-    WORS_U_MusicBook.toggleButton:RegisterForDrag("LeftButton")
-    WORS_U_MusicBook.toggleButton:SetScript("OnDragStart", function(self) self:StartMoving() end)
-    WORS_U_MusicBook.toggleButton:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
-
-    -- Custom background texture for the button
-    WORS_U_MusicBook.toggleButton:SetBackdrop({
-        bgFile = "Interface\\WORS\\OldSchoolBackground2",
-        edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
-        tile = false, tileSize = 32, edgeSize = 16,
-        insets = { left = 1, right = 1, top = 1, bottom = 1 }
-    })
-
-    -- Icon for the toggle button
-    local icon = WORS_U_MusicBook.toggleButton:CreateTexture(nil, "ARTWORK")
-    icon:SetSize(25, 25)
-    icon:SetPoint("CENTER")
-    icon:SetTexture("Interface\\Icons\\bluephat")  -- Replace with your preferred icon
-
-    -- Set position if no saved position exists
-    WORS_U_MusicBook.toggleButton:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
-end
-
--- Toggle button functionality for transparency and frame show/hide
-WORS_U_MusicBook.toggleButton:SetScript("OnClick", function()
+local function OnMusicClick(self)
     if IsAltKeyDown() then
         currentTransparencyIndex = currentTransparencyIndex % #transparencyLevels + 1
         WORS_U_MusicBook.musicPlayer:SetAlpha(transparencyLevels[currentTransparencyIndex])
@@ -149,11 +122,11 @@ WORS_U_MusicBook.toggleButton:SetScript("OnClick", function()
         end
         UpdateButtonBackground()  -- Update the background color based on visibility
     end
-end)
+end
+MusicMicroButton:SetScript("OnClick", OnMusicClick)
 
--- Load transparency and update button background on addon load
-LoadTransparency()
-UpdateButtonBackground()  -- Ensure initial background color is correct
+
+
 
 -- Command to show/hide the music player
 SLASH_WORSUMUSICBOOK1 = "/worsuplayer"
@@ -165,3 +138,64 @@ SlashCmdList["WORSUMUSICBOOK"] = function()
     end
     UpdateButtonBackground()  -- Update background when using the slash command
 end
+
+
+-- **********************************************************************
+-- **********************************************************************
+-- ************************OLD CODE FOR TOGGLE BUTTON *******************
+-- **********************************************************************
+-- **********************************************************************
+
+
+
+
+-- -- Create the toggle button only if it doesn't exist
+-- if not WORS_U_MusicBook.toggleButton then
+    -- WORS_U_MusicBook.toggleButton = CreateFrame("Button", "WORS_U_MusicBookToggleButton", UIParent)
+    -- WORS_U_MusicBook.toggleButton:SetSize(30, 35)
+    -- WORS_U_MusicBook.toggleButton:SetMovable(true)
+    -- WORS_U_MusicBook.toggleButton:SetClampedToScreen(true)
+    -- WORS_U_MusicBook.toggleButton:EnableMouse(true)
+    -- WORS_U_MusicBook.toggleButton:RegisterForDrag("LeftButton")
+    -- WORS_U_MusicBook.toggleButton:SetScript("OnDragStart", function(self) self:StartMoving() end)
+    -- WORS_U_MusicBook.toggleButton:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
+
+    -- -- Custom background texture for the button
+    -- WORS_U_MusicBook.toggleButton:SetBackdrop({
+        -- bgFile = "Interface\\WORS\\OldSchoolBackground2",
+        -- edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
+        -- tile = false, tileSize = 32, edgeSize = 16,
+        -- insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    -- })
+
+    -- -- Icon for the toggle button
+    -- local icon = WORS_U_MusicBook.toggleButton:CreateTexture(nil, "ARTWORK")
+    -- icon:SetSize(25, 25)
+    -- icon:SetPoint("CENTER")
+    -- icon:SetTexture("Interface\\Icons\\bluephat")  -- Replace with your preferred icon
+
+    -- -- Set position if no saved position exists
+    -- WORS_U_MusicBook.toggleButton:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
+-- end
+
+-- -- Toggle button functionality for transparency and frame show/hide
+-- WORS_U_MusicBook.toggleButton:SetScript("OnClick", function()
+    -- if IsAltKeyDown() then
+        -- currentTransparencyIndex = currentTransparencyIndex % #transparencyLevels + 1
+        -- WORS_U_MusicBook.musicPlayer:SetAlpha(transparencyLevels[currentTransparencyIndex])
+        -- SaveTransparency()
+        -- print("Music Book Transparency:", transparencyLevels[currentTransparencyIndex] * 100 .. "%")
+    -- else
+        -- if WORS_U_MusicBook.musicPlayer:IsShown() then
+            -- WORS_U_MusicBook.musicPlayer:Hide()
+        -- else
+            -- WORS_U_MusicBook.musicPlayer:Show()
+        -- end
+        -- UpdateButtonBackground()  -- Update the background color based on visibility
+    -- end
+-- end)
+
+-- -- Load transparency and update button background on addon load
+-- --MusicMicroButton:Hide()
+-- LoadTransparency()
+-- UpdateButtonBackground()  -- Ensure initial background color is correct

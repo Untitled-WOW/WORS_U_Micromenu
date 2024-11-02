@@ -3,27 +3,36 @@ WORS_U_EmoteBook.emotes = {
 
     { name = "Yes", command = "nod" },
     { name = "No", command = "no" },
-	{ name = "Dance", command = "dance" },
-    { name = "Cheer", command = "cheer" },
-    { name = "Poke", command = "poke" },
-    { name = "Sniff", command = "sniff" },
-	{ name = "Gasp", command = "gasp" },
-    { name = "Bonk", command = "bonk" },
-    { name = "Sorry", command = "apologize" },
-    { name = "Bow", command = "bow" },
-	{ name = "Clap", command = "clap" },
+	{ name = "Bow", command = "Bow" },
+    { name = "Angry", command = "angry" }, --OSRS correct
+    { name = "Think", command = "think" },
+    { name = "Wave", command = "wave" },
+	{ name = "Shrug", command = "shrug" },
+    { name = "Cheer", command = "cheer" },--OsRS correcthey
+    { name = "Beckon", command = "beckon" },	
+    { name = "Laugh", command = "laugh" },
+    { name = "Joy", command = "Bounce" },
+	{ name = "Yawn", command = "Yawn" },--OSRS correct
+    { name = "Dance", command = "dance" },
+    { name = "Shake", command = "shake" },
+	{ name = "Tease", command = "tease" },
+	{ name = "Bonk", command = "Bonk" },--OSRS correct
     { name = "Cry", command = "cry" },
-    { name = "Bark", command = "bark" },
-    { name = "Chicken", command = "chicken" },
-	{ name = "Moo", command = "moo" },
-    { name = "Purr", command = "purr" },
-	
+	{ name = "Blow", command = "kiss" },
+	{ name = "Panic", command = "panic" },
+	{ name = "Fart", command = "fart" },
+	{ name = "Clap", command = "clap" },
+	{ name = "Salute", command = "salute" },
 }
 
 -- Initialize saved variables for transparency
 WORS_U_EmoteBookSettings = WORS_U_EmoteBookSettings or {
     transparency = 1,  -- Default transparency value
 }
+-- Transparency levels
+local transparencyLevels = {1, 0.75, 0.5, 0.25}
+local currentTransparencyIndex = 1
+
 
 -- Function to load transparency from saved variables
 local function LoadTransparency()
@@ -84,9 +93,9 @@ local function SetupEmoteButtons()
     wipe(emoteButtons)
 
     -- Button size configuration
-    local buttonWidth = 35  -- Custom width for buttons
+    local buttonWidth = 40  -- Custom width for buttons
     local buttonHeight = 25  -- Custom height for buttons
-    local padding = 10
+    local padding = 5
     local columns = 4
 
     for i, emoteData in ipairs(WORS_U_EmoteBook.emotes) do
@@ -116,45 +125,23 @@ end
 
 
 
--- Movable button to toggle emote book
-WORS_U_EmoteBook.toggleButton = CreateFrame("Button", "WORS_U_EmoteBookToggleButton", UIParent)
-WORS_U_EmoteBook.toggleButton:SetSize(30, 35)
-WORS_U_EmoteBook.toggleButton:SetMovable(true)
-WORS_U_EmoteBook.toggleButton:SetClampedToScreen(true)
-WORS_U_EmoteBook.toggleButton:EnableMouse(true)
-WORS_U_EmoteBook.toggleButton:RegisterForDrag("LeftButton")
-WORS_U_EmoteBook.toggleButton:SetScript("OnDragStart", function(self) self:StartMoving() end)
-WORS_U_EmoteBook.toggleButton:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
 
--- Custom background texture for the toggle button
-WORS_U_EmoteBook.toggleButton:SetBackdrop({
-    bgFile = "Interface\\WORS\\OldSchoolBackground2",
-    edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
-    tile = false, tileSize = 32, edgeSize = 16,
-    insets = { left = 1, right = 1, top = 1, bottom = 1 }
-})
-
--- Icon texture for the toggle button
-local icon = WORS_U_EmoteBook.toggleButton:CreateTexture(nil, "ARTWORK")
-icon:SetSize(25, 25)
-icon:SetPoint("CENTER")
-icon:SetTexture("Interface\\Icons\\redhalloweenmask")  -- Replace with your emote icon
 
 -- Function to update the button's background color
 local function UpdateButtonBackground()
     if WORS_U_EmoteBook.frame:IsShown() then
-        WORS_U_EmoteBook.toggleButton:SetBackdropColor(1, 0, 0, 1)  -- Red background when open
+        --WORS_U_EmoteBook.toggleButton:SetBackdropColor(1, 0, 0, 1)  -- Red background when open
+		EmotesMicroButton:GetNormalTexture():SetVertexColor(1, 0, 0) -- Set the color to red	
+
     else
-        WORS_U_EmoteBook.toggleButton:SetBackdropColor(1, 1, 1, 1)  -- Default white background when closed
-    end
+        --WORS_U_EmoteBook.toggleButton:SetBackdropColor(1, 1, 1, 1)  -- Default white background when closed
+    	EmotesMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
+
+	end
 end
 
--- Transparency levels
-local transparencyLevels = {1, 0.75, 0.5, 0.25}
-local currentTransparencyIndex = 1
-
--- OnClick to toggle the emote book and transparency
-WORS_U_EmoteBook.toggleButton:SetScript("OnClick", function(self)
+-- Function to handle EmotesMicroButton clicks
+local function OnEmoteClick(self)
     if IsAltKeyDown() then
         -- Cycle through transparency levels
         currentTransparencyIndex = currentTransparencyIndex % #transparencyLevels + 1
@@ -173,14 +160,83 @@ WORS_U_EmoteBook.toggleButton:SetScript("OnClick", function(self)
         end
 		UpdateButtonBackground()
     end
-end)
+end
 
--- Initial transparency load
-LoadTransparency()
 
--- Position the toggle button
---WORS_U_EmoteBook.toggleButton:SetPoint("CENTER")
--- Initial highlight update
-EmotesMicroButton:Hide()
-UpdateButtonBackground()
-WORS_U_EmoteBook.toggleButton:SetPoint(unpack(WORS_U_EmoteBookButtonPosition or {"CENTER"}))
+
+EmotesMicroButton:SetScript("OnClick", OnEmoteClick)
+
+SLASH_WORSUEMOTEBOOK1 = "/worsuemotebook"
+SlashCmdList["WORSUEMOTEBOOK"] = function()
+    if WORS_U_EmoteBook.frame:IsShown() then
+        WORS_U_EmoteBook.frame:Hide()
+    else
+		SetupEmoteButtons()
+        WORS_U_EmoteBook.frame:Show()
+    end
+end
+
+
+-- **********************************************************************
+-- **********************************************************************
+-- ************************OLD CODE FOR TOGGLE BUTTON *******************
+-- **********************************************************************
+-- **********************************************************************
+
+
+-- Movable button to toggle emote book
+-- WORS_U_EmoteBook.toggleButton = CreateFrame("Button", "WORS_U_EmoteBookToggleButton", UIParent)
+-- WORS_U_EmoteBook.toggleButton:SetSize(30, 35)
+-- WORS_U_EmoteBook.toggleButton:SetMovable(true)
+-- WORS_U_EmoteBook.toggleButton:SetClampedToScreen(true)
+-- WORS_U_EmoteBook.toggleButton:EnableMouse(true)
+-- WORS_U_EmoteBook.toggleButton:RegisterForDrag("LeftButton")
+-- WORS_U_EmoteBook.toggleButton:SetScript("OnDragStart", function(self) self:StartMoving() end)
+-- WORS_U_EmoteBook.toggleButton:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
+
+-- -- Custom background texture for the toggle button
+-- WORS_U_EmoteBook.toggleButton:SetBackdrop({
+    -- bgFile = "Interface\\WORS\\OldSchoolBackground2",
+    -- edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
+    -- tile = false, tileSize = 32, edgeSize = 16,
+    -- insets = { left = 1, right = 1, top = 1, bottom = 1 }
+-- })
+
+-- -- Icon texture for the toggle button
+-- local icon = WORS_U_EmoteBook.toggleButton:CreateTexture(nil, "ARTWORK")
+-- icon:SetSize(25, 25)
+-- icon:SetPoint("CENTER")
+-- icon:SetTexture("Interface\\Icons\\redhalloweenmask")  -- Replace with your emote icon
+
+
+
+
+-- -- OnClick to toggle the emote book and transparency
+-- WORS_U_EmoteBook.toggleButton:SetScript("OnClick", function(self)
+    -- if IsAltKeyDown() then
+        -- -- Cycle through transparency levels
+        -- currentTransparencyIndex = currentTransparencyIndex % #transparencyLevels + 1
+        -- WORS_U_EmoteBook.frame:SetAlpha(transparencyLevels[currentTransparencyIndex])
+        -- SaveTransparency()  -- Save transparency after change
+        -- print("Emote Book Transparency:", transparencyLevels[currentTransparencyIndex] * 100 .. "%")
+    -- else
+        -- -- Standard toggle functionality
+        -- if WORS_U_EmoteBook.frame:IsShown() then
+            -- print("Hiding Emote Book")  -- Debug output
+            -- WORS_U_EmoteBook.frame:Hide()
+        -- else
+            -- print("Showing Emote Book")  -- Debug output
+            -- SetupEmoteButtons()  -- Ensure buttons are set up
+            -- WORS_U_EmoteBook.frame:Show()
+        -- end
+		-- UpdateButtonBackground()
+    -- end
+-- end)
+
+-- -- Initial transparency load
+
+
+
+-- --EmotesMicroButton:Hide()
+-- UpdateButtonBackground()
+-- WORS_U_EmoteBook.toggleButton:SetPoint(unpack(WORS_U_EmoteBookButtonPosition or {"CENTER"}))
