@@ -293,13 +293,6 @@ local function SetupMagicButtons()
             GameTooltip:Hide()
         end)
 
-        -- Allow dragging the spell button to the action bar
-        spellButton:RegisterForDrag("LeftButton")
-        spellButton:SetScript("OnDragStart", function()
-            if not InCombatLockdown() and magicLevel >= requiredLevel then
-                PickupSpell(spellID)
-            end
-        end)
 
         table.insert(magicButtons, spellButton)
     end
@@ -371,7 +364,8 @@ local function OnMagicClick(self)
 		
     elseif IsShiftKeyDown() then
         print("Shift key is down. Open normal Spellbook")  -- Debug statement for Shift key
-        AscensionSpellbookFrame:Show()
+        --AscensionSpellbookFrame:Show()
+		ToggleSpellBook(BOOKTYPE_SPELL)
     else
         print("Toggling Mini Spell Book visibility.")  -- Debug statement for standard toggle
         -- Standard toggle functionality

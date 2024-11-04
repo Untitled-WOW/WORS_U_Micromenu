@@ -303,8 +303,11 @@ local function OnPrayerClick(self)
             WORS_U_PrayBook.toggleButton:GetScript("OnClick")(self, button) -- Reinvoke the OnClick
         end)
         return
-    end
-    if IsAltKeyDown() then
+	elseif IsShiftKeyDown() then
+        print("Shift key is down. Open normal Spellbook")  -- Debug statement for Shift key
+        --AscensionSpellbookFrame:Show()
+		ToggleSpellBook(BOOKTYPE_SPELL)
+    elseif IsAltKeyDown() then
         -- Cycle through transparency levels
         WORS_U_PrayBook.frame:Show()
         transparencyIndex = transparencyIndex % #transparencyLevels + 1

@@ -23,16 +23,18 @@ WORS_U_EmoteBook.emotes = {
 	{ name = "Fart", command = "fart" },
 	{ name = "Clap", command = "clap" },
 	{ name = "Salute", command = "salute" },
+
 }
 
+-- Initialize saved variables for transparency
 -- Initialize saved variables for transparency
 WORS_U_EmoteBookSettings = WORS_U_EmoteBookSettings or {
     transparency = 1,  -- Default transparency value
 }
+
 -- Transparency levels
 local transparencyLevels = {1, 0.75, 0.5, 0.25}
 local currentTransparencyIndex = 1
-
 
 -- Function to load transparency from saved variables
 local function LoadTransparency()
@@ -65,14 +67,67 @@ WORS_U_EmoteBook.frame:RegisterForDrag("LeftButton")
 WORS_U_EmoteBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
 WORS_U_EmoteBook.frame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
 
--- Movable button to toggle prayer book
+-- Create the title for the emote book
+local title = WORS_U_EmoteBook.frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+title:SetText("Emote Book")
+title:SetPoint("TOP", WORS_U_EmoteBook.frame, "TOP", 0, -10)  -- Position title
+title:SetTextColor(1, 1, 1)  -- Set title color to white
+
+-- Create a scrollable frame for the buttons
+local scrollFrame = CreateFrame("ScrollFrame", nil, WORS_U_EmoteBook.frame, "UIPanelScrollFrameTemplate")
+scrollFrame:SetSize(180, 210)  -- Size of the scrollable area
+scrollFrame:SetPoint("TOPLEFT", 5, -40)  -- Position it below the title
+
+--Set a backdrop for the scroll frame with the TGA file as the background
+-- scrollFrame:SetBackdrop({
+    -- bgFile = "Interface\\AddOns\\WORS_U_EmoteBook\\emoteone33.tga", -- Path to your TGA file
+    -- edgeFile = nil,
+    -- tile = false,
+    -- tileSize = 0,
+    -- edgeSize = 0,
+    -- insets = { left = 0, right = 0, top = 0, bottom = 0 }
+-- })
+
+-- Hiding the scroll bar
+local scrollBar = scrollFrame.ScrollBar or _G[scrollFrame:GetName() .. "ScrollBar"]
+if scrollBar then
+    scrollBar:DisableDrawLayer("BACKGROUND")
+    scrollBar:GetThumbTexture():SetAlpha(0)
+
+    -- Hide the scroll buttons
+    local scrollUpButton = _G[scrollBar:GetName() .. "ScrollUpButton"]
+    local scrollDownButton = _G[scrollBar:GetName() .. "ScrollDownButton"]
+
+    scrollUpButton:GetNormalTexture():SetAlpha(0)
+    scrollUpButton:GetPushedTexture():SetAlpha(0)
+    scrollUpButton:GetDisabledTexture():SetAlpha(0)
+    scrollUpButton:GetHighlightTexture():SetAlpha(0)
+
+    scrollDownButton:GetNormalTexture():SetAlpha(0)
+    scrollDownButton:GetPushedTexture():SetAlpha(0)
+    scrollDownButton:GetDisabledTexture():SetAlpha(0)
+    scrollDownButton:GetHighlightTexture():SetAlpha(0)
+end
+
+
+
+
+-- Create a container for the buttons
+local buttonContainer = CreateFrame("Frame", nil, scrollFrame)
+buttonContainer:SetSize(180, 220)  -- Same size as scroll frame to avoid clipping
+scrollFrame:SetScrollChild(buttonContainer)
+
+
+
+
+-- Movable button to toggle the emote book
 local function SaveButtonPosition()
     WORS_U_EmoteBookButtonPosition = { WORS_U_EmoteBook.toggleButton:GetPoint() }
 end
 
 -- Save settings on logout
 local function OnLogout()
-	SaveButtonPosition()
+    SaveButtonPosition()
     SaveTransparency()
 end
 
@@ -97,15 +152,35 @@ local function SetupEmoteButtons()
     local buttonHeight = 25  -- Custom height for buttons
     local padding = 5
     local columns = 4
+    local startX = 2  -- Adjust this value to move buttons away from the left side
+    local buttonStartY = -10  -- Starting Y position for buttons (below the title)
+
+    -- Create title label
+    local titleLabel = WORS_U_EmoteBook.frame.titleLabel or WORS_U_EmoteBook.frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    titleLabel:SetPoint("TOP", 0, -10)  -- Position it at the top center of the frame
+    titleLabel:SetText("Emote Book")
+    WORS_U_EmoteBook.frame.titleLabel = titleLabel  -- Store it for later reference
 
     for i, emoteData in ipairs(WORS_U_EmoteBook.emotes) do
-        local emoteButton = CreateFrame("Button", nil, WORS_U_EmoteBook.frame, "UIPanelButtonTemplate")
+        local emoteButton = CreateFrame("Button", nil, buttonContainer, "UIPanelButtonTemplate")
         emoteButton:SetSize(buttonWidth, buttonHeight)
+
+        -- Set up the button border
+        emoteButton:SetBackdrop({
+            edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border", -- Border texture
+            edgeSize = 8,  -- Border thickness
+            insets = { left = 2, right = 2, top = 2, bottom = 2 },  -- Insets for border
+        })
+
+        -- Hide the default textures
+        emoteButton:SetNormalTexture(nil)
+        emoteButton:SetPushedTexture(nil)
+        emoteButton:SetHighlightTexture(nil)
 
         -- Calculate position
         local row = math.floor((i - 1) / columns)
         local column = (i - 1) % columns
-        emoteButton:SetPoint("TOPLEFT", padding + (buttonWidth + padding) * column, -padding - (buttonHeight + padding) * row)
+        emoteButton:SetPoint("TOPLEFT", startX + (buttonWidth + padding) * column, buttonStartY - (buttonHeight + padding) * row)
 
         -- Set up the button label and text
         emoteButton:SetText(emoteData.name)
@@ -124,20 +199,13 @@ local function SetupEmoteButtons()
 end
 
 
-
-
-
 -- Function to update the button's background color
 local function UpdateButtonBackground()
     if WORS_U_EmoteBook.frame:IsShown() then
-        --WORS_U_EmoteBook.toggleButton:SetBackdropColor(1, 0, 0, 1)  -- Red background when open
-		EmotesMicroButton:GetNormalTexture():SetVertexColor(1, 0, 0) -- Set the color to red	
-
+        EmotesMicroButton:GetNormalTexture():SetVertexColor(1, 0, 0) -- Set the color to red
     else
-        --WORS_U_EmoteBook.toggleButton:SetBackdropColor(1, 1, 1, 1)  -- Default white background when closed
-    	EmotesMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
-
-	end
+        EmotesMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
+    end
 end
 
 -- Function to handle EmotesMicroButton clicks
@@ -158,13 +226,13 @@ local function OnEmoteClick(self)
             SetupEmoteButtons()  -- Ensure buttons are set up
             WORS_U_EmoteBook.frame:Show()
         end
-		UpdateButtonBackground()
+        UpdateButtonBackground()
     end
 end
 
-
-
 EmotesMicroButton:SetScript("OnClick", OnEmoteClick)
+
+
 
 SLASH_WORSUEMOTEBOOK1 = "/worsuemotebook"
 SlashCmdList["WORSUEMOTEBOOK"] = function()
