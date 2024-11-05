@@ -1,0 +1,10 @@
+## Interface: 30300
+## Title: WORS U Music Book
+## Notes: Music Book add-on for WORS.                                                                            Open by clicking the Music Micro Menu button.                                                               Toggle transparancy by Alt clicking Music Micro Menu button.                                                                           Send bug reports to Untitled - Llama69420 on discord.
+## Author: Untitled - Discord@Llama69420
+## Version: 1.0
+## SavedVariables: WORS_U_MusicBookSettings
+## DefaultState: disabled
+
+# Main
+WORS_U_MusicBook.lua

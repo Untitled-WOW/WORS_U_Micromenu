@@ -1,0 +1,14 @@
+## Interface: 30300
+## Title: WORS U MicroMenu)
+## Notes: Spell Book add-on for WORS.                                                                            Open by clicking the Spell Micro Menu button.                                                               Toggle transparancy by Alt clicking Spell Micro Menu button.                                                                           Open WOW Spellbook by Shift clicking button.                                                                           Send bug reports to Untitled - Llama69420 on discord.
+## Author: Untitled - Discord@Llama69420
+## Version: 1.0
+## SavedVariables: WORS_U_SpellBookSettings, WORS_U_EmoteBookSettings, WORS_U_MusicBookSettings, WORS_U_PrayBookSettings
+## DefaultState: disabled
+
+# Main
+WORS_U_SpellBook.lua
+WORS_U_EmoteBook.lua
+WORS_U_MusicBook.lua
+WORS_U_PrayBook.lua
+
