@@ -1,9 +1,0 @@
-## Interface: 30300
-## Title: WORS U Prayer Book
-## Notes: Prayer Book add-on for WORS.                                                                            Open by clicking the Prayer Micro Menu button.                                                               Toggle transparancy by Alt clicking Prayer Micro Menu button.                                                                           Open WOW Spellbook by Shift clicking button.                                                                           Send bug reports to Untitled - Llama69420 on discord.
-## Author: Untitled - Discord@Llama69420
-## Version: 1.0
-## SavedVariables: WORS_U_PrayBookSettings
-
-#Main
-WORS_U_PrayBook.lua
