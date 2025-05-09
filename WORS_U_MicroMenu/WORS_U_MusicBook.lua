@@ -16,8 +16,10 @@ WORS_U_MusicBook.currentTrack = nil
 -- Transparency settings for cycling
 local transparencyLevels = {1, 0.75, 0.5, 0.25}
 local currentTransparencyIndex = 1
-WORS_U_MusicBookSettings = WORS_U_MusicBookSettings or {}
-WORS_U_MusicBookSettings.transparency = WORS_U_MusicBookSettings.transparency or 1
+WORS_U_MicroMenuSettings = WORS_U_MicroMenuSettings or {
+    transparency = 1,  -- Default transparency value
+	AutoCloseEnabled = true,
+}
 
 -- Main frame for the music player
 WORS_U_MusicBook.musicPlayer = CreateFrame("Frame", "WORS_U_MusicPlayerFrame", UIParent)
@@ -159,14 +161,14 @@ CreateMusicButtons()
 
 -- Transparency functions (Load and Save)
 local function LoadTransparency()
-    local savedAlpha = WORS_U_MusicBookSettings.transparency or 1
+    local savedAlpha = WORS_U_MicroMenuSettings.transparency or 1
     WORS_U_MusicBook.musicPlayer:SetAlpha(savedAlpha)
     print("Transparency loaded:", savedAlpha * 100 .. "%")
 end
 
 local function SaveTransparency()
-    WORS_U_MusicBookSettings.transparency = transparencyLevels[currentTransparencyIndex]
-    print("Transparency saved:", WORS_U_MusicBookSettings.transparency * 100 .. "%")
+    WORS_U_MicroMenuSettings.transparency = transparencyLevels[currentTransparencyIndex]
+    print("Transparency saved:", WORS_U_MicroMenuSettings.transparency * 100 .. "%")
 end
 
 -- Update background color based on visibility
@@ -190,7 +192,8 @@ local function OnMusicClick(self)
         if WORS_U_MusicBook.musicPlayer:IsShown() then
             WORS_U_MusicBook.musicPlayer:Hide()
         else
-            WORS_U_MusicBook.musicPlayer:Show()
+			MicroMenu_ToggleFrame(WORS_U_MusicBook.musicPlayer)--:Show()
+            
         end
         UpdateButtonBackground()
     end

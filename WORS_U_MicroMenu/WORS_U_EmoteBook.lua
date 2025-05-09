@@ -27,9 +27,9 @@ WORS_U_EmoteBook.emotes = {
 }
 
 -- Initialize saved variables for transparency
--- Initialize saved variables for transparency
-WORS_U_EmoteBookSettings = WORS_U_EmoteBookSettings or {
+WORS_U_MicroMenuSettings = WORS_U_MicroMenuSettings or {
     transparency = 1,  -- Default transparency value
+	AutoCloseEnabled = true,
 }
 
 -- Transparency levels
@@ -38,15 +38,15 @@ local currentTransparencyIndex = 1
 
 -- Function to load transparency from saved variables
 local function LoadTransparency()
-    local savedAlpha = WORS_U_EmoteBookSettings.transparency or 1
+    local savedAlpha = WORS_U_MicroMenuSettings.transparency or 1
     WORS_U_EmoteBook.frame:SetAlpha(savedAlpha)  -- Load the transparency value
     print("Transparency loaded:", savedAlpha * 100 .. "%")  -- Debug output
 end
 
 -- Function to save transparency on change or logout
 local function SaveTransparency()
-    WORS_U_EmoteBookSettings.transparency = WORS_U_EmoteBook.frame:GetAlpha()
-    print("Transparency saved:", WORS_U_EmoteBookSettings.transparency * 100 .. "%")  -- Debug output
+    WORS_U_MicroMenuSettings.transparency = transparencyLevels[currentTransparencyIndex]
+    print("Transparency saved:", WORS_U_MicroMenuSettings.transparency * 100 .. "%")  -- Debug output
 end
 
 -- Create the main frame for the custom emote book
@@ -118,23 +118,6 @@ buttonContainer:SetSize(180, 220)  -- Same size as scroll frame to avoid clippin
 scrollFrame:SetScrollChild(buttonContainer)
 
 
-
-
--- Movable button to toggle the emote book
-local function SaveButtonPosition()
-    WORS_U_EmoteBookButtonPosition = { WORS_U_EmoteBook.toggleButton:GetPoint() }
-end
-
--- Save settings on logout
-local function OnLogout()
-    SaveButtonPosition()
-    SaveTransparency()
-end
-
--- Register the logout event
-local frame = CreateFrame("Frame")
-frame:RegisterEvent("PLAYER_LOGOUT")
-frame:SetScript("OnEvent", OnLogout)
 
 -- Initialize emote buttons
 local emoteButtons = {}
@@ -224,7 +207,8 @@ local function OnEmoteClick(self)
         else
             print("Showing Emote Book")  -- Debug output
             SetupEmoteButtons()  -- Ensure buttons are set up
-            WORS_U_EmoteBook.frame:Show()
+            MicroMenu_ToggleFrame(WORS_U_EmoteBook.frame)--:Show()
+			
         end
         UpdateButtonBackground()
     end

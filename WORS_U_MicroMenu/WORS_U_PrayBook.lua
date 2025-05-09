@@ -145,19 +145,20 @@ local transparencyIndex = 1
 
 -- Initialize saved variables
 -- Initialize saved variables
-WORS_U_PrayBookSettings = WORS_U_PrayBookSettings or {
+WORS_U_MicroMenuSettings = WORS_U_MicroMenuSettings or {
     transparency = 1,  -- Default transparency value
+	AutoCloseEnabled = true,
 }
 
 -- Function to save transparency on change or logout
 local function SaveTransparency()
-    WORS_U_PrayBookSettings.transparency = WORS_U_PrayBook.frame:GetAlpha()
-    print("Transparency saved:", WORS_U_PrayBookSettings.transparency)  -- Debug output
+    WORS_U_MicroMenuSettings.transparency = transparencyLevels[currentTransparencyIndex]
+    print("Transparency saved:", WORS_U_MicroMenuSettings.transparency)  -- Debug output
 end
 
 -- Function to load transparency from saved variables
 local function LoadTransparency()
-    local savedAlpha = WORS_U_PrayBookSettings.transparency
+    local savedAlpha = WORS_U_MicroMenuSettings.transparency
     WORS_U_PrayBook.frame:SetAlpha(savedAlpha)  -- Load the transparency value
     print("Transparency loaded:", savedAlpha)  -- Debug output
 end
@@ -273,15 +274,7 @@ WORS_U_PrayBook.frame:SetScript("OnDragStop", function(self) self:StopMovingOrSi
 
 
 
--- Save settings on logout
-local function OnLogout()
-    SaveTransparency()
-end
 
--- Register the logout event
-local frame = CreateFrame("Frame")
-frame:RegisterEvent("PLAYER_LOGOUT")
-frame:SetScript("OnEvent", OnLogout)
 
 -- Function to update the button's background color
 local function UpdateButtonBackground()
@@ -322,7 +315,8 @@ local function OnPrayerClick(self)
         else
             InitializePrayerLevel()
             SetupPrayerButtons()
-            WORS_U_PrayBook.frame:Show()
+			
+            MicroMenu_ToggleFrame(WORS_U_PrayBook.frame)--:Show()
         end
     end
 	UpdateButtonBackground()

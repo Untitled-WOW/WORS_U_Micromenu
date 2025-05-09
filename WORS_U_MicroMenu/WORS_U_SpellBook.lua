@@ -199,19 +199,20 @@ local currentTransparencyIndex = 1
 
 
 -- Initialize saved variables for transparency
-WORS_U_SpellBookSettings = WORS_U_SpellBookSettings or {
+WORS_U_MicroMenuSettings = WORS_U_MicroMenuSettings or {
     transparency = 1,  -- Default transparency value
+	AutoCloseEnabled = true,
 }
 
 -- Function to save transparency on change or logout
 local function SaveTransparency()
-    WORS_U_SpellBookSettings.transparency = WORS_U_SpellBook.frame:GetAlpha()
-    print("Transparency saved:", WORS_U_SpellBookSettings.transparency)  -- Debug output
+    WORS_U_MicroMenuSettings.transparency = transparencyLevels[currentTransparencyIndex]
+    print("Transparency saved:", WORS_U_MicroMenuSettings.transparency)  -- Debug output
 end
 
 -- Function to load transparency from saved variables
 local function LoadTransparency()
-    local savedAlpha = WORS_U_SpellBookSettings.transparency
+    local savedAlpha = WORS_U_MicroMenuSettings.transparency
     WORS_U_SpellBook.frame:SetAlpha(savedAlpha)  -- Load the transparency value
     print("Transparency loaded:", savedAlpha)  -- Debug output
 end
@@ -319,16 +320,6 @@ WORS_U_SpellBook.frame:RegisterForDrag("LeftButton")
 WORS_U_SpellBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
 WORS_U_SpellBook.frame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
 
--- Save settings on logout
-local function OnLogout()
-    SaveTransparency()
-end
-
--- Register the logout event
-local frame = CreateFrame("Frame")
-frame:RegisterEvent("PLAYER_LOGOUT")
-frame:SetScript("OnEvent", OnLogout)
-
 
 
 -- Function to update the button's background color
@@ -375,7 +366,8 @@ local function OnMagicClick(self)
         else
             InitializeMagicLevel()
             SetupMagicButtons()
-            WORS_U_SpellBook.frame:Show()
+			MicroMenu_ToggleFrame(WORS_U_SpellBook.frame)--:Show()
+            
             print("Spell Book shown.")  -- Debug statement for showing
         end
     end
