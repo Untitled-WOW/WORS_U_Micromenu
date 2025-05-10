@@ -8,7 +8,7 @@ WORS_U_SpellBook.spells = {
     {level = 3, id = 99311},  -- Confuse
     -- {level = 4, id = nil},     -- Enchant Crossbow Bolt (Opal)
     {level = 5, id = 79535},  -- Water Strike
-    -- {level = 7, id = nil},     -- Lvl-1 Enchant
+    {level = 7, id = 460022},     -- Lvl-1 Enchant
     -- {level = 7, id = nil},     -- Enchant Crossbow Bolt (Sapphire)
     {level = 9, id = 79540},  -- Earth Strike
     {level = 11, id = 99312},  -- Weaken
@@ -22,48 +22,49 @@ WORS_U_SpellBook.spells = {
     {level = 23, id = 79536},  -- Water Bolt
     -- {level = 24, id = nil},     -- Enchant Crossbow Bolt (Pearl)
     {level = 25, id = 114193}, -- Varrock Teleport
-    -- {level = 27, id = nil},     -- Lvl-2 Enchant
+    {level = 27, id = 460023},     -- Lvl-2 Enchant
     -- {level = 27, id = nil},     -- Enchant Crossbow Bolt (Emerald)
     {level = 29, id = 79541},  -- Earth Bolt
     -- {level = 29, id = nil},     -- Enchant Crossbow Bolt (Red Topaz)
     {level = 31, id = 114196}, -- Lumbridge Teleport
-    -- {level = 33, id = nil},     -- Telekinetic Grab
+    {level = 33, id = 114134},   -- Telekinetic Grab (Corpse)
+	{level = 33, id = 1812},     -- Telekinetic Grab (Gameobject)
     {level = 35, id = 79546},  -- Fire Bolt
     {level = 37, id = 114194}, -- Falador Teleport
     {level = 39, id = 99317},  -- Crumble Undead
     -- {level = 40, id = nil},     -- Teleport to House
     {level = 41, id = 79532},  -- Wind Blast
     {level = 43, id = 99318},  -- Superheat Item
-    -- {level = 45, id = nil},     -- Camelot Teleport
+    {level = 45, id = 114197},     -- Camelot Teleport
     {level = 47, id = 79537},  -- Water Blast
     -- {level = 48, id = nil},     -- Kourend Castle Teleport
-    -- {level = 49, id = nil},     -- Lvl-3 Enchant
+    {level = 49, id = 460024},     -- Lvl-3 Enchant
     -- {level = 49, id = nil},     -- Enchant Crossbow Bolt (Ruby)
     -- {level = 50, id = nil},     -- Iban Blast
     {level = 50, id = 99537},  -- Snare
     -- {level = 50, id = nil},     -- Magic Dart
-    -- {level = 51, id = nil},     -- Ardougne Teleport
+    {level = 51, id = 114198},     -- Ardougne Teleport
     {level = 53, id = 79542},  -- Earth Blast
     -- {level = 54, id = nil},     -- Civitas illa Fortis Teleport
     {level = 55, id = 200090}, -- High Level Alchemy
-    -- {level = 56, id = nil},     -- Charge Water Orb
-    -- {level = 57, id = nil},     -- Lvl-4 Enchant
+    {level = 56, id = 99233},     -- Charge Water Orb
+    {level = 57, id = 460025},     -- Lvl-4 Enchant
     -- {level = 57, id = nil},     -- Enchant Crossbow Bolt (Diamond)
-    -- {level = 58, id = nil},     -- Watchtower Teleport
+    {level = 58, id = 114200},     -- Watchtower Teleport
     {level = 59, id = 79547},  -- Fire Blast
-    -- {level = 60, id = nil},     -- Charge Earth Orb
+    {level = 60, id = 99234},     -- Charge Earth Orb
     -- {level = 60, id = nil},     -- Bones to Peaches
     -- {level = 60, id = nil},     -- Saradomin Strike
     -- {level = 60, id = nil},     -- Flames of Zamorak
     -- {level = 60, id = nil},     -- Claws of Guthix
-    -- {level = 61, id = nil},     -- Trollheim Teleport
+    {level = 61, id = 114199},     -- Trollheim Teleport
     {level = 62, id = 79533},  -- Wind Wave
-    -- {level = 63, id = nil},     -- Charge Fire Orb
+    {level = 63, id = 99235},     -- Charge Fire Orb
     -- {level = 64, id = nil},     -- Ape Atoll Teleport
     {level = 65, id = 79538},  -- Water Wave
-    -- {level = 66, id = nil},     -- Charge Air Orb
+    {level = 66, id = 99236},     -- Charge Air Orb
     -- {level = 66, id = nil},     -- Vulnerability
-    -- {level = 68, id = nil},     -- Lvl-5 Enchant
+    {level = 68, id = 460026},     -- Lvl-5 Enchant
     -- {level = 68, id = nil},     -- Enchant Crossbow Bolt (Dragonstone)
     {level = 70, id = 79543},  -- Earth Wave
     -- {level = 73, id = nil},     -- Enfeeble
@@ -71,11 +72,11 @@ WORS_U_SpellBook.spells = {
     {level = 75, id = 79548},  -- Fire Wave
     {level = 79, id = 99315},  -- Entangle
     -- {level = 80, id = nil},     -- Stun
-    -- {level = 80, id = nil},     -- Charge
+    {level = 80, id = 707049},     -- Charge
     --{level = 81, id = 79534},     -- Wind Surge
     -- {level = 82, id = nil},     -- Teleother Falador
     --{level = 85, id = 79539},  -- Water Surge
-    -- {level = 85, id = nil},     -- Tele Block
+    {level = 85, id = 99542},     -- Tele Block
     -- {level = 85, id = nil},     -- Teleport to Target
     -- {level = 87, id = nil},     -- Lvl-6 Enchant
     -- {level = 87, id = nil},     -- Enchant Crossbow Bolt (Onyx)
@@ -202,6 +203,7 @@ local currentTransparencyIndex = 1
 WORS_U_MicroMenuSettings = WORS_U_MicroMenuSettings or {
     transparency = 1,  -- Default transparency value
 	AutoCloseEnabled = true,
+	MicroMenuPOS = { point = "CENTER", relativeTo = nil, relativePoint = "CENTER", xOfs = 0, yOfs = 0 }
 }
 
 -- Function to save transparency on change or logout
@@ -249,23 +251,30 @@ local function SetupMagicButtons()
     end
     wipe(magicButtons)
 
-    local buttonSize = 25
-    local padding = 10
-    local columns = 5
+	-- Size and spacing for 5 columns of spells
+	--local buttonSize = 25
+	--local padding 	 = 10         -- space between buttons
+	--local margin 	 = 10        -- space from frame edge
+	--local columns 	 = 5
+
+	local buttonSize = 20
+	local padding 	 = 5         -- space between buttons
+	local margin 	 = 10        -- space from frame edge
+	local columns 	 = 7
 
     for i, spellData in ipairs(WORS_U_SpellBook.spells) do
         local spellID = spellData.id
         local requiredLevel = spellData.level
         local spellName, _, spellIcon = GetSpellInfo(spellID)
-
-        local spellButton = CreateFrame("Button", nil, WORS_U_SpellBook.frame, "SecureActionButtonTemplate")
+		local spellButton = CreateFrame("Button", nil, WORS_U_SpellBook.frame, "ActionButtonTemplate")
+        --local spellButton = CreateFrame("Button", nil, WORS_U_SpellBook.frame, "SecureActionButtonTemplate")
         spellButton:SetSize(buttonSize, buttonSize)
 
         -- Calculate position
         local row = math.floor((i - 1) / columns)
         local column = (i - 1) % columns
-        spellButton:SetPoint("TOPLEFT", padding + (buttonSize + padding) * column, -padding - (buttonSize + padding) * row)
-
+        --spellButton:SetPoint("TOPLEFT", padding + (buttonSize + padding) * column, -padding - (buttonSize + padding) * row)
+		spellButton:SetPoint("TOPLEFT", WORS_U_SpellBook.frame, "TOPLEFT", margin + (buttonSize + padding) * column, -margin - (buttonSize + padding) * row)
         -- Set up the button icon
         local icon = spellButton:CreateTexture(nil, "BACKGROUND")
         icon:SetAllPoints()
@@ -304,22 +313,43 @@ end
 
 -- Create the main frame for the custom spell book
 WORS_U_SpellBook.frame = CreateFrame("Frame", "WORS_U_SpellBookFrame", UIParent)
-WORS_U_SpellBook.frame:SetSize(190, 260)
-WORS_U_SpellBook.frame:SetPoint("CENTER")
+WORS_U_SpellBook.frame:SetSize(192, 280)
 WORS_U_SpellBook.frame:SetBackdrop({
-    bgFile = "Interface\\WORS\\OldSchoolBackground2",
+    bgFile = "Interface\\WORS\\OldSchoolBackground1",
     edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
     tile = false, tileSize = 32, edgeSize = 32,
-    insets = { left = 5, right = 6, top = 6, bottom = 5 }
+    insets = { left = 5, right = 5, top = 5, bottom = 5 }
 })
 
 WORS_U_SpellBook.frame:Hide()
 WORS_U_SpellBook.frame:SetMovable(true)
 WORS_U_SpellBook.frame:EnableMouse(true)
 WORS_U_SpellBook.frame:RegisterForDrag("LeftButton")
+WORS_U_SpellBook.frame:SetClampedToScreen(true)
 WORS_U_SpellBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
-WORS_U_SpellBook.frame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
-
+WORS_U_SpellBook.frame:SetScript("OnDragStop", function(self)
+    self:StopMovingOrSizing()
+    local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
+    WORS_U_MicroMenuSettings.MicroMenuPOS = {
+        point = point,
+        relativeTo = relativeTo and relativeTo:GetName() or nil,
+        relativePoint = relativePoint,
+        xOfs = xOfs,
+        yOfs = yOfs
+    }
+	self:SetUserPlaced(false)
+end)
+local closeButton = CreateFrame("Button", nil, WORS_U_SpellBookFrame)
+closeButton:SetSize(16, 16)
+closeButton:SetPoint("TOPRIGHT", WORS_U_SpellBookFrame, "TOPRIGHT", 4, 4)
+WORS_U_SpellBook.closeButton = closeButton
+closeButton:SetNormalTexture("Interface\\WORS\\OldSchool-CloseButton-Up.blp")
+closeButton:SetHighlightTexture("Interface\\WORS\\OldSchool-CloseButton-Highlight.blp", "ADD")
+closeButton:SetPushedTexture("Interface\\WORS\\OldSchool-CloseButton-Down.blp")
+closeButton:SetScript("OnClick", function()
+	WORS_U_SpellBook.frame:Hide()
+    SpellbookMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
+end)
 
 
 -- Function to update the button's background color
@@ -336,16 +366,21 @@ end
 -- Function to handle MagicMicroButton clicks
 local function OnMagicClick(self)
     print("MagicMicroButton has been clicked!")  -- Debug statement
-    if InCombatLockdown() then
-        print("Cannot open Spell Book during combat.")  -- Debug combat check
-        C_Timer.After(1, function()
-            print("Re-checking click logic after 1 second.")  -- Debug after delay
-            --WORS_U_SpellBook.toggleButton:GetScript("OnClick")(self)  -- Re-check the click logic after 1 second
-			OnMagicClick(self)
-			--SpellbookMicroButton:GetScript("OnClick")(self)
-		end)
-        return
-    end
+    local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
+	if pos then
+		local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
+		WORS_U_SpellBook.frame:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
+	else
+		WORS_U_SpellBook.frame:SetPoint("CENTER")
+	end
+	-- if InCombatLockdown() then
+        -- print("Cannot open Spell Book during combat.")  -- Debug combat check
+        -- C_Timer.After(1, function()
+            -- print("Re-checking click logic after 1 second.")  -- Debug after delay
+            -- WORS_U_SpellBook.toggleButton:GetScript("OnClick")(self)  -- Re-check the click logic after 1 second
+        -- end)
+        -- return
+    -- end
     if IsAltKeyDown() then
         print("Alt key is down.")  -- Debug statement for Alt key
         -- Cycle through transparency levels
