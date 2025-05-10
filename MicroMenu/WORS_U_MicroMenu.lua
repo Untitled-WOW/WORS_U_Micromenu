@@ -17,17 +17,38 @@ MicroMenu_Frames = {
 }
 
 -- Hide all frames and reset button colors
-function MicroMenu_HideAll()	
+function MicroMenu_HideAll()
 	for _, frame in ipairs(MicroMenu_Frames) do
-        frame:Hide()
-		print("Frame: ".. frame:GetName() .."Hiden")
-    end
+		if InCombatLockdown() and (frame == WORS_U_SpellBookFrame or frame == WORS_U_PrayBookFrame) then
+			-- Skip hiding this frame during combat
+		elseif frame == WORS_U_SpellBookFrame or frame == WORS_U_PrayBookFrame then
+			frame:SetFrameStrata("High")
+			frame:SetFrameLevel(10)
+			frame:Hide()
+			print("Frame: " .. frame:GetName() .. " Hiden")
+		else
+			frame:SetFrameStrata("High")
+			frame:SetFrameLevel(20)
+			frame:Hide()
+			print("Frame: " .. frame:GetName() .. " Hiden")
+		end
+		
+	end
 	CloseBackpack()
 end
 
 -- Toggle a frame if target and open or hidesall frames if AutoCloseEnabled true
 function MicroMenu_ToggleFrame(targetFrame)
-    if targetFrame:IsShown() then
+	if InCombatLockdown() then
+		if targetFrame ==  WORS_U_SpellBookFrame or targetFrame ==  WORS_U_PrayBookFrame then
+			print("You cannot open or close Spell / Prayer Book in combat.")
+			return
+		else
+			targetFrame:SetFrameStrata("HIGH")
+		end
+		
+	end
+	if targetFrame:IsShown() then
         targetFrame:Hide()
     else
         if WORS_U_MicroMenuSettings.AutoCloseEnabled then
@@ -37,23 +58,7 @@ function MicroMenu_ToggleFrame(targetFrame)
     end
 end
 
--- Function to save transparency to saved variables
-function SaveTransparency()
-    WORS_U_MicroMenuSettings.transparency = transparencyLevels[currentTransparencyIndex]
-    print("Transparency saved:", WORS_U_MicroMenuSettings.transparency * 100 .. "%")  -- Debug output
-end
 
--- Function to load transparency from saved variables
-function LoadTransparency()
-    local savedAlpha = WORS_U_MicroMenuSettings.transparency or 1  -- Default to 1 (100%) if not saved
-    -- Apply transparency to each frame in the list
-	for _, frame in ipairs(MicroMenu_Frames) do
-        if frame then
-            frame:SetAlpha(savedAlpha)  -- Set transparency for the frame
-        end
-    end
-    print("Transparency loaded:", savedAlpha * 100 .. "%")  -- Debug output
-end
 
 -- Function to save the position of the frame
 local function SaveFramePosition(self)
@@ -72,9 +77,13 @@ local function SaveFramePosition(self)
         local relativeFrame = relativeTo and _G[relativeTo] or UIParent
         for _, frame in ipairs(MicroMenu_Frames) do
             if frame and frame ~= self then
-                frame:ClearAllPoints()
-                frame:SetPoint(point, relativeFrame, relativePoint, xOfs, yOfs)
-                frame:SetUserPlaced(false)
+				if InCombatLockdown() and (frame == WORS_U_SpellBookFrame or frame == WORS_U_PrayBookFrame) then
+					print("Skipped position update for", frame:GetName(), "due to combat lockdown")
+				else
+					frame:ClearAllPoints()
+					frame:SetPoint(point, relativeFrame, relativePoint, xOfs, yOfs)
+					frame:SetUserPlaced(false)
+				end
             end
         end
 		print("Frame pos applied to all MicroMenuFrames and CombatStylePanel")
@@ -102,9 +111,11 @@ local function HookAFrames()
     if Backpack then
        if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then 
 			Backpack:HookScript("OnShow", function()
+				if not InCombatLockdown() then
+					WORS_U_SpellBook.frame:Hide()
+					WORS_U_PrayBook.frame:Hide()
+				end
 				WORS_U_EmoteBook.frame:Hide()
-				WORS_U_SpellBook.frame:Hide()
-				WORS_U_PrayBook.frame:Hide()
 				WORS_U_MusicBook.musicPlayer:Hide()
 				CombatStylePanel:Hide()
 			end)
@@ -127,9 +138,11 @@ local function HookAFrames()
     if CombatStylePanel then
 		if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then 
 			CombatStylePanel:HookScript("OnShow", function()
+				if not InCombatLockdown() then
+					WORS_U_SpellBook.frame:Hide()
+					WORS_U_PrayBook.frame:Hide()
+				end
 				WORS_U_EmoteBook.frame:Hide()
-				WORS_U_SpellBook.frame:Hide()
-				WORS_U_PrayBook.frame:Hide()
 				WORS_U_MusicBook.musicPlayer:Hide()
 				CloseBackpack()
 			end)

@@ -12,6 +12,10 @@ end
 -- Function to set up magic buttons dynamically
 local function SetupPrayerButtons()
     -- Clear existing buttons before creating new ones
+	if InCombatLockdown() then
+		return
+	end
+	
 	for _, button in pairs(prayerButtons) do
         button:Hide()
         button:SetParent(nil)
@@ -87,12 +91,14 @@ WORS_U_PrayBook.frame:SetBackdrop({
     tile = false, tileSize = 32, edgeSize = 32,
     insets = { left = 5, right = 5, top = 5, bottom = 5 }
 })
+WORS_U_PrayBook.frame:SetFrameStrata("High")
+WORS_U_PrayBookFrame:SetFrameLevel(10)
 WORS_U_PrayBook.frame:Hide()
 WORS_U_PrayBook.frame:SetMovable(true)
 WORS_U_PrayBook.frame:EnableMouse(true)
 WORS_U_PrayBook.frame:RegisterForDrag("LeftButton")
 WORS_U_PrayBook.frame:SetClampedToScreen(true)
-tinsert(UISpecialFrames, "WORS_U_PrayBookFrame")
+--tinsert(UISpecialFrames, "WORS_U_PrayBookFrame")
 WORS_U_PrayBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
 WORS_U_PrayBook.frame:SetScript("OnDragStop", function(self)
     self:StopMovingOrSizing()
@@ -105,8 +111,14 @@ closeButton:SetNormalTexture("Interface\\WORS\\OldSchool-CloseButton-Up.blp")
 closeButton:SetHighlightTexture("Interface\\WORS\\OldSchool-CloseButton-Highlight.blp", "ADD")
 closeButton:SetPushedTexture("Interface\\WORS\\OldSchool-CloseButton-Down.blp")
 closeButton:SetScript("OnClick", function()
-	WORS_U_PrayBook.frame:Hide()
-    PrayerMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
+	if InCombatLockdown() then
+		print("You cannot open or close Spell / Prayer Book in combat.")
+		return
+	else
+	
+		WORS_U_PrayBook.frame:Hide()
+		PrayerMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
+	end
 end)
 
 -- Function to update the button's background color
@@ -127,21 +139,7 @@ WORS_U_PrayBook.frame:SetScript("OnHide", UpdateButtonBackground)
 -- Function to handle PrayerMicroButton clicks
 local function OnPrayerClick(self)
 	local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
-	if InCombatLockdown() then
-		print("You cannot open Spell / Prayer Book in combat. Will open when out of combat.")
-		local function tryOpenLoop()
-			if not InCombatLockdown() then
-				print("Combat ended. Opening Prayer Book.")
-				OnPrayerClick(PrayerMicroButton)
-			else
-				C_Timer.After(1, tryOpenLoop)  -- Call itself again after 1 second
-			end
-		end
-
-		C_Timer.After(1, tryOpenLoop)  -- Start the loop
-		return
-	end
-	if pos then
+	if pos and not InCombatLockdown() then
 		local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
 		WORS_U_PrayBook.frame:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
 	else
@@ -170,6 +168,5 @@ local function OnPrayerClick(self)
             MicroMenu_ToggleFrame(WORS_U_PrayBook.frame)--:Show()
         end
     end
-	UpdateButtonBackground()
 end
 PrayerMicroButton:SetScript("OnClick", OnPrayerClick)

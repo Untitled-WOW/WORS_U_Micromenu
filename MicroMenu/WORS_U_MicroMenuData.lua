@@ -291,3 +291,21 @@ end
 -- Used to cycle thru transparancy levels on Alt clicking MicroMenuButtons
 transparencyLevels = {1, 0.75, 0.5, 0.25}
 currentTransparencyIndex = 1
+
+-- Function to save transparency to saved variables
+function SaveTransparency()
+    WORS_U_MicroMenuSettings.transparency = transparencyLevels[currentTransparencyIndex]
+    print("Transparency saved:", WORS_U_MicroMenuSettings.transparency * 100 .. "%")  -- Debug output
+end
+
+-- Function to load transparency from saved variables
+function LoadTransparency()
+    local savedAlpha = WORS_U_MicroMenuSettings.transparency or 1  -- Default to 1 (100%) if not saved
+    -- Apply transparency to each frame in the list
+	for _, frame in ipairs(MicroMenu_Frames) do
+        if frame then
+            frame:SetAlpha(savedAlpha)  -- Set transparency for the frame
+        end
+    end
+    print("Transparency loaded:", savedAlpha * 100 .. "%")  -- Debug output
+end

@@ -11,7 +11,11 @@ end
 
 -- Function to set up magic buttons dynamically
 local function SetupMagicButtons()
-    -- Clear existing buttons before creating new ones
+    if InCombatLockdown() then
+		return
+	end
+	
+	-- Clear existing buttons before creating new ones
     for _, button in pairs(magicButtons) do
         button:Hide()
         button:SetParent(nil)
@@ -77,13 +81,14 @@ WORS_U_SpellBook.frame:SetBackdrop({
     tile = false, tileSize = 32, edgeSize = 32,
     insets = { left = 5, right = 5, top = 5, bottom = 5 }
 })
-
+WORS_U_SpellBook.frame:SetFrameStrata("High")
+WORS_U_SpellBook.frame:SetFrameLevel(10)
 WORS_U_SpellBook.frame:Hide()
 WORS_U_SpellBook.frame:SetMovable(true)
 WORS_U_SpellBook.frame:EnableMouse(true)
 WORS_U_SpellBook.frame:RegisterForDrag("LeftButton")
 WORS_U_SpellBook.frame:SetClampedToScreen(true)
-tinsert(UISpecialFrames, "WORS_U_SpellBookFrame")
+--tinsert(UISpecialFrames, "WORS_U_SpellBookFrame")
 WORS_U_SpellBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
 WORS_U_SpellBook.frame:SetScript("OnDragStop", function(self)
     self:StopMovingOrSizing()
@@ -96,9 +101,15 @@ closeButton:SetNormalTexture("Interface\\WORS\\OldSchool-CloseButton-Up.blp")
 closeButton:SetHighlightTexture("Interface\\WORS\\OldSchool-CloseButton-Highlight.blp", "ADD")
 closeButton:SetPushedTexture("Interface\\WORS\\OldSchool-CloseButton-Down.blp")
 closeButton:SetScript("OnClick", function()
-	WORS_U_SpellBook.frame:Hide()
-    SpellbookMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
+	if InCombatLockdown() then
+		print("You cannot open or close Spell / Prayer Book in combat.")
+		return
+	else
+		WORS_U_SpellBook.frame:Hide()
+		SpellbookMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
+	end
 end)
+
 
 
 -- Function to update the button's background color
@@ -119,21 +130,7 @@ WORS_U_SpellBook.frame:SetScript("OnHide", UpdateButtonBackground)
 local function OnMagicClick(self)
     print("MagicMicroButton has been clicked!")  -- Debug statement
     local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
-	if InCombatLockdown() then
-		print("You cannot open Spell / Prayer Book in combat. Will open when out of combat.")
-		local function tryOpenLoop()
-			if not InCombatLockdown() then
-				print("Combat ended. Opening Spell Book.")
-				OnMagicClick(SpellbookMicroButton)
-			else
-				C_Timer.After(1, tryOpenLoop)  -- Call itself again after 1 second
-			end
-		end
-		C_Timer.After(1, tryOpenLoop)  -- Start the loop
-		return
-	end
-	
-	if pos then
+	if pos and not InCombatLockdown() then
 		local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
 		WORS_U_SpellBook.frame:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
 	else
@@ -155,12 +152,10 @@ local function OnMagicClick(self)
         -- Standard toggle functionality
         if WORS_U_SpellBook.frame:IsShown() then
             WORS_U_SpellBook.frame:Hide()
-            print("Spell Book hidden.")  
         else
             InitializeMagicLevel()
             SetupMagicButtons()
 			MicroMenu_ToggleFrame(WORS_U_SpellBook.frame)--:Show()
-            print("Spell Book shown.")  -- Debug statement for showing
         end
     end
 end
