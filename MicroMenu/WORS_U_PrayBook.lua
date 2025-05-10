@@ -96,15 +96,6 @@ tinsert(UISpecialFrames, "WORS_U_PrayBookFrame")
 WORS_U_PrayBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
 WORS_U_PrayBook.frame:SetScript("OnDragStop", function(self)
     self:StopMovingOrSizing()
-    -- local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
-    -- WORS_U_MicroMenuSettings.MicroMenuPOS = {
-        -- point = point,
-        -- relativeTo = relativeTo and relativeTo:GetName() or nil,
-        -- relativePoint = relativePoint,
-        -- xOfs = xOfs,
-        -- yOfs = yOfs
-    -- }
-	-- self:SetUserPlaced(false)
 end)
 local closeButton = CreateFrame("Button", nil, WORS_U_PrayBookFrame)
 closeButton:SetSize(16, 16)
@@ -117,9 +108,6 @@ closeButton:SetScript("OnClick", function()
 	WORS_U_PrayBook.frame:Hide()
     PrayerMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
 end)
-
-
-
 
 -- Function to update the button's background color
 local function UpdateButtonBackground()
@@ -179,88 +167,9 @@ local function OnPrayerClick(self)
         else
             InitializePrayerLevel()
             SetupPrayerButtons()
-			
             MicroMenu_ToggleFrame(WORS_U_PrayBook.frame)--:Show()
         end
     end
 	UpdateButtonBackground()
 end
 PrayerMicroButton:SetScript("OnClick", OnPrayerClick)
-
--- **********************************************************************
--- **********************************************************************
--- ************************OLD CODE FOR TOGGLE BUTTON *******************
--- **********************************************************************
--- **********************************************************************
-
-
-
-
--- -- Movable button to toggle prayer book
--- local function SaveButtonPosition()
-    -- WORS_U_PrayBookButtonPosition = { WORS_U_PrayBook.toggleButton:GetPoint() }
--- end
-
--- WORS_U_PrayBook.toggleButton = CreateFrame("Button", "WORS_U_PrayBookToggleButton", UIParent)
--- WORS_U_PrayBook.toggleButton:SetSize(30, 35)
--- WORS_U_PrayBook.toggleButton:SetMovable(true)
--- WORS_U_PrayBook.toggleButton:SetClampedToScreen(true)
--- WORS_U_PrayBook.toggleButton:EnableMouse(true)
--- WORS_U_PrayBook.toggleButton:RegisterForDrag("LeftButton")
--- WORS_U_PrayBook.toggleButton:SetScript("OnDragStart", function(self) self:StartMoving() end)
--- WORS_U_PrayBook.toggleButton:SetScript("OnDragStop", function(self)
-    -- self:StopMovingOrSizing()
-    -- SaveButtonPosition()
--- end)
-
--- -- Custom background texture
--- local bg = WORS_U_PrayBook.toggleButton:CreateTexture(nil, "BACKGROUND")
--- WORS_U_PrayBook.toggleButton:SetBackdrop({
-    -- bgFile = "Interface\\WORS\\OldSchoolBackground2",          -- Background texture
-    -- edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",      -- Border texture
-    -- tile = false, tileSize = 32, edgeSize = 16,                 -- Adjust edgeSize as needed for your border
-    -- insets = { left = 1, right = 1, top = 1, bottom = 1 }       -- Adjust insets to control border thickness
--- })
-
--- -- Icon texture instead of text
--- local icon = WORS_U_PrayBook.toggleButton:CreateTexture(nil, "ARTWORK")
--- icon:SetSize(25, 25)
--- icon:SetPoint("CENTER")
--- icon:SetTexture("Interface\\Icons\\prayer.blp")
-
-
--- -- OnClick to toggle the prayer book and update transparency when Alt is held
--- WORS_U_PrayBook.toggleButton:SetScript("OnClick", function(self, button)
-    -- if InCombatLockdown() then
-        -- print("Cannot open Prayer Book while in combat. Retrying...")
-        -- -- Wait 1 second and try again
-        -- C_Timer.After(1, function()
-            -- WORS_U_PrayBook.toggleButton:GetScript("OnClick")(self, button) -- Reinvoke the OnClick
-        -- end)
-        -- return
-    -- end
-    -- if IsAltKeyDown() then
-        -- -- Cycle through transparency levels
-        -- WORS_U_PrayBook.frame:Show()
-        -- transparencyIndex = transparencyIndex % #transparencyLevels + 1
-        -- local alpha = transparencyLevels[transparencyIndex]
-        -- WORS_U_PrayBook.frame:SetAlpha(alpha)
-        -- SaveTransparency()  -- Save transparency after change
-        -- print("Prayer Book Transparency set to:", alpha * 100 .. "%")  -- Debug output
-    -- else
-        -- -- Regular toggle functionality
-        -- if WORS_U_PrayBook.frame:IsShown() then
-            -- WORS_U_PrayBook.frame:Hide()
-        -- else
-            -- InitializePrayerLevel()
-            -- SetupPrayerButtons()
-            -- WORS_U_PrayBook.frame:Show()
-        -- end
-    -- end
-	-- UpdateButtonBackground()
--- end)
-
--- -- Initial highlight update
--- --PrayerMicroButton:Hide()
--- UpdateButtonBackground()
--- WORS_U_PrayBook.toggleButton:SetPoint(unpack(WORS_U_PrayBookButtonPosition or {"CENTER"}))

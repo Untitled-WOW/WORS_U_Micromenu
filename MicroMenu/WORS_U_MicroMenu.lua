@@ -189,4 +189,3 @@ f:SetScript("OnEvent", function(self, event)
         self:UnregisterEvent("PLAYER_LOGIN")  -- Unregister the event after hooking
     end
 end)
-

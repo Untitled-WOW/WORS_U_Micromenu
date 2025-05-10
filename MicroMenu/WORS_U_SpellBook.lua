@@ -87,15 +87,6 @@ tinsert(UISpecialFrames, "WORS_U_SpellBookFrame")
 WORS_U_SpellBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
 WORS_U_SpellBook.frame:SetScript("OnDragStop", function(self)
     self:StopMovingOrSizing()
-    -- local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
-    -- WORS_U_MicroMenuSettings.MicroMenuPOS = {
-        -- point = point,
-        -- relativeTo = relativeTo and relativeTo:GetName() or nil,
-        -- relativePoint = relativePoint,
-        -- xOfs = xOfs,
-        -- yOfs = yOfs
-    -- }
-	-- self:SetUserPlaced(false)
 end)
 local closeButton = CreateFrame("Button", nil, WORS_U_SpellBookFrame)
 closeButton:SetSize(16, 16)
@@ -158,7 +149,6 @@ local function OnMagicClick(self)
 		
     elseif IsShiftKeyDown() then
         print("Shift key is down. Open normal Spellbook")  
-        --AscensionSpellbookFrame:Show()
 		ToggleSpellBook(BOOKTYPE_SPELL)
     else
         print("Toggling Mini Spell Book visibility.")  
@@ -170,83 +160,9 @@ local function OnMagicClick(self)
             InitializeMagicLevel()
             SetupMagicButtons()
 			MicroMenu_ToggleFrame(WORS_U_SpellBook.frame)--:Show()
-            
             print("Spell Book shown.")  -- Debug statement for showing
         end
     end
 end
 -- Register the click event for the SpellbookMicroButton
 SpellbookMicroButton:SetScript("OnClick", OnMagicClick)
-
--- **********************************************************************
--- **********************************************************************
--- ************************OLD CODE FOR TOGGLE BUTTON *******************
--- **********************************************************************
--- **********************************************************************
-
-
--- -- Movable button to toggle spell book
--- local function SaveButtonPosition()
-    -- WORS_U_SpellBookButtonPosition = { WORS_U_SpellBook.toggleButton:GetPoint() }
--- end
-
--- WORS_U_SpellBook.toggleButton = CreateFrame("Button", "WORS_U_SpellBookToggleButton", UIParent)
--- WORS_U_SpellBook.toggleButton:SetSize(30, 35)
--- WORS_U_SpellBook.toggleButton:SetMovable(true)
--- WORS_U_SpellBook.toggleButton:SetClampedToScreen(true)
--- WORS_U_SpellBook.toggleButton:EnableMouse(true)
--- WORS_U_SpellBook.toggleButton:RegisterForDrag("LeftButton")
--- WORS_U_SpellBook.toggleButton:SetScript("OnDragStart", function(self) self:StartMoving() end)
--- WORS_U_SpellBook.toggleButton:SetScript("OnDragStop", function(self)
-    -- self:StopMovingOrSizing()
-    -- SaveButtonPosition()
--- end)
-
--- -- Custom background texture for the toggle button
--- local bg = WORS_U_SpellBook.toggleButton:CreateTexture(nil, "BACKGROUND")
--- WORS_U_SpellBook.toggleButton:SetBackdrop({
-    -- bgFile = "Interface\\WORS\\OldSchoolBackground2",
-    -- edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
-    -- tile = false, tileSize = 32, edgeSize = 16,
-    -- insets = { left = 1, right = 1, top = 1, bottom = 1 }
--- })
-
--- -- Icon texture for the toggle button
--- local icon = WORS_U_SpellBook.toggleButton:CreateTexture(nil, "ARTWORK")
--- icon:SetSize(25, 25)
--- icon:SetPoint("CENTER")
--- icon:SetTexture("Interface\\Icons\\magicicon")  -- Replace with your spell icon
-
-
--- WORS_U_SpellBook.toggleButton:SetScript("OnClick", function(self)
-    -- if InCombatLockdown() then
-        -- print("Cannot open Spell Book during combat. Will check again in 1 second.")
-        -- C_Timer.After(1, function()
-            -- WORS_U_SpellBook.toggleButton:GetScript("OnClick")(self)  -- Re-check the click logic after 1 second
-        -- end)
-        -- return
-    -- end
-    -- if IsAltKeyDown() then
-        -- -- Cycle through transparency levels
-        -- WORS_U_SpellBook.frame:Show()
-        -- currentTransparencyIndex = currentTransparencyIndex % #transparencyLevels + 1
-        -- WORS_U_SpellBook.frame:SetAlpha(transparencyLevels[currentTransparencyIndex])
-        -- SaveTransparency()  -- Save transparency after change
-        -- print("Spell Book Transparency:", transparencyLevels[currentTransparencyIndex] * 100, "%")
-    -- else
-        -- -- Standard toggle functionality
-        -- if WORS_U_SpellBook.frame:IsShown() then
-            -- WORS_U_SpellBook.frame:Hide()
-        -- else
-            -- InitializeMagicLevel()  -- Refresh magic level before showing frame
-            -- SetupMagicButtons()      -- Ensure buttons are set up based on current magic level
-            -- WORS_U_SpellBook.frame:Show()
-        -- end
-        -- UpdateButtonBackground()
-    -- end
--- end)
-
--- -- Initial highlight update
--- --SpellbookMicroButton:Hide()
--- UpdateButtonBackground()
--- WORS_U_SpellBook.toggleButton:SetPoint(unpack(WORS_U_SpellBookButtonPosition or {"CENTER"}))

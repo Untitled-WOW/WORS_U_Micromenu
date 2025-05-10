@@ -18,15 +18,6 @@ tinsert(UISpecialFrames, "WORS_U_EmoteBookFrame")
 WORS_U_EmoteBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
 WORS_U_EmoteBook.frame:SetScript("OnDragStop", function(self)
     self:StopMovingOrSizing()
-    -- local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
-    -- WORS_U_MicroMenuSettings.MicroMenuPOS = {
-        -- point = point,
-        -- relativeTo = relativeTo and relativeTo:GetName() or nil,
-        -- relativePoint = relativePoint,
-        -- xOfs = xOfs,
-        -- yOfs = yOfs
-    -- }
-	-- self:SetUserPlaced(false)
 end)
 local closeButton = CreateFrame("Button", nil, WORS_U_EmoteBookFrame)
 closeButton:SetSize(16, 16)
@@ -168,69 +159,3 @@ local function OnEmoteClick(self)
     end
 end
 EmotesMicroButton:SetScript("OnClick", OnEmoteClick)
-
-
-
--- **********************************************************************
--- **********************************************************************
--- ************************OLD CODE FOR TOGGLE BUTTON *******************
--- **********************************************************************
--- **********************************************************************
-
-
--- Movable button to toggle emote book
--- WORS_U_EmoteBook.toggleButton = CreateFrame("Button", "WORS_U_EmoteBookToggleButton", UIParent)
--- WORS_U_EmoteBook.toggleButton:SetSize(30, 35)
--- WORS_U_EmoteBook.toggleButton:SetMovable(true)
--- WORS_U_EmoteBook.toggleButton:SetClampedToScreen(true)
--- WORS_U_EmoteBook.toggleButton:EnableMouse(true)
--- WORS_U_EmoteBook.toggleButton:RegisterForDrag("LeftButton")
--- WORS_U_EmoteBook.toggleButton:SetScript("OnDragStart", function(self) self:StartMoving() end)
--- WORS_U_EmoteBook.toggleButton:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
-
--- -- Custom background texture for the toggle button
--- WORS_U_EmoteBook.toggleButton:SetBackdrop({
-    -- bgFile = "Interface\\WORS\\OldSchoolBackground2",
-    -- edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
-    -- tile = false, tileSize = 32, edgeSize = 16,
-    -- insets = { left = 1, right = 1, top = 1, bottom = 1 }
--- })
-
--- -- Icon texture for the toggle button
--- local icon = WORS_U_EmoteBook.toggleButton:CreateTexture(nil, "ARTWORK")
--- icon:SetSize(25, 25)
--- icon:SetPoint("CENTER")
--- icon:SetTexture("Interface\\Icons\\redhalloweenmask")  -- Replace with your emote icon
-
-
-
-
--- -- OnClick to toggle the emote book and transparency
--- WORS_U_EmoteBook.toggleButton:SetScript("OnClick", function(self)
-    -- if IsAltKeyDown() then
-        -- -- Cycle through transparency levels
-        -- currentTransparencyIndex = currentTransparencyIndex % #transparencyLevels + 1
-        -- WORS_U_EmoteBook.frame:SetAlpha(transparencyLevels[currentTransparencyIndex])
-        -- SaveTransparency()  -- Save transparency after change
-        -- print("Emote Book Transparency:", transparencyLevels[currentTransparencyIndex] * 100 .. "%")
-    -- else
-        -- -- Standard toggle functionality
-        -- if WORS_U_EmoteBook.frame:IsShown() then
-            -- print("Hiding Emote Book")  -- Debug output
-            -- WORS_U_EmoteBook.frame:Hide()
-        -- else
-            -- print("Showing Emote Book")  -- Debug output
-            -- SetupEmoteButtons()  -- Ensure buttons are set up
-            -- WORS_U_EmoteBook.frame:Show()
-        -- end
-		-- UpdateButtonBackground()
-    -- end
--- end)
-
--- -- Initial transparency load
-
-
-
--- --EmotesMicroButton:Hide()
--- UpdateButtonBackground()
--- WORS_U_EmoteBook.toggleButton:SetPoint(unpack(WORS_U_EmoteBookButtonPosition or {"CENTER"}))

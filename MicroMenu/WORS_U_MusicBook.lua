@@ -16,15 +16,6 @@ tinsert(UISpecialFrames, "WORS_U_MusicPlayerFrame")
 WORS_U_MusicBook.musicPlayer:SetScript("OnDragStart", function(self) self:StartMoving() end)
 WORS_U_MusicBook.musicPlayer:SetScript("OnDragStop", function(self)
     self:StopMovingOrSizing()
-    -- local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
-    -- WORS_U_MicroMenuSettings.MicroMenuPOS = {
-        -- point = point,
-        -- relativeTo = relativeTo and relativeTo:GetName() or nil,
-        -- relativePoint = relativePoint,
-        -- xOfs = xOfs,
-        -- yOfs = yOfs
-    -- }
-	-- self:SetUserPlaced(false)
 end)
 local closeButton = CreateFrame("Button", nil, WORS_U_MusicPlayerFrame)
 closeButton:SetSize(16, 16)
@@ -53,25 +44,17 @@ local scrollBar = scrollFrame.ScrollBar or _G[scrollFrame:GetName() .. "ScrollBa
 if scrollBar then
     scrollBar:DisableDrawLayer("BACKGROUND")  -- Hide the background
     scrollBar:GetThumbTexture():SetAlpha(0)  -- Make the thumb texture transparent
-
-    -- Hide the scroll buttons
     local scrollUpButton = _G[scrollBar:GetName() .. "ScrollUpButton"]
     local scrollDownButton = _G[scrollBar:GetName() .. "ScrollDownButton"]
-
-    -- Hide textures for scroll up button
     scrollUpButton:GetNormalTexture():SetAlpha(0) -- Hide normal texture
     scrollUpButton:GetPushedTexture():SetAlpha(0) -- Hide pushed texture
     scrollUpButton:GetDisabledTexture():SetAlpha(0) -- Hide disabled texture
     scrollUpButton:GetHighlightTexture():SetAlpha(0) -- Hide highlight texture
-
-    -- Hide textures for scroll down button
     scrollDownButton:GetNormalTexture():SetAlpha(0) -- Hide normal texture
     scrollDownButton:GetPushedTexture():SetAlpha(0) -- Hide pushed texture
     scrollDownButton:GetDisabledTexture():SetAlpha(0) -- Hide disabled texture
     scrollDownButton:GetHighlightTexture():SetAlpha(0) -- Hide highlight texture
 end
-
-
 
 -- Content frame for track buttons inside the scroll frame
 local contentFrame = CreateFrame("Frame", nil, scrollFrame)
@@ -124,7 +107,6 @@ local function CreateMusicButtons()
 	
 	
 
--- Stop button positioned at the bottom of the main frame
 -- Stop button positioned at the bottom of the main frame
 local stopButton = CreateFrame("Button", "WORS_U_MusicBook_StopButton", WORS_U_MusicBook.musicPlayer)
 stopButton:SetSize(150, 30)
@@ -196,64 +178,3 @@ local function OnMusicClick(self)
     end
 end
 MusicMicroButton:SetScript("OnClick", OnMusicClick)
-
-
--- **********************************************************************
--- **********************************************************************
--- ************************OLD CODE FOR TOGGLE BUTTON *******************
--- **********************************************************************
--- **********************************************************************
-
-
-
-
--- -- Create the toggle button only if it doesn't exist
--- if not WORS_U_MusicBook.toggleButton then
-    -- WORS_U_MusicBook.toggleButton = CreateFrame("Button", "WORS_U_MusicBookToggleButton", UIParent)
-    -- WORS_U_MusicBook.toggleButton:SetSize(30, 35)
-    -- WORS_U_MusicBook.toggleButton:SetMovable(true)
-    -- WORS_U_MusicBook.toggleButton:SetClampedToScreen(true)
-    -- WORS_U_MusicBook.toggleButton:EnableMouse(true)
-    -- WORS_U_MusicBook.toggleButton:RegisterForDrag("LeftButton")
-    -- WORS_U_MusicBook.toggleButton:SetScript("OnDragStart", function(self) self:StartMoving() end)
-    -- WORS_U_MusicBook.toggleButton:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
-
-    -- -- Custom background texture for the button
-    -- WORS_U_MusicBook.toggleButton:SetBackdrop({
-        -- bgFile = "Interface\\WORS\\OldSchoolBackground2",
-        -- edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
-        -- tile = false, tileSize = 32, edgeSize = 16,
-        -- insets = { left = 1, right = 1, top = 1, bottom = 1 }
-    -- })
-
-    -- -- Icon for the toggle button
-    -- local icon = WORS_U_MusicBook.toggleButton:CreateTexture(nil, "ARTWORK")
-    -- icon:SetSize(25, 25)
-    -- icon:SetPoint("CENTER")
-    -- icon:SetTexture("Interface\\Icons\\bluephat")  -- Replace with your preferred icon
-
-    -- -- Set position if no saved position exists
-    -- WORS_U_MusicBook.toggleButton:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
--- end
-
--- -- Toggle button functionality for transparency and frame show/hide
--- WORS_U_MusicBook.toggleButton:SetScript("OnClick", function()
-    -- if IsAltKeyDown() then
-        -- currentTransparencyIndex = currentTransparencyIndex % #transparencyLevels + 1
-        -- WORS_U_MusicBook.musicPlayer:SetAlpha(transparencyLevels[currentTransparencyIndex])
-        -- SaveTransparency()
-        -- print("Music Book Transparency:", transparencyLevels[currentTransparencyIndex] * 100 .. "%")
-    -- else
-        -- if WORS_U_MusicBook.musicPlayer:IsShown() then
-            -- WORS_U_MusicBook.musicPlayer:Hide()
-        -- else
-            -- WORS_U_MusicBook.musicPlayer:Show()
-        -- end
-        -- UpdateButtonBackground()  -- Update the background color based on visibility
-    -- end
--- end)
-
--- -- Load transparency and update button background on addon load
--- --MusicMicroButton:Hide()
--- LoadTransparency()
--- UpdateButtonBackground()  -- Ensure initial background color is correct
