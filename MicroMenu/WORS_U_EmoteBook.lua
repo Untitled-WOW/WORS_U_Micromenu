@@ -143,3 +143,9 @@ local function OnEmoteClick(self)
     end
 end
 EmotesMicroButton:SetScript("OnClick", OnEmoteClick)
+EmotesMicroButton:HookScript("OnEnter", function(self)
+    if GameTooltip:IsOwned(self) then
+        GameTooltip:AddLine("ALT + Click to change transparency.", 1, 1, 0, true)
+        GameTooltip:Show()
+    end
+end)

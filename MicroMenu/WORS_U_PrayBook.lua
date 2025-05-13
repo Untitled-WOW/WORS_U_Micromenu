@@ -160,3 +160,10 @@ local function OnPrayerClick(self)
     end
 end
 PrayerMicroButton:SetScript("OnClick", OnPrayerClick)
+PrayerMicroButton:HookScript("OnEnter", function(self)
+    if GameTooltip:IsOwned(self) then
+        GameTooltip:AddLine("Shift + Click to open WOW Spellbook.", 1, 1, 0, true)
+        GameTooltip:AddLine("ALT + Click to change transparency.", 1, 1, 0, true)
+        GameTooltip:Show()
+    end
+end)

@@ -168,3 +168,10 @@ local function OnMagicClick(self)
     end
 end
 SpellbookMicroButton:SetScript("OnClick", OnMagicClick)
+SpellbookMicroButton:HookScript("OnEnter", function(self)
+    if GameTooltip:IsOwned(self) then
+        GameTooltip:AddLine("Shift + Click to open WOW Spellbook.", 1, 1, 0, true)
+        GameTooltip:AddLine("ALT + Click to change transparency.", 1, 1, 0, true)
+        GameTooltip:Show()
+    end
+end)
