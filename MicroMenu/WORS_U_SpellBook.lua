@@ -1,20 +1,16 @@
--- Get current Magic level from rep
+-- Function to initialize Prayer level from rep
 local factionID = 1169
 local magicLevel = 1
-local magicButtons = {}
-
--- Function to initialize Magic level
 local function InitializeMagicLevel()
     magicLevel = GetLevelFromFactionReputation(factionID)
-    print("Magic Level:", magicLevel)
 end
 
+local magicButtons = {}
 -- Function to set up magic buttons dynamically
 local function SetupMagicButtons()
     if InCombatLockdown() then
 		return
-	end
-	
+	end	
 	-- Clear existing buttons before creating new ones
     for _, button in pairs(magicButtons) do
         button:Hide()
@@ -30,34 +26,37 @@ local function SetupMagicButtons()
         local spellID = spellData.id
         local requiredLevel = spellData.level
         local spellName, _, spellIcon = GetSpellInfo(spellID)
-		--local spellButton = CreateFrame("Button", nil, WORS_U_SpellBook.frame, "ActionButtonTemplate")
         local spellButton = CreateFrame("Button", nil, WORS_U_SpellBook.frame, "SecureActionButtonTemplate")
         spellButton:SetSize(buttonSize, buttonSize)
-
         -- Calculate position
         local row = math.floor((i - 1) / columns)
-        local column = (i - 1) % columns
-        --spellButton:SetPoint("TOPLEFT", padding + (buttonSize + padding) * column, -padding - (buttonSize + padding) * row)
+        local column = (i - 1) % columns        
 		spellButton:SetPoint("TOPLEFT", WORS_U_SpellBook.frame, "TOPLEFT", margin + (buttonSize + padding) * column, -margin - (buttonSize + padding) * row)
-        -- Set up the button icon
         local icon = spellButton:CreateTexture(nil, "BACKGROUND")
         icon:SetAllPoints()
         icon:SetTexture(spellIcon)
-
-        -- Check if player's level meets the spell's required level
-        if magicLevel < requiredLevel then
-            icon:SetDesaturated(true)
-            spellButton:SetAlpha(0.5)
-        else
-            icon:SetDesaturated(false)
-            spellButton:SetAlpha(1)
-        end
-
+		-- Check Magic level and Rune requirments and set icon color
+		if magicLevel < requiredLevel then
+			icon:SetVertexColor(0.1, 0.1, 0.1) -- No magic level: Dark Gray
+		else
+			local hasRunes = WORS_U_SpellBook:HasRequiredRunes(spellData.runes)
+			if hasRunes then
+				icon:SetVertexColor(1, 1, 1) -- Can cast: Normal icon
+				-- Backpack open logic for spells like hi alch
+				if spellData.openInv then
+					spellButton:SetScript("PostClick", function()
+						ToggleBackpack()
+					end)
+				end
+			else				
+				icon:SetVertexColor(0.25, 0.25, 0.25) -- No runes: Gray
+				--icon:SetVertexColor(1, 0.03, 0.03) -- No runes: Red 
+			end
+		end
         -- Set up secure attributes for spell button
         spellButton:SetAttribute("type", "spell")
         spellButton:SetAttribute("spell", spellID)
-
-        -- Tooltip
+		
         spellButton:SetScript("OnEnter", function()
             GameTooltip:SetOwner(spellButton, "ANCHOR_RIGHT")
             GameTooltip:SetSpellByID(spellID)
@@ -68,9 +67,18 @@ local function SetupMagicButtons()
         end)
         table.insert(magicButtons, spellButton)
     end
-    -- Load the saved variable transparency value when the frame is created
     LoadTransparency()
 end
+
+-- Event used to check if magic run requirments are met
+local eventFrame = CreateFrame("Frame")
+eventFrame:RegisterEvent("BAG_UPDATE")
+eventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+eventFrame:SetScript("OnEvent", function(self, event, ...)
+    if InCombatLockdown() then return end
+    if not WORS_U_SpellBook.frame:IsShown() then return end
+    SetupMagicButtons()
+end)
 
 -- Create the main frame for the custom spell book
 WORS_U_SpellBook.frame = CreateFrame("Frame", "WORS_U_SpellBookFrame", UIParent)
@@ -102,7 +110,7 @@ closeButton:SetHighlightTexture("Interface\\WORS\\OldSchool-CloseButton-Highligh
 closeButton:SetPushedTexture("Interface\\WORS\\OldSchool-CloseButton-Down.blp")
 closeButton:SetScript("OnClick", function()
 	if InCombatLockdown() then
-		print("You cannot open or close Spell / Prayer Book in combat.")
+		print("|cff00ff00MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
 		return
 	else
 		WORS_U_SpellBook.frame:Hide()
@@ -110,54 +118,53 @@ closeButton:SetScript("OnClick", function()
 	end
 end)
 
-
-
 -- Function to update the button's background color
 local function UpdateButtonBackground()
     if WORS_U_SpellBook.frame:IsShown() then
-        --WORS_U_SpellBook.toggleButton:SetBackdropColor(1, 0, 0, 1)  -- Red background when open
 		SpellbookMicroButton:GetNormalTexture():SetVertexColor(1, 0, 0) -- Set the color to red
 	else
-        --WORS_U_SpellBook.toggleButton:SetBackdropColor(1, 1, 1, 1)  -- Default white background when closed
 		SpellbookMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color to red
 	end
 end
 WORS_U_SpellBook.frame:SetScript("OnShow", UpdateButtonBackground)
 WORS_U_SpellBook.frame:SetScript("OnHide", UpdateButtonBackground)
 
-
 -- Function to handle MagicMicroButton clicks
 local function OnMagicClick(self)
-    print("MagicMicroButton has been clicked!")  -- Debug statement
     local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
-	if pos and not InCombatLockdown() then
-		local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
-		WORS_U_SpellBook.frame:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
+	if not InCombatLockdown() then
+		if pos and not InCombatLockdown() then
+			local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
+			WORS_U_SpellBook.frame:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
+		else
+			WORS_U_SpellBook.frame:SetPoint("CENTER")
+		end
 	else
-		WORS_U_SpellBook.frame:SetPoint("CENTER")
+		print("|cff00ff00MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
 	end
 
-    if IsAltKeyDown() then
+    if IsAltKeyDown() and not InCombatLockdown()then
         WORS_U_SpellBook.frame:Show()
         currentTransparencyIndex = currentTransparencyIndex % #transparencyLevels + 1
         WORS_U_SpellBook.frame:SetAlpha(transparencyLevels[currentTransparencyIndex])
         SaveTransparency()
-        print("Spell Book Transparency:", transparencyLevels[currentTransparencyIndex] * 100, "%")
-		
     elseif IsShiftKeyDown() then
-        print("Shift key is down. Open normal Spellbook")  
 		ToggleSpellBook(BOOKTYPE_SPELL)
     else
-        print("Toggling Mini Spell Book visibility.")  
-        -- Standard toggle functionality
-        if WORS_U_SpellBook.frame:IsShown() then
-            WORS_U_SpellBook.frame:Hide()
-        else
-            InitializeMagicLevel()
-            SetupMagicButtons()
-			MicroMenu_ToggleFrame(WORS_U_SpellBook.frame)--:Show()
-        end
+        if not InCombatLockdown() then		
+			if WORS_U_SpellBook.frame:IsShown() then
+				WORS_U_SpellBook.frame:Hide()
+			else
+				InitializeMagicLevel()
+				SetupMagicButtons()
+				MicroMenu_ToggleFrame(WORS_U_SpellBook.frame)--:Show()
+			end
+		elseif WORS_U_MicroMenuSettings.AutoCloseEnabled then	
+			WORS_U_EmoteBookFrame:Hide()
+			WORS_U_MusicPlayerFrame:Hide()
+			CombatStylePanel:Hide()
+			CloseBackpack()
+		end
     end
 end
--- Register the click event for the SpellbookMicroButton
 SpellbookMicroButton:SetScript("OnClick", OnMagicClick)

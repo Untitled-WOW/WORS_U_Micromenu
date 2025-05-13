@@ -1,13 +1,11 @@
--- enable or disable auto-closing of other micromenu frames
-
+-- Initialize saved variable WORS_U_MicroMenuSettings
 WORS_U_MicroMenuSettings = WORS_U_MicroMenuSettings or {
     transparency = 1,  -- Default transparency value
 	AutoCloseEnabled = true,
 	MicroMenuPOS = { point = "CENTER", relativeTo = nil, relativePoint = "CENTER", xOfs = 0, yOfs = 0 }
 }
 
-
--- Store all micro menu frames
+-- Store all MicroMenu frames and CombatStylePanel
 MicroMenu_Frames = {
     WORS_U_SpellBookFrame,
     WORS_U_PrayBookFrame,
@@ -25,12 +23,10 @@ function MicroMenu_HideAll()
 			frame:SetFrameStrata("High")
 			frame:SetFrameLevel(10)
 			frame:Hide()
-			print("Frame: " .. frame:GetName() .. " Hiden")
 		else
 			frame:SetFrameStrata("High")
 			frame:SetFrameLevel(20)
 			frame:Hide()
-			print("Frame: " .. frame:GetName() .. " Hiden")
 		end
 		
 	end
@@ -41,12 +37,9 @@ end
 function MicroMenu_ToggleFrame(targetFrame)
 	if InCombatLockdown() then
 		if targetFrame ==  WORS_U_SpellBookFrame or targetFrame ==  WORS_U_PrayBookFrame then
-			print("You cannot open or close Spell / Prayer Book in combat.")
+			print("|cff00ff00MicroMenu: MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
 			return
-		else
-			targetFrame:SetFrameStrata("HIGH")
-		end
-		
+		end		
 	end
 	if targetFrame:IsShown() then
         targetFrame:Hide()
@@ -58,8 +51,6 @@ function MicroMenu_ToggleFrame(targetFrame)
     end
 end
 
-
-
 -- Function to save the position of the frame
 local function SaveFramePosition(self)
     if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then
@@ -70,27 +61,24 @@ local function SaveFramePosition(self)
 			relativePoint = relativePoint,
 			xOfs = xOfs,
 			yOfs = yOfs
-		}
-		print("Frame position saved:", point, relativePoint, xOfs, yOfs)  -- Debug output
+		}--print("Frame position saved:", point, relativePoint, xOfs, yOfs)  -- Debug output
 		
-		 -- Apply this position to all other frames in MicroMenuFramesToAdjust
+		-- Apply this position to all other frames 
         local relativeFrame = relativeTo and _G[relativeTo] or UIParent
         for _, frame in ipairs(MicroMenu_Frames) do
             if frame and frame ~= self then
 				if InCombatLockdown() and (frame == WORS_U_SpellBookFrame or frame == WORS_U_PrayBookFrame) then
-					print("Skipped position update for", frame:GetName(), "due to combat lockdown")
+				--print("Skipped position update for", frame:GetName(), "due to combat lockdown")
 				else
 					frame:ClearAllPoints()
 					frame:SetPoint(point, relativeFrame, relativePoint, xOfs, yOfs)
 					frame:SetUserPlaced(false)
 				end
             end
-        end
-		print("Frame pos applied to all MicroMenuFrames and CombatStylePanel")
+        end		
 		Backpack:ClearAllPoints()
 		Backpack:SetPoint(point, relativeFrame, relativePoint, xOfs, yOfs+25)
         Backpack:SetUserPlaced(false)
-		print("Frame pos applied Backpack")
 	else
 		for _, frame in ipairs(MicroMenu_Frames) do
             if frame and frame ~= self then
@@ -98,16 +86,14 @@ local function SaveFramePosition(self)
             end
         end
 		Backpack:SetUserPlaced(true)
-		print("AutoCloseEnabled set to false")
 	end
 end
 
-
+-- Hook into Backpack and CombatStylePanel to hide MicroMenu frames and set postion
 local function HookAFrames()
     if WORS_U_MicroMenuSettings.AutoCloseEnabled ~= true then
         return
     end
-
     if Backpack then
        if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then 
 			Backpack:HookScript("OnShow", function()
@@ -125,16 +111,11 @@ local function HookAFrames()
 				Backpack:ClearAllPoints()
 				Backpack:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs+25)
 				Backpack:SetUserPlaced(false)
-			else
-				
 			end
-			
 		else
 			print("AutoCloseEnabled set to false")
 		end
-
     end
-
     if CombatStylePanel then
 		if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then 
 			CombatStylePanel:HookScript("OnShow", function()
@@ -154,8 +135,7 @@ local function HookAFrames()
 				CombatStylePanel:SetUserPlaced(false)
 			else
 				
-			end
-			
+			end			
 		else
 			print("AutoCloseEnabled set to false")
 		end
@@ -165,7 +145,7 @@ local function HookAFrames()
     if not Backpack and not CombatStylePanel then
         C_Timer.After(0.1, HookAFrames)
     end
-	print("Backpack and CombatStylePanel Hooked")
+	--print("Backpack and CombatStylePanel Hooked")
 end
 
 local function HookMicroMenuFrames()
@@ -177,28 +157,24 @@ local function HookMicroMenuFrames()
 		end 
 		return
     end
--- Hook into the OnDragStop handler for MicroMenu and CombatStylePanel frames
+	-- Hook into the OnDragStop handler for MicroMenu and CombatStylePanel frames
 	for _, frame in ipairs(MicroMenu_Frames) do
 		if frame then
 			frame:HookScript("OnDragStop", function(self)
 				SaveFramePosition(self)  -- Save the position after drag
-				
 			end)
 		end
 	end
 end
 
-
 local f = CreateFrame("Frame")
 f:RegisterEvent("PLAYER_ENTERING_WORLD")  -- Ensure it's only triggered after login
 f:SetScript("OnEvent", function(self, event)
-    if event == "PLAYER_ENTERING_WORLD" then
-		
+    if event == "PLAYER_ENTERING_WORLD" then		
 		C_Timer.After(0.5, function()
 			HookAFrames()			
 			HookMicroMenuFrames()
 		end)		
-
         self:UnregisterEvent("PLAYER_LOGIN")  -- Unregister the event after hooking
     end
 end)

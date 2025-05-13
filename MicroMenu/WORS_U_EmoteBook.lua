@@ -1,14 +1,12 @@
 -- Create the main frame for the custom emote book
 WORS_U_EmoteBook.frame = CreateFrame("Frame", "WORS_U_EmoteBookFrame", UIParent)
 WORS_U_EmoteBook.frame:SetSize(192, 280)
-
 WORS_U_EmoteBook.frame:SetBackdrop({
     bgFile = "Interface\\WORS\\OldSchoolBackground1",
     edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
     tile = false, tileSize = 32, edgeSize = 32,
     insets = { left = 5, right = 5, top = 5, bottom = 5 }
 })
-
 WORS_U_EmoteBook.frame:Hide()
 WORS_U_EmoteBook.frame:SetMovable(true)
 WORS_U_EmoteBook.frame:EnableMouse(true)
@@ -31,14 +29,11 @@ closeButton:SetScript("OnClick", function()
     EmotesMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
 	
 end)
-
-
 -- Create the title for the emote book
 local title = WORS_U_EmoteBook.frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
 title:SetText("Emote Book")
 title:SetPoint("TOP", WORS_U_EmoteBook.frame, "TOP", 0, -10)  -- Position title
 title:SetTextColor(1, 1, 1)  -- Set title color to white
-
 -- Create a scrollable frame for the buttons
 local scrollFrame = CreateFrame("ScrollFrame", nil, WORS_U_EmoteBook.frame, "UIPanelScrollFrameTemplate")
 scrollFrame:SetSize(180, 210)  -- Size of the scrollable area
@@ -76,14 +71,12 @@ local function SetupEmoteButtons()
         button:SetParent(nil)
     end
     wipe(emoteButtons)
-    -- Button size configuration
     local buttonWidth = 40  -- Custom width for buttons
     local buttonHeight = 25  -- Custom height for buttons
     local padding = 5
     local columns = 4
     local startX = 2  -- Adjust this value to move buttons away from the left side
     local buttonStartY = -10  -- Starting Y position for buttons (below the title)
-    -- Create title label
     local titleLabel = WORS_U_EmoteBook.frame.titleLabel or WORS_U_EmoteBook.frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     titleLabel:SetPoint("TOP", 0, -10)  -- Position it at the top center of the frame
     titleLabel:SetText("Emote Book")
@@ -105,12 +98,9 @@ local function SetupEmoteButtons()
         local row = math.floor((i - 1) / columns)
         local column = (i - 1) % columns
         emoteButton:SetPoint("TOPLEFT", startX + (buttonWidth + padding) * column, buttonStartY - (buttonHeight + padding) * row)
-        -- Set up the button label and text
         emoteButton:SetText(emoteData.name)
         emoteButton:SetNormalFontObject("GameFontNormalSmall")
-        -- Set up button functionality
         emoteButton:SetScript("OnClick", function()
-            print("Button clicked: " .. emoteData.name)  -- Debug output
             DoEmote(emoteData.command)  -- Use the actual command for each emote
         end)
         table.insert(emoteButtons, emoteButton)
@@ -129,7 +119,6 @@ end
 WORS_U_EmoteBook.frame:SetScript("OnShow", UpdateButtonBackground)
 WORS_U_EmoteBook.frame:SetScript("OnHide", UpdateButtonBackground)
 
-
 -- Function to handle EmotesMicroButton clicks
 local function OnEmoteClick(self)
 	local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
@@ -138,21 +127,16 @@ local function OnEmoteClick(self)
 		WORS_U_EmoteBook.frame:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
 	else
 		WORS_U_EmoteBook.frame:SetPoint("CENTER")
-	end
-	
+	end	
     if IsAltKeyDown() then
 		WORS_U_EmoteBook.frame:Show()
         currentTransparencyIndex = currentTransparencyIndex % #transparencyLevels + 1
         WORS_U_EmoteBook.frame:SetAlpha(transparencyLevels[currentTransparencyIndex])
         SaveTransparency()  -- Save transparency after change
-        print("Emote Book Transparency:", transparencyLevels[currentTransparencyIndex] * 100 .. "%")
     else
-        -- Standard toggle functionality
         if WORS_U_EmoteBook.frame:IsShown() then
-            print("Hiding Emote Book")  -- Debug output
             WORS_U_EmoteBook.frame:Hide()
         else
-            print("Showing Emote Book")  -- Debug output
             SetupEmoteButtons()  -- Ensure buttons are set up
             MicroMenu_ToggleFrame(WORS_U_EmoteBook.frame)--:Show()
         end

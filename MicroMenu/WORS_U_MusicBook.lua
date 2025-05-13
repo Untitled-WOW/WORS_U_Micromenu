@@ -29,17 +29,12 @@ closeButton:SetScript("OnClick", function()
     MusicMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
 	
 end)
-
--- Label to show the currently playing track
 WORS_U_MusicBook.trackLabel = WORS_U_MusicBook.musicPlayer:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
 WORS_U_MusicBook.trackLabel:SetPoint("TOP", WORS_U_MusicBook.musicPlayer, "TOP", 0, -10)
 WORS_U_MusicBook.trackLabel:SetText("No track playing")
-
--- Scroll frame for the track buttons
 local scrollFrame = CreateFrame("ScrollFrame", nil, WORS_U_MusicBook.musicPlayer, "UIPanelScrollFrameTemplate")
 scrollFrame:SetSize(160, 180)
 scrollFrame:SetPoint("TOP", WORS_U_MusicBook.trackLabel, "BOTTOM", 0, -10)
--- Hiding the scroll bar
 local scrollBar = scrollFrame.ScrollBar or _G[scrollFrame:GetName() .. "ScrollBar"]  -- Reference to the scrollbar
 if scrollBar then
     scrollBar:DisableDrawLayer("BACKGROUND")  -- Hide the background
@@ -55,8 +50,6 @@ if scrollBar then
     scrollDownButton:GetDisabledTexture():SetAlpha(0) -- Hide disabled texture
     scrollDownButton:GetHighlightTexture():SetAlpha(0) -- Hide highlight texture
 end
-
--- Content frame for track buttons inside the scroll frame
 local contentFrame = CreateFrame("Frame", nil, scrollFrame)
 contentFrame:SetSize(160, 500)  -- Adjust the height based on the number of tracks
 scrollFrame:SetScrollChild(contentFrame)
@@ -69,7 +62,7 @@ function WORS_U_MusicBook:PlayTrack(track)
         self.currentTrack = track
         self.trackLabel:SetText("" .. track.name)
     else
-        print("Invalid track file path or track is nil.")
+		print("|cff00ff00MicroMenu: |r" .. "|cffff0000Error: |r" .. "|cff00ff00Invalid track file path or track is nil.|r")
     end
 end
 
@@ -84,61 +77,46 @@ end
 
 -- Create individual play buttons for each track inside the scrollable content frame
 local function CreateMusicButtons()
-    for i, track in ipairs(WORS_U_MusicBook.tracks) do
+    -- Buttons created for all WORS_U_MusicBook.tracks
+	for i, track in ipairs(WORS_U_MusicBook.tracks) do
         local button = CreateFrame("Button", nil, contentFrame, "UIPanelButtonTemplate")
         button:SetText("Play " .. track.name)
         button:SetSize(150, 25)
         button:SetPoint("TOP", contentFrame, "TOP", 0, -30 * (i - 1))
-        button:SetScript("OnClick", function()
-            WORS_U_MusicBook:PlayTrack(track)
-        end)
-        -- Set up the button border
         button:SetBackdrop({
             edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border", -- Border texture
             edgeSize = 8,  -- Border thickness
             insets = { left = 2, right = 2, top = 2, bottom = 2 },  -- Insets for border
         })
-        -- Hide the default textures
-        button:SetNormalTexture(nil)
-        button:SetPushedTexture(nil)
-        button:SetHighlightTexture(nil)
-
+        button:SetNormalTexture(nil) -- Hide the default textures
+        button:SetPushedTexture(nil) -- Hide the default textures
+        button:SetHighlightTexture(nil) -- Hide the default textures
+		button:SetScript("OnClick", function()
+            WORS_U_MusicBook:PlayTrack(track)
+        end)
 	end
 	
-	
-
--- Stop button positioned at the bottom of the main frame
-local stopButton = CreateFrame("Button", "WORS_U_MusicBook_StopButton", WORS_U_MusicBook.musicPlayer)
-stopButton:SetSize(150, 30)
-stopButton:SetPoint("BOTTOM", WORS_U_MusicBook.musicPlayer, "BOTTOM", 0, 10)
-
--- Set backdrop for the button
-stopButton:SetBackdrop({
-    bgFile = "Interface\\WORS\\OldSchoolBackground2",  -- No background texture
-    edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border", -- Border texture
-    edgeSize = 8,  -- Border thickness
-    insets = { left = 2, right = 2, top = 2, bottom = 2 },  -- Insets for border
-})
-
--- Set the background color to red
-stopButton:SetBackdropColor(1, 0, 0, 1)  -- RGBA values (Red, Green, Blue, Alpha)
-
--- Set up text on the button
-stopButton.text = stopButton:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-stopButton.text:SetPoint("CENTER")  -- Center the text
-stopButton.text:SetText("Stop")  -- Set button text to "Stop"
-
-
--- OnClick function for the button
-stopButton:SetScript("OnClick", function()
-    WORS_U_MusicBook:StopTrack()
-end)
+	-- Stop button positioned at the bottom of the main frame
+	local stopButton = CreateFrame("Button", "WORS_U_MusicBook_StopButton", WORS_U_MusicBook.musicPlayer)
+	stopButton:SetSize(150, 30)
+	stopButton:SetPoint("BOTTOM", WORS_U_MusicBook.musicPlayer, "BOTTOM", 0, 10)
+	stopButton:SetBackdrop({
+		bgFile = "Interface\\WORS\\OldSchoolBackground2",  -- No background texture
+		edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border", -- Border texture
+		edgeSize = 8,  -- Border thickness
+		insets = { left = 2, right = 2, top = 2, bottom = 2 },  -- Insets for border
+	})
+	stopButton:SetBackdropColor(1, 0, 0, 1) -- Red Background for Stop RGBA values (Red, Green, Blue, Alpha)
+	stopButton.text = stopButton:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+	stopButton.text:SetPoint("CENTER")  -- Center the text
+	stopButton.text:SetText("Stop")  -- Set button text to "Stop"
+	stopButton:SetScript("OnClick", function()
+		WORS_U_MusicBook:StopTrack()
+	end)
 
 
 end
 CreateMusicButtons()
-
-
 
 -- Update background color based on visibility
 local function UpdateButtonBackground()
@@ -160,20 +138,17 @@ local function OnMusicClick(self)
 		WORS_U_MusicBook.musicPlayer:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
 	else
 		WORS_U_MusicBook.musicPlayer:SetPoint("CENTER")
-	end
-	
+	end	
     if IsAltKeyDown() then
 		WORS_U_MusicBook.musicPlayer:Show()
         currentTransparencyIndex = currentTransparencyIndex % #transparencyLevels + 1
         WORS_U_MusicBook.musicPlayer:SetAlpha(transparencyLevels[currentTransparencyIndex])
         SaveTransparency()
-        print("Music Book Transparency:", transparencyLevels[currentTransparencyIndex] * 100 .. "%")
     else
         if WORS_U_MusicBook.musicPlayer:IsShown() then
             WORS_U_MusicBook.musicPlayer:Hide()
         else
-			MicroMenu_ToggleFrame(WORS_U_MusicBook.musicPlayer)--:Show()
-            
+			MicroMenu_ToggleFrame(WORS_U_MusicBook.musicPlayer)--:Show()   
         end
     end
 end

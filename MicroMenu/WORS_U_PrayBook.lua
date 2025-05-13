@@ -1,21 +1,17 @@
--- Get current Prayer level from rep
+-- Function to initialize Prayer level from rep
 local factionID = 1170
 local prayerLevel = 1
-local prayerButtons = {}  -- Table to hold button references for clearing/re-creation
-
--- Function to initialize Prayer level
 local function InitializePrayerLevel()
     prayerLevel = GetLevelFromFactionReputation(factionID)
-    print("Prayer Level:", prayerLevel)
 end
 
+local prayerButtons = {}  
 -- Function to set up magic buttons dynamically
 local function SetupPrayerButtons()
-    -- Clear existing buttons before creating new ones
 	if InCombatLockdown() then
 		return
 	end
-	
+	-- Clear existing buttons before creating new ones
 	for _, button in pairs(prayerButtons) do
         button:Hide()
         button:SetParent(nil)
@@ -30,25 +26,22 @@ local function SetupPrayerButtons()
         local prayerID = prayerData.id
         local requiredLevel = prayerData.level
         local prayerName, _, prayerIcon = GetSpellInfo(prayerID)
-
         local prayerButton = CreateFrame("Button", nil, WORS_U_PrayBook.frame, "SecureActionButtonTemplate")
         prayerButton:SetSize(buttonSize, buttonSize)
-        local row = math.floor((i - 1) / columns)
+        -- Calculate position
+		local row = math.floor((i - 1) / columns)
         local column = (i - 1) % columns
         prayerButton:SetPoint("TOPLEFT", margin + (buttonSize + padding) * column, -margin - (buttonSize + padding) * row)
-
         local icon = prayerButton:CreateTexture(nil, "BACKGROUND")
         icon:SetAllPoints()
         icon:SetTexture(prayerIcon)
-
+		-- Check prayer level and set icon color
         if prayerLevel < requiredLevel then
-            icon:SetDesaturated(true)
-            prayerButton:SetAlpha(0.5)
+			icon:SetVertexColor(0.2, 0.2, 0.2) -- No magic level: Dark Gray
         else
-            icon:SetDesaturated(false)
-            prayerButton:SetAlpha(1)
+			icon:SetVertexColor(1, 1, 1) -- Normal icon
         end
-
+		-- pre click used to cast prayer or remove aura
         prayerButton:SetScript("PreClick", function(self)
             if UnitBuff("player", prayerName) then
                 self:SetAttribute("type", "macro")
@@ -58,7 +51,6 @@ local function SetupPrayerButtons()
                 self:SetAttribute("spell", prayerID)
             end
         end)
-
         prayerButton:SetScript("OnEnter", function()
             GameTooltip:SetOwner(prayerButton, "ANCHOR_RIGHT")
             GameTooltip:SetSpellByID(prayerID)
@@ -67,7 +59,6 @@ local function SetupPrayerButtons()
         prayerButton:SetScript("OnLeave", function()
             GameTooltip:Hide()
         end)
-
         prayerButton:SetScript("OnUpdate", function(self)
             if UnitBuff("player", prayerName) then
                 icon:SetTexture(prayerData.buffIcon)
@@ -75,10 +66,8 @@ local function SetupPrayerButtons()
                 icon:SetTexture(prayerIcon)
             end
         end)
-
         table.insert(prayerButtons, prayerButton)
     end	
-	-- Load the saved variable transparency value when the frame is created
 	LoadTransparency()
 end
 
@@ -112,10 +101,9 @@ closeButton:SetHighlightTexture("Interface\\WORS\\OldSchool-CloseButton-Highligh
 closeButton:SetPushedTexture("Interface\\WORS\\OldSchool-CloseButton-Down.blp")
 closeButton:SetScript("OnClick", function()
 	if InCombatLockdown() then
-		print("You cannot open or close Spell / Prayer Book in combat.")
+		print("|cff00ff00MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
 		return
-	else
-	
+	else	
 		WORS_U_PrayBook.frame:Hide()
 		PrayerMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
 	end
@@ -124,49 +112,51 @@ end)
 -- Function to update the button's background color
 local function UpdateButtonBackground()
     if WORS_U_PrayBook.frame:IsShown() then
-        --WORS_U_PrayBook.toggleButton:SetBackdropColor(1, 0, 0, 1)  -- Red background when open
 		PrayerMicroButton:GetNormalTexture():SetVertexColor(1, 0, 0) -- Set the color to red	
 	else
-        --WORS_U_PrayBook.toggleButton:SetBackdropColor(1, 1, 1, 1)  -- Default white background when closed
 		PrayerMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Default	
 	end
 end
 WORS_U_PrayBook.frame:SetScript("OnShow", UpdateButtonBackground)
 WORS_U_PrayBook.frame:SetScript("OnHide", UpdateButtonBackground)
 
-
-
 -- Function to handle PrayerMicroButton clicks
 local function OnPrayerClick(self)
 	local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
-	if pos and not InCombatLockdown() then
-		local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
-		WORS_U_PrayBook.frame:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
+	if not InCombatLockdown() then
+		if pos then
+			local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
+			WORS_U_PrayBook.frame:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
+		else
+			WORS_U_PrayBook.frame:SetPoint("CENTER")
+		end
 	else
-		WORS_U_PrayBook.frame:SetPoint("CENTER")
+		print("|cff00ff00MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
 	end
 
-	if IsAltKeyDown() then
+	if IsAltKeyDown() and not InCombatLockdown() then
         WORS_U_PrayBook.frame:Show()
 		currentTransparencyIndex = currentTransparencyIndex % #transparencyLevels + 1
         WORS_U_PrayBook.frame:SetAlpha(transparencyLevels[currentTransparencyIndex])
         SaveTransparency()  -- Save transparency after change
-        print("Prayer Book Transparency set to:", transparencyLevels[currentTransparencyIndex] * 100 .. "%")
-	
-	elseif IsShiftKeyDown() then
-        print("Shift key is down. Open normal Spellbook")  -- Debug statement for Shift key
+	elseif IsShiftKeyDown() then        
         --AscensionSpellbookFrame:Show()
 		ToggleSpellBook(BOOKTYPE_SPELL)
-
     else
-        -- Regular toggle functionality
-        if WORS_U_PrayBook.frame:IsShown() then
-            WORS_U_PrayBook.frame:Hide()
-        else
-            InitializePrayerLevel()
-            SetupPrayerButtons()
-            MicroMenu_ToggleFrame(WORS_U_PrayBook.frame)--:Show()
-        end
+		if not InCombatLockdown() then	
+			if WORS_U_PrayBook.frame:IsShown() then
+				WORS_U_PrayBook.frame:Hide()
+			else
+				InitializePrayerLevel()
+				SetupPrayerButtons()
+				MicroMenu_ToggleFrame(WORS_U_PrayBook.frame)--:Show()
+			end
+		elseif WORS_U_MicroMenuSettings.AutoCloseEnabled then	
+			WORS_U_EmoteBookFrame:Hide()
+			WORS_U_MusicPlayerFrame:Hide()
+			CombatStylePanel:Hide()
+			CloseBackpack()
+		end
     end
 end
 PrayerMicroButton:SetScript("OnClick", OnPrayerClick)

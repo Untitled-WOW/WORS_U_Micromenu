@@ -13,3 +13,5 @@ WORS_U_EmoteBook.lua
 WORS_U_MusicBook.lua
 WORS_U_PrayBook.lua
 WORS_U_MicroMenu.lua
+
+ChatSkin.lua
