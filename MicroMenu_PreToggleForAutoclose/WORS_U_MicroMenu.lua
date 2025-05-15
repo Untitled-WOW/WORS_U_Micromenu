@@ -44,7 +44,7 @@ function MicroMenu_ToggleFrame(targetFrame)
 	if targetFrame:IsShown() then
         targetFrame:Hide()
     else
-        if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then
+        if WORS_U_MicroMenuSettings.AutoCloseEnabled then
             MicroMenu_HideAll()
         end
         targetFrame:Show()
@@ -97,15 +97,13 @@ local function HookAFrames()
     if Backpack then
        if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then 
 			Backpack:HookScript("OnShow", function()
-				if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then
-					if not InCombatLockdown() then
-						WORS_U_SpellBook.frame:Hide()
-						WORS_U_PrayBook.frame:Hide()
-					end
-					WORS_U_EmoteBook.frame:Hide()
-					WORS_U_MusicBook.musicPlayer:Hide()
-					CombatStylePanel:Hide()
+				if not InCombatLockdown() then
+					WORS_U_SpellBook.frame:Hide()
+					WORS_U_PrayBook.frame:Hide()
 				end
+				WORS_U_EmoteBook.frame:Hide()
+				WORS_U_MusicBook.musicPlayer:Hide()
+				CombatStylePanel:Hide()
 			end)
 			local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
 			if pos then
@@ -121,15 +119,13 @@ local function HookAFrames()
     if CombatStylePanel then
 		if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then 
 			CombatStylePanel:HookScript("OnShow", function()
-				if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then
-					if not InCombatLockdown() then
-						WORS_U_SpellBook.frame:Hide()
-						WORS_U_PrayBook.frame:Hide()
-					end
-					WORS_U_EmoteBook.frame:Hide()
-					WORS_U_MusicBook.musicPlayer:Hide()
-					CloseBackpack()
+				if not InCombatLockdown() then
+					WORS_U_SpellBook.frame:Hide()
+					WORS_U_PrayBook.frame:Hide()
 				end
+				WORS_U_EmoteBook.frame:Hide()
+				WORS_U_MusicBook.musicPlayer:Hide()
+				CloseBackpack()
 			end)
 			local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
 			if pos then
@@ -182,94 +178,3 @@ f:SetScript("OnEvent", function(self, event)
         self:UnregisterEvent("PLAYER_LOGIN")  -- Unregister the event after hooking
     end
 end)
-
----------------------------------------------------------------------------------------------------
-
-------------------------------------------------------------------------
-
-local optionsFrame = CreateFrame("Frame", "MicroMenuOptionsFrame", InterfaceOptionsFramePanelContainer)
-optionsFrame.name = "MicroMenu"
--- Create a scroll frame
-local scrollFrame = CreateFrame("ScrollFrame", "MicroMenuOptionsScrollFrame", optionsFrame, "UIPanelScrollFrameTemplate")
-scrollFrame:SetSize(550, 540) -- Set the desired size of the scroll frame
-scrollFrame:SetPoint("TOPLEFT", 16, -16)
-local contentFrame = CreateFrame("Frame", "MicroMenuOptionsContentFrame", scrollFrame)
-contentFrame:SetSize(400, 500) -- Set size based on the expected total content height
-scrollFrame:SetScrollChild(contentFrame)
--- Create a title
-local title = contentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-title:SetPoint("TOPLEFT", 0, 0)
-title:SetText("Micro Menu Options")
-
--- Create checkbox for pinToBackpack
-local autoCloseEnabledCheckbox = CreateFrame("CheckButton", "MicroMenuAutoCloseEnabledCheckbox", contentFrame, "InterfaceOptionsCheckButtonTemplate")
-autoCloseEnabledCheckbox:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 10, -10)
-autoCloseEnabledCheckbox.text = autoCloseEnabledCheckbox:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-autoCloseEnabledCheckbox.text:SetPoint("LEFT", autoCloseEnabledCheckbox, "RIGHT", 5, 0)
-autoCloseEnabledCheckbox.text:SetText("Enable Auto Close and Stacking of MicroMenu, Backpack and Combat Style Windows") -- Set the checkbox label
-autoCloseEnabledCheckbox:SetScript("OnShow", function(self)
-    if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then
-        self:SetChecked(true)
-    else
-        self:SetChecked(false)
-    end
-end)
-autoCloseEnabledCheckbox:SetScript("OnClick", function(self)
-	WORS_U_MicroMenuSettings.AutoCloseEnabled = self:GetChecked() == 1 and true or false
-	HookAFrames()
-	HookMicroMenuFrames()
-end)
-
--- local transparencyLabel = contentFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
--- transparencyLabel:SetPoint("TOPLEFT", autoCloseEnabledCheckbox, "BOTTOMLEFT", 0, -50)
--- transparencyLabel:SetText("Transparency")
-
--- local transparencyDropdown = CreateFrame("Frame", "WORS_TransparencyDropdown", contentFrame, "UIDropDownMenuTemplate")
--- transparencyDropdown:SetPoint("TOPLEFT", transparencyLabel, "BOTTOMLEFT", -16, -5)
-
--- local transparencyOptions = {25, 50, 75, 100}
-
--- UIDropDownMenu_Initialize(transparencyDropdown, function(self, level)
-    -- for _, value in ipairs(transparencyOptions) do
-        -- local info = UIDropDownMenu_CreateInfo()
-        -- info.text = value .. "%"
-        -- info.value = value
-        -- info.func = function()
-            -- UIDropDownMenu_SetSelectedValue(transparencyDropdown, value)
-            -- UIDropDownMenu_SetText(transparencyDropdown, value .. "%")
-
-            -- -- Inline application of alpha
-            -- local alpha = value / 100
-            -- WORS_U_MicroMenuSettings.transparency = value
-            -- if WORS_U_EmoteBook and WORS_U_EmoteBook.frame then
-                -- WORS_U_EmoteBook.frame:SetAlpha(alpha)
-            -- end
-            -- if WORS_U_PrayBook and WORS_U_PrayBook.frame then
-                -- WORS_U_PrayBook.frame:SetAlpha(alpha)
-            -- end
-            -- if WORS_U_SpellBook and WORS_U_SpellBook.frame then
-                -- WORS_U_SpellBook.frame:SetAlpha(alpha)
-            -- end
-            -- if WORS_U_MusicBook and WORS_U_MusicBook.musicPlayer then
-                -- WORS_U_MusicBook.musicPlayer:SetAlpha(alpha)
-            -- end
-			-- WORS_U_MicroMenuSettings.transparency = value
-			
-
-        -- end
-        -- UIDropDownMenu_AddButton(info, level)
-    -- end
--- end)
-
--- transparencyDropdown:SetScript("OnShow", function()
-    -- local selected = WORS_U_MicroMenuSettings.transparency * 100 or 100
-    -- UIDropDownMenu_SetSelectedValue(transparencyDropdown, selected)
-    -- UIDropDownMenu_SetText(transparencyDropdown, selected .. "%")
--- end)
-
-
-
-
-
--- Register the options frame
-InterfaceOptions_AddCategory(optionsFrame)

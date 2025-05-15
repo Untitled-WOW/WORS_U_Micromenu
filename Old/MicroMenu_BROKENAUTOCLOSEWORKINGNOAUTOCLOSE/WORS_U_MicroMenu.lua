@@ -1,10 +1,3 @@
--- Initialize saved variable WORS_U_MicroMenuSettings
-WORS_U_MicroMenuSettings = WORS_U_MicroMenuSettings or {
-    transparency = 1,  -- Default transparency value
-	AutoCloseEnabled = true,
-	MicroMenuPOS = { point = "CENTER", relativeTo = nil, relativePoint = "CENTER", xOfs = 0, yOfs = 0 }
-}
-
 -- Store all MicroMenu frames and CombatStylePanel
 MicroMenu_Frames = {
     WORS_U_SpellBookFrame,
@@ -44,7 +37,7 @@ function MicroMenu_ToggleFrame(targetFrame)
 	if targetFrame:IsShown() then
         targetFrame:Hide()
     else
-        if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then
+        if WORS_U_MicroMenuSettings.AutoCloseEnabled then
             MicroMenu_HideAll()
         end
         targetFrame:Show()
@@ -77,7 +70,7 @@ local function SaveFramePosition(self)
             end
         end		
 		Backpack:ClearAllPoints()
-		Backpack:SetPoint(point, relativeFrame, relativePoint, xOfs, yOfs+25)
+		Backpack:SetPoint(point, relativeFrame, relativePoint, xOfs, yOfs)
         Backpack:SetUserPlaced(false)
 	else
 		for _, frame in ipairs(MicroMenu_Frames) do
@@ -91,21 +84,19 @@ end
 
 -- Hook into Backpack and CombatStylePanel to hide MicroMenu frames and set postion
 local function HookAFrames()
-    if WORS_U_MicroMenuSettings.AutoCloseEnabled ~= true then
+    if WORS_U_MicroMenuSettings.AutoCloseEnabled == false then
         return
     end
     if Backpack then
        if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then 
 			Backpack:HookScript("OnShow", function()
-				if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then
-					if not InCombatLockdown() then
-						WORS_U_SpellBook.frame:Hide()
-						WORS_U_PrayBook.frame:Hide()
-					end
-					WORS_U_EmoteBook.frame:Hide()
-					WORS_U_MusicBook.musicPlayer:Hide()
-					CombatStylePanel:Hide()
+				if not InCombatLockdown() then
+					WORS_U_SpellBook.frame:Hide()
+					WORS_U_PrayBook.frame:Hide()
 				end
+				WORS_U_EmoteBook.frame:Hide()
+				WORS_U_MusicBook.musicPlayer:Hide()
+				CombatStylePanel:Hide()
 			end)
 			local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
 			if pos then
@@ -121,15 +112,13 @@ local function HookAFrames()
     if CombatStylePanel then
 		if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then 
 			CombatStylePanel:HookScript("OnShow", function()
-				if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then
-					if not InCombatLockdown() then
-						WORS_U_SpellBook.frame:Hide()
-						WORS_U_PrayBook.frame:Hide()
-					end
-					WORS_U_EmoteBook.frame:Hide()
-					WORS_U_MusicBook.musicPlayer:Hide()
-					CloseBackpack()
+				if not InCombatLockdown() then
+					WORS_U_SpellBook.frame:Hide()
+					WORS_U_PrayBook.frame:Hide()
 				end
+				WORS_U_EmoteBook.frame:Hide()
+				WORS_U_MusicBook.musicPlayer:Hide()
+				CloseBackpack()
 			end)
 			local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
 			if pos then
@@ -153,7 +142,7 @@ local function HookAFrames()
 end
 
 local function HookMicroMenuFrames()
-	if WORS_U_MicroMenuSettings.AutoCloseEnabled ~= true then
+	if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then
 		for _, frame in ipairs(MicroMenu_Frames) do
 			if frame then
 				frame:SetUserPlaced(true)
@@ -183,6 +172,10 @@ f:SetScript("OnEvent", function(self, event)
     end
 end)
 
+
+
+
+
 ---------------------------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------
@@ -207,15 +200,13 @@ autoCloseEnabledCheckbox:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 10, -10)
 autoCloseEnabledCheckbox.text = autoCloseEnabledCheckbox:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
 autoCloseEnabledCheckbox.text:SetPoint("LEFT", autoCloseEnabledCheckbox, "RIGHT", 5, 0)
 autoCloseEnabledCheckbox.text:SetText("Enable Auto Close and Stacking of MicroMenu, Backpack and Combat Style Windows") -- Set the checkbox label
-autoCloseEnabledCheckbox:SetScript("OnShow", function(self)
-    if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then
-        self:SetChecked(true)
-    else
-        self:SetChecked(false)
-    end
-end)
+autoCloseEnabledCheckbox:SetChecked(WORS_U_MicroMenuSettings.AutoCloseEnabled)
 autoCloseEnabledCheckbox:SetScript("OnClick", function(self)
-	WORS_U_MicroMenuSettings.AutoCloseEnabled = self:GetChecked() == 1 and true or false
+	if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then
+        WORS_U_MicroMenuSettings.AutoCloseEnabled = false  -- Set the variable to false
+    elseif WORS_U_MicroMenuSettings.AutoCloseEnabled == false then
+        WORS_U_MicroMenuSettings.AutoCloseEnabled = true
+	end
 	HookAFrames()
 	HookMicroMenuFrames()
 end)
