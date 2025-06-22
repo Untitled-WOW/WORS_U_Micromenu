@@ -13,10 +13,24 @@ WORS_U_EmoteBook.frame:EnableMouse(true)
 WORS_U_EmoteBook.frame:RegisterForDrag("LeftButton")
 WORS_U_EmoteBook.frame:SetClampedToScreen(true)
 tinsert(UISpecialFrames, "WORS_U_EmoteBookFrame")
-WORS_U_EmoteBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
+WORS_U_EmoteBook.frame:SetScript("OnDragStart", function(self)
+    -- if InCombatLockdown() then return end
+    -- WORS_U_SpellBook.frame:Hide()
+    -- WORS_U_PrayBook.frame:Hide()
+    self:StartMoving()
+end)
+
 WORS_U_EmoteBook.frame:SetScript("OnDragStop", function(self)
+    -- if InCombatLockdown() then return end
+    -- WORS_U_SpellBook.frame:Show()
     self:StopMovingOrSizing()
 end)
+
+
+
+
+
+
 local closeButton = CreateFrame("Button", nil, WORS_U_EmoteBookFrame)
 closeButton:SetSize(16, 16)
 closeButton:SetPoint("TOPRIGHT", WORS_U_EmoteBookFrame, "TOPRIGHT", 4, 4)

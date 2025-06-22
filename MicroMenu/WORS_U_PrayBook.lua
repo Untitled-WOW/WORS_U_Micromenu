@@ -19,8 +19,16 @@ WORS_U_PrayBook.frame:SetMovable(true)
 WORS_U_PrayBook.frame:EnableMouse(true)
 WORS_U_PrayBook.frame:RegisterForDrag("LeftButton")
 WORS_U_PrayBook.frame:SetClampedToScreen(true)
-WORS_U_PrayBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
-WORS_U_PrayBook.frame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
+WORS_U_PrayBook.frame:SetScript("OnDragStart", function(self) 
+	
+	
+	self:StartMoving() 
+end)
+WORS_U_PrayBook.frame:SetScript("OnDragStop", function(self) 
+
+	
+	self:StopMovingOrSizing() 
+end)
 
 -- Close button
 local closeButton = CreateFrame("Button", nil, WORS_U_PrayBook.frame)

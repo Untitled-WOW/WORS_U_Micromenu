@@ -183,6 +183,7 @@ local function HookAFrames()
 			UpdatePrayMicroButtonBackground()
         end)
 		Backpack:HookScript("OnHide", function()
+			RestoreMicroButtonsFromMicroMenu()
 			UpdateSpellMicroButtonBackground()
 			UpdatePrayMicroButtonBackground()
         end)
@@ -193,11 +194,20 @@ local function HookAFrames()
             Backpack:SetPoint(pos.point, ref, pos.relativePoint, pos.xOfs, pos.yOfs)
             Backpack:SetUserPlaced(false)
         end
+		hooksecurefunc(Backpack, "OnDragStart", function(self)
+			if InCombatLockdown() then return end
+			WORS_U_SpellBook.frame:Hide()
+			WORS_U_PrayBook.frame:Hide()
+		end)
+		
 		hooksecurefunc(Backpack, "StopMovingOrSizing", function(self)
 			-- only run if AutoClose is on
 			if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
 			print("|cff00ff00[MicroMenu Debug]|r Backpack drag ended, saving position")
 			SaveFramePosition(self)
+			if InCombatLockdown() then return end
+			WORS_U_SpellBook.frame:Show()
+			
 		end)	
     end
     if CombatStylePanel then
@@ -216,6 +226,7 @@ local function HookAFrames()
 			--UpdatePrayMicroButtonBackground()
         end)
 		CombatStylePanel:HookScript("OnHide", function()
+			RestoreMicroButtonsFromMicroMenu()
 			--UpdateSpellMicroButtonBackground()
 			--UpdatePrayMicroButtonBackground()
         end)
@@ -257,10 +268,46 @@ local function HookMicroMenuFrames()
         end
         return
     end
+
     for _, frame in ipairs(MicroMenu_Frames) do
-        if frame then frame:HookScript("OnDragStop", SaveFramePosition) end
+        if frame then
+            frame:HookScript("OnDragStop", SaveFramePosition)
+
+            -- Skip hiding logic for SpellBook and PrayBook themselves
+            if frame ~= WORS_U_SpellBookFrame and frame ~= WORS_U_PrayBookFrame then
+				
+				----- this and hooks comments not working
+				frame:HookScript("OnDragStart", function(self)
+					if InCombatLockdown() then return end
+					WORS_U_SpellBookFrame:Hide()
+					WORS_U_PrayBookFrame:Hide()
+				end)
+
+				frame:HookScript("OnDragStop", function(self)
+					if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
+					if InCombatLockdown() then return end
+					WORS_U_SpellBookFrame:Show()
+					WORS_U_PrayBookFrame:Show()
+				end)
+
+                -- hooksecurefunc(frame, "OnDragStart", function(self)
+					-- if InCombatLockdown() then return end
+					-- WORS_U_SpellBook.frame:Hide()
+					-- WORS_U_PrayBook.frame:Hide()
+				-- end)				
+				
+				-- hooksecurefunc(frame, "StopMovingOrSizing", function(self)
+                    -- if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
+                    -- SaveFramePosition(self)
+                    -- if InCombatLockdown() then return end
+                    -- WORS_U_SpellBook.frame:Show()
+                -- end)
+            end
+        end
     end
 end
+
+
 
 -- Hook hide on micro-menu frames to restore buttons
 local function HookMicroMenuButtonRestores()
@@ -309,7 +356,9 @@ f:SetScript("OnEvent", function(self, event)
 					print("[MagicMicro] Out of combat: Showing spellbook and opening backpack")
 					WORS_U_SpellBookFrame:Show()
 					SaveFramePosition(WORS_U_SpellBookFrame)
-					MainMenuBarBackpackButton:Click()
+					
+					
+					InventoryMicroButton:Click()
 					spellbookTriggered = true
 					ticker:Cancel()
 				else
