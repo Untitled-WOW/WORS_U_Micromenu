@@ -52,9 +52,26 @@ local function SetupMagicButtons()
             local hasRunes = WORS_U_SpellBook:HasRequiredRunes(spellData.runes)
             if hasRunes then
                 icon:SetVertexColor(1, 1, 1)
-                if spellData.openInv then
-                    spellButton:SetScript("PostClick", ToggleBackpack)
-                end
+				if spellData.openInv then
+					spellButton:SetScript("PostClick", function()
+						ToggleBackpack()
+						local names = {"High Alchemy", "Low Alchemy","Superheat", "Level-1 Enchant", "Level-2 Enchant",	"Level-3 Enchant", "Level-4 Enchant", "Level-5 Enchant"}
+						local watcher = CreateFrame("Frame")
+						watcher:RegisterEvent("UNIT_SPELLCAST_SENT")
+						watcher:SetScript("OnEvent", function(self, _, unit, spellName)
+							if unit == "player" then
+								for _, name in ipairs(names) do
+									if spellName == name then
+										MicroMenu_ToggleFrame(WORS_U_SpellBook.frame)
+										self:UnregisterAllEvents()
+										self:SetScript("OnEvent", nil)
+										break
+									end
+								end
+							end
+						end)
+					end)
+				end
             else
                 icon:SetVertexColor(0.25, 0.25, 0.25)
             end
