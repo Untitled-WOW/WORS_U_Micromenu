@@ -46,23 +46,12 @@ title:SetTextColor(1,1,1)
 local scrollFrame = CreateFrame("ScrollFrame", nil, WORS_U_EmoteBook.frame, "UIPanelScrollFrameTemplate")
 scrollFrame:SetSize(180, 210)  -- Size of the scrollable area
 scrollFrame:SetPoint("TOPLEFT", 5, -40)  -- Position it below the title
+local scrollBar = scrollFrame.ScrollBar 
+local scrollUpButton = _G[scrollBar:GetName() .. "ScrollUpButton"]
+local scrollDownButton = _G[scrollBar:GetName() .. "ScrollDownButton"]
+scrollBar:Hide(); scrollBar:SetAlpha(0); scrollUpButton:Hide(); scrollDownButton:Hide(); scrollUpButton:SetAlpha(0); scrollDownButton:SetAlpha(0)
+scrollBar:EnableMouse(false)  -- Disable mouse interaction on the bar itself
 
--- Hiding the scroll bar
-local scrollBar = scrollFrame.ScrollBar or _G[scrollFrame:GetName() .. "ScrollBar"]
-if scrollBar then
-    scrollBar:DisableDrawLayer("BACKGROUND")
-    scrollBar:GetThumbTexture():SetAlpha(0)
-    local scrollUpButton = _G[scrollBar:GetName() .. "ScrollUpButton"]
-    local scrollDownButton = _G[scrollBar:GetName() .. "ScrollDownButton"]
-    scrollUpButton:GetNormalTexture():SetAlpha(0)
-    scrollUpButton:GetPushedTexture():SetAlpha(0)
-    scrollUpButton:GetDisabledTexture():SetAlpha(0)
-    scrollUpButton:GetHighlightTexture():SetAlpha(0)
-    scrollDownButton:GetNormalTexture():SetAlpha(0)
-    scrollDownButton:GetPushedTexture():SetAlpha(0)
-    scrollDownButton:GetDisabledTexture():SetAlpha(0)
-    scrollDownButton:GetHighlightTexture():SetAlpha(0)
-end
 
 -- Create a container for the buttons
 local buttonContainer = CreateFrame("Frame", nil, scrollFrame)
@@ -113,7 +102,6 @@ local function SetupEmoteButtons()
         end)
         table.insert(emoteButtons, emoteButton)
     end
-    LoadTransparency()  -- Load the saved transparency when buttons are set up
 end
 
 -- Function to update the button's background color
@@ -136,24 +124,16 @@ local function OnEmoteClick(self)
 	else
 		WORS_U_EmoteBook.frame:SetPoint("CENTER")
 	end	
-    if IsAltKeyDown() then
-		WORS_U_EmoteBook.frame:Show()
-        currentTransparencyIndex = currentTransparencyIndex % #transparencyLevels + 1
-        WORS_U_EmoteBook.frame:SetAlpha(transparencyLevels[currentTransparencyIndex])
-        SaveTransparency()  -- Save transparency after change
-    else
-        if WORS_U_EmoteBook.frame:IsShown() then
-            WORS_U_EmoteBook.frame:Hide()
-        else
-            SetupEmoteButtons()  -- Ensure buttons are set up
-            MicroMenu_ToggleFrame(WORS_U_EmoteBook.frame)--:Show()
-        end
-    end
+	if WORS_U_EmoteBook.frame:IsShown() then
+		WORS_U_EmoteBook.frame:Hide()
+	else
+		SetupEmoteButtons()  -- Ensure buttons are set up
+		MicroMenu_ToggleFrame(WORS_U_EmoteBook.frame)--:Show()
+	end
 end
 EmotesMicroButton:SetScript("OnClick", OnEmoteClick)
 EmotesMicroButton:HookScript("OnEnter", function(self)
     if GameTooltip:IsOwned(self) then
-        GameTooltip:AddLine("ALT + Click to change transparency.", 1, 1, 0, true)
         GameTooltip:Show()
     end
 end)

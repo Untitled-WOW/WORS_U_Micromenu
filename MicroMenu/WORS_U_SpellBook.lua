@@ -76,7 +76,6 @@ local function SetupMagicButtons()
                 icon:SetVertexColor(0.25, 0.25, 0.25)
             end
         end
-
         -- Set up secure spell attributes
         spellButton:SetAttribute("type", "spell")
         spellButton:SetAttribute("spell", spellID)
@@ -91,8 +90,6 @@ local function SetupMagicButtons()
 
         table.insert(magicButtons, spellButton)
     end
-
-    LoadTransparency()
 end
 
 
@@ -122,7 +119,6 @@ WORS_U_SpellBook.frame:SetMovable(true)
 WORS_U_SpellBook.frame:EnableMouse(true)
 WORS_U_SpellBook.frame:RegisterForDrag("LeftButton")
 WORS_U_SpellBook.frame:SetClampedToScreen(true)
---tinsert(UISpecialFrames, "WORS_U_SpellBookFrame")
 WORS_U_SpellBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
 WORS_U_SpellBook.frame:SetScript("OnDragStop", function(self)
     self:StopMovingOrSizing()
@@ -170,12 +166,7 @@ local function OnMagicClick(self)
 		print("|cff00ff00MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
 	end
 
-    if IsAltKeyDown() and not InCombatLockdown()then
-        WORS_U_SpellBook.frame:Show()
-        currentTransparencyIndex = currentTransparencyIndex % #transparencyLevels + 1
-        WORS_U_SpellBook.frame:SetAlpha(transparencyLevels[currentTransparencyIndex])
-        SaveTransparency()
-    elseif IsShiftKeyDown() then
+    if IsShiftKeyDown() then
 		ToggleSpellBook(BOOKTYPE_SPELL)
     else
         if not InCombatLockdown() then		
@@ -198,7 +189,6 @@ SpellbookMicroButton:SetScript("OnClick", OnMagicClick)
 SpellbookMicroButton:HookScript("OnEnter", function(self)
     if GameTooltip:IsOwned(self) then
         GameTooltip:AddLine("Shift + Click to open WOW Spellbook.", 1, 1, 0, true)
-        GameTooltip:AddLine("ALT + Click to change transparency.", 1, 1, 0, true)
         GameTooltip:Show()
     end
 end)

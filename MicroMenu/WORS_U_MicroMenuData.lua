@@ -445,19 +445,19 @@ currentTransparencyIndex = 1
 
 -- Function to save transparency to saved variables
 function SaveTransparency()
-    WORS_U_MicroMenuSettings.transparency = transparencyLevels[currentTransparencyIndex]
-	print("|cff00ff00MicroMenu: Transparency saved:", WORS_U_MicroMenuSettings.transparency * 100 .. "%|r")
-	print("|cff00ff00MicroMenu: |r" .. "|cffff0000Error: |r" .. "|cff00ff00Transparency saved:", WORS_U_MicroMenuSettings.transparency * 100 .. "%|r")
+    -- WORS_U_MicroMenuSettings.transparency = transparencyLevels[currentTransparencyIndex]
+	-- print("|cff00ff00MicroMenu: Transparency saved:", WORS_U_MicroMenuSettings.transparency * 100 .. "%|r")
+	-- print("|cff00ff00MicroMenu: |r" .. "|cffff0000Error: |r" .. "|cff00ff00Transparency saved:", WORS_U_MicroMenuSettings.transparency * 100 .. "%|r")
 
 end
 
 -- Function to load transparency from saved variables
 function LoadTransparency()
-    local savedAlpha = WORS_U_MicroMenuSettings.transparency or 1  -- Default to 1 (100%) if not saved
-    -- Apply transparency to each frame in the list
-	for _, frame in ipairs(MicroMenu_Frames) do
-        if frame then
-            frame:SetAlpha(savedAlpha)  -- Set transparency for the frame
-        end
-    end
+    -- local savedAlpha = WORS_U_MicroMenuSettings.transparency or 1  -- Default to 1 (100%) if not saved
+    -- -- Apply transparency to each frame in the list
+	-- for _, frame in ipairs(MicroMenu_Frames) do
+        -- if frame then
+            -- frame:SetAlpha(savedAlpha)  -- Set transparency for the frame
+        -- end
+    -- end
 end

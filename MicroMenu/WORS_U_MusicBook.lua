@@ -47,21 +47,13 @@ WORS_U_MusicBook.trackLabel:SetTextColor(1, 1, 1)
 local scrollFrame = CreateFrame("ScrollFrame", nil, WORS_U_MusicBook.musicPlayer, "UIPanelScrollFrameTemplate")
 scrollFrame:SetSize(160, 180)
 scrollFrame:SetPoint("TOP", WORS_U_MusicBook.trackLabel, "BOTTOM", 0, -10)
-local scrollBar = scrollFrame.ScrollBar or _G[scrollFrame:GetName() .. "ScrollBar"]  -- Reference to the scrollbar
-if scrollBar then
-    scrollBar:DisableDrawLayer("BACKGROUND")  -- Hide the background
-    scrollBar:GetThumbTexture():SetAlpha(0)  -- Make the thumb texture transparent
-    local scrollUpButton = _G[scrollBar:GetName() .. "ScrollUpButton"]
-    local scrollDownButton = _G[scrollBar:GetName() .. "ScrollDownButton"]
-    scrollUpButton:GetNormalTexture():SetAlpha(0) -- Hide normal texture
-    scrollUpButton:GetPushedTexture():SetAlpha(0) -- Hide pushed texture
-    scrollUpButton:GetDisabledTexture():SetAlpha(0) -- Hide disabled texture
-    scrollUpButton:GetHighlightTexture():SetAlpha(0) -- Hide highlight texture
-    scrollDownButton:GetNormalTexture():SetAlpha(0) -- Hide normal texture
-    scrollDownButton:GetPushedTexture():SetAlpha(0) -- Hide pushed texture
-    scrollDownButton:GetDisabledTexture():SetAlpha(0) -- Hide disabled texture
-    scrollDownButton:GetHighlightTexture():SetAlpha(0) -- Hide highlight texture
-end
+local scrollBar = scrollFrame.ScrollBar 
+local scrollUpButton = _G[scrollBar:GetName() .. "ScrollUpButton"]
+local scrollDownButton = _G[scrollBar:GetName() .. "ScrollDownButton"]
+scrollBar:Hide(); scrollBar:SetAlpha(0); scrollUpButton:Hide(); scrollDownButton:Hide(); scrollUpButton:SetAlpha(0); scrollDownButton:SetAlpha(0)
+scrollBar:EnableMouse(false)  -- Disable mouse interaction on the bar itself
+
+
 local contentFrame = CreateFrame("Frame", nil, scrollFrame)
 contentFrame:SetSize(160, 500)  -- Adjust the height based on the number of tracks
 scrollFrame:SetScrollChild(contentFrame)
@@ -137,12 +129,11 @@ local function UpdateButtonBackground()
     else
         MusicMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1)  -- Default color when closed
     end
-    LoadTransparency()
 end
 WORS_U_MusicBook.musicPlayer:SetScript("OnShow", UpdateButtonBackground)
 WORS_U_MusicBook.musicPlayer:SetScript("OnHide", UpdateButtonBackground)
 
--- Toggle function with Alt key for transparency
+-- Toggle function 
 local function OnMusicClick(self)
 	local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
 	if pos then
@@ -151,23 +142,16 @@ local function OnMusicClick(self)
 	else
 		WORS_U_MusicBook.musicPlayer:SetPoint("CENTER")
 	end	
-    if IsAltKeyDown() then
-		WORS_U_MusicBook.musicPlayer:Show()
-        currentTransparencyIndex = currentTransparencyIndex % #transparencyLevels + 1
-        WORS_U_MusicBook.musicPlayer:SetAlpha(transparencyLevels[currentTransparencyIndex])
-        SaveTransparency()
-    else
-        if WORS_U_MusicBook.musicPlayer:IsShown() then
-            WORS_U_MusicBook.musicPlayer:Hide()
-        else
-			MicroMenu_ToggleFrame(WORS_U_MusicBook.musicPlayer)--:Show()   
-        end
-    end
+	if WORS_U_MusicBook.musicPlayer:IsShown() then
+		WORS_U_MusicBook.musicPlayer:Hide()
+	else
+		MicroMenu_ToggleFrame(WORS_U_MusicBook.musicPlayer)--:Show()   
+	end
+
 end
 MusicMicroButton:SetScript("OnClick", OnMusicClick)
 MusicMicroButton:HookScript("OnEnter", function(self)
     if GameTooltip:IsOwned(self) then
-        GameTooltip:AddLine("ALT + Click to change transparency.", 1, 1, 0, true)
         GameTooltip:Show()
     end
 end)

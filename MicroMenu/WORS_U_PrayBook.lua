@@ -71,10 +71,9 @@ local function SetupPrayerButtons()
             end
         end)
 
-        tinsert(prayerButtons, btn)
+        --tinsert(prayerButtons, btn)
+		table.insert(prayerButtons, btn)
     end
-
-    LoadTransparency()
 end
 
 -- Create the prayer book frame
@@ -136,12 +135,8 @@ local function OnPrayerClick(self)
         end
     else
         print("|cff00ff00MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
-    end
-
-    if IsAltKeyDown() and not InCombatLockdown() then
-        WORS_U_PrayBook.frame:Show()
-        WORS_U_PrayBook.frame:SetAlpha(transparencyLevels[currentTransparencyIndex])
-    elseif IsShiftKeyDown() then
+    end        
+    if IsShiftKeyDown() then
         ToggleSpellBook(BOOKTYPE_SPELL)
     else
         if not InCombatLockdown() then
@@ -164,7 +159,6 @@ PrayerMicroButton:SetScript("OnClick", OnPrayerClick)
 PrayerMicroButton:HookScript("OnEnter", function(self)
     if GameTooltip:IsOwned(self) then
         GameTooltip:AddLine("Shift + Click to open WOW Spellbook.", 1, 1, 0, true)
-        GameTooltip:AddLine("ALT + Click to change transparency.", 1, 1, 0, true)
         GameTooltip:Show()
     end
 end)
