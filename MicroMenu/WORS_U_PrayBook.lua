@@ -1,5 +1,8 @@
 -- WORS_U_PrayBook.lua
 
+local magicButtons = {}
+local prayerButtons = {}
+
 -- Create the prayer book frame
 WORS_U_PrayBook.frame = CreateFrame("Frame", "WORS_U_PrayBookFrame", UIParent)
 WORS_U_PrayBook.frame:SetSize(192, 280)
@@ -49,31 +52,16 @@ WORS_U_PrayBook.frame:SetScript("OnHide", UpdateButtonBackground)
 
 -- PrayerMicroButton click handler
 local function OnPrayerClick(self)
-    local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
-    if not InCombatLockdown() then
-        if pos then
-            local rel = pos.relativeTo and _G[pos.relativeTo] or UIParent
-            WORS_U_PrayBook.frame:SetPoint(pos.point, rel, pos.relativePoint, pos.xOfs, pos.yOfs)
-        else
-            WORS_U_PrayBook.frame:SetPoint("CENTER")
-        end
-    else
-        print("|cff00ff00MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
-    end        
     if IsShiftKeyDown() then
         ToggleSpellBook(BOOKTYPE_SPELL)
     else
         if not InCombatLockdown() then
-            if WORS_U_PrayBook.frame:IsShown() then
-                WORS_U_PrayBook.frame:Hide()
-            else
-                InitializeMagicPrayerLevels()
-                SetupPrayerButtons(-10, WORS_U_PrayBookFrame)				
-				if WORS_U_MicroMenuSettings.showMagicandPrayer then
-					SetupMagicButtons(155, WORS_U_PrayBookFrame)
-				end
-                MicroMenu_ToggleFrame(WORS_U_PrayBook.frame)
-            end
+			InitializeMagicPrayerLevels()
+			SetupPrayerButtons(-10, WORS_U_PrayBookFrame, prayerButtons)				
+			if WORS_U_MicroMenuSettings.showMagicandPrayer then
+				SetupMagicButtons(155, WORS_U_PrayBookFrame, magicButtons)
+			end
+			MicroMenu_ToggleFrame(WORS_U_PrayBook.frame)
         elseif WORS_U_MicroMenuSettings.AutoCloseEnabled then
             WORS_U_EmoteBookFrame:Hide()
             WORS_U_MusicPlayerFrame:Hide()
@@ -83,19 +71,34 @@ local function OnPrayerClick(self)
     end
 end
 
--- Event used to check if magic run requirments are met
 local eventFrame = CreateFrame("Frame")
+local hasSetPrayerBookPosition = false  -- track this internally, not saved
+
+eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 eventFrame:RegisterEvent("BAG_UPDATE")
 eventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+
 eventFrame:SetScript("OnEvent", function(self, event, ...)
+    if not hasSetPrayerBookPosition and not InCombatLockdown() then
+        local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
+        if pos then
+            local rel = pos.relativeTo and _G[pos.relativeTo] or UIParent
+            WORS_U_PrayBook.frame:SetPoint(pos.point, rel, pos.relativePoint, pos.xOfs, pos.yOfs)
+        else
+            WORS_U_PrayBook.frame:SetPoint("CENTER")
+        end
+        hasSetPrayerBookPosition = true
+    elseif not hasSetPrayerBookPosition and InCombatLockdown() then
+        print("|cff00ff00MicroMenu: You cannot reposition the Prayer Book in combat.|r")
+    end
     if InCombatLockdown() then return end
-    if not WORS_U_SpellBook.frame:IsShown() then return end
-	InitializeMagicPrayerLevels()
-	SetupPrayerButtons(-10, WORS_U_PrayBookFrame)	
-	if WORS_U_MicroMenuSettings.showMagicandPrayer then	
-		SetupMagicButtons(155, WORS_U_PrayBookFrame)		
-	end
+    InitializeMagicPrayerLevels()
+    SetupPrayerButtons(-10, WORS_U_PrayBookFrame, prayerButtons)
+    if WORS_U_MicroMenuSettings.showMagicandPrayer then
+        SetupMagicButtons(155, WORS_U_PrayBookFrame, magicButtons)
+    end
 end)
+
 
 PrayerMicroButton:SetScript("OnClick", OnPrayerClick)
 PrayerMicroButton:HookScript("OnEnter", function(self)

@@ -142,11 +142,8 @@ local function OnMusicClick(self)
 	else
 		WORS_U_MusicBook.musicPlayer:SetPoint("CENTER")
 	end	
-	if WORS_U_MusicBook.musicPlayer:IsShown() then
-		WORS_U_MusicBook.musicPlayer:Hide()
-	else
-		MicroMenu_ToggleFrame(WORS_U_MusicBook.musicPlayer)--:Show()   
-	end
+	MicroMenu_ToggleFrame(WORS_U_MusicBook.musicPlayer)--:Show()   
+
 
 end
 MusicMicroButton:SetScript("OnClick", OnMusicClick)

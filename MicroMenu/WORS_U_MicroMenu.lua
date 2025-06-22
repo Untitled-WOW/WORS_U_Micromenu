@@ -2,25 +2,30 @@
 -- Store all MicroMenu frames and CombatStylePanel
 MicroMenu_Frames = {WORS_U_SpellBookFrame, WORS_U_PrayBookFrame, WORS_U_EmoteBookFrame, WORS_U_MusicPlayerFrame, CombatStylePanel}
 
--- Hide all frames and reset button colors
 function MicroMenu_HideAll()
     for _, frame in ipairs(MicroMenu_Frames) do
-        if InCombatLockdown() and (frame == WORS_U_SpellBookFrame or frame == WORS_U_PrayBookFrame) then
-            -- Skip hiding this frame during combat
-        elseif frame == WORS_U_SpellBookFrame or frame == WORS_U_PrayBookFrame then
-            frame:SetFrameStrata("High")
+        -- Always set strata/level
+        if frame == WORS_U_SpellBookFrame or frame == WORS_U_PrayBookFrame then
+            frame:SetFrameStrata("HIGH")
             frame:SetFrameLevel(10)
-            frame:Hide()
         else
-            frame:SetFrameStrata("High")
+            frame:SetFrameStrata("HIGH")
             frame:SetFrameLevel(20)
+        end
+
+        -- Only hide if not combat-locked
+        if not (InCombatLockdown() and (frame == WORS_U_SpellBookFrame or frame == WORS_U_PrayBookFrame)) then
             frame:Hide()
         end
     end
+
     CloseBackpack()
+    UpdateSpellMicroButtonBackground()
 end
 
--- Toggle target frame and attach/restore micro-buttons
+
+local LastOpenedBookFrame = nil
+
 function MicroMenu_ToggleFrame(targetFrame)
     if InCombatLockdown() then
         if targetFrame == WORS_U_SpellBookFrame or targetFrame == WORS_U_PrayBookFrame then
@@ -45,12 +50,48 @@ function MicroMenu_ToggleFrame(targetFrame)
         if WORS_U_MicroMenuSettings.AutoCloseEnabled then
             MicroMenu_HideAll()
         end
+
+        -- Enforce exclusivity between books
+        if targetFrame == WORS_U_SpellBookFrame and not InCombatLockdown() then
+            WORS_U_PrayBookFrame:Hide()
+            LastOpenedBookFrame = WORS_U_SpellBookFrame
+        elseif targetFrame == WORS_U_PrayBookFrame and not InCombatLockdown() then
+            WORS_U_SpellBookFrame:Hide()
+            LastOpenedBookFrame = WORS_U_PrayBookFrame
+        end
+
+        -- Show the target frame
         targetFrame:Show()
+
+        -- Stealth-load the last used book if opening something else
+        if not InCombatLockdown()
+            and targetFrame ~= WORS_U_SpellBookFrame
+            and targetFrame ~= WORS_U_PrayBookFrame
+            and LastOpenedBookFrame
+            and not LastOpenedBookFrame:IsShown()
+        then
+            -- Hide the other book first
+            local other = (LastOpenedBookFrame == WORS_U_SpellBookFrame) and WORS_U_PrayBookFrame or WORS_U_SpellBookFrame
+            if other and other:IsShown() then
+                other:Hide()
+            end
+
+            LastOpenedBookFrame:SetFrameStrata("HIGH")
+            LastOpenedBookFrame:SetFrameLevel(10)
+            LastOpenedBookFrame:Show()
+        end
+
         if isMicroMenuFrame(targetFrame) then
             AttachMicroButtonsTo(targetFrame)
         end
     end
+
+    -- ✅ Always update the button appearance after toggling
+    UpdateSpellMicroButtonBackground()
 end
+
+
+
 
 local function SaveFramePosition(self)
     print("|cff00ff00[MicroMenu Debug]|r SaveFramePosition for", self:GetName())
@@ -130,13 +171,17 @@ local function HookAFrames()
             AttachMicroButtonsTo(Backpack)
             if WORS_U_MicroMenuSettings.AutoCloseEnabled then
                 if not InCombatLockdown() then
-                    WORS_U_SpellBook.frame:Hide()
-                    WORS_U_PrayBook.frame:Hide()
+                    WORS_U_SpellBook.frame:Show()
+                    --WORS_U_PrayBook.frame:Hide()
                 end
                 WORS_U_EmoteBook.frame:Hide()
                 WORS_U_MusicBook.musicPlayer:Hide()
                 CombatStylePanel:Hide()
             end
+			UpdateSpellMicroButtonBackground()
+        end)
+		Backpack:HookScript("OnHide", function()
+			UpdateSpellMicroButtonBackground()
         end)
         local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
         if pos then
@@ -157,13 +202,17 @@ local function HookAFrames()
             AttachMicroButtonsTo(CombatStylePanel)
             if WORS_U_MicroMenuSettings.AutoCloseEnabled then
                 if not InCombatLockdown() then
-                    WORS_U_SpellBook.frame:Hide()
-                    WORS_U_PrayBook.frame:Hide()
+                    WORS_U_SpellBook.frame:Show()
+                    --WORS_U_PrayBook.frame:Hide()
                 end
                 WORS_U_EmoteBook.frame:Hide()
                 WORS_U_MusicBook.musicPlayer:Hide()
                 CloseBackpack()
             end
+			UpdateSpellMicroButtonBackground()
+        end)
+		CombatStylePanel:HookScript("OnHide", function()
+			UpdateSpellMicroButtonBackground()
         end)
 		-- Button click handlers
 		CombatStyleMicroButton:SetScript("OnClick", function()

@@ -124,12 +124,9 @@ local function OnEmoteClick(self)
 	else
 		WORS_U_EmoteBook.frame:SetPoint("CENTER")
 	end	
-	if WORS_U_EmoteBook.frame:IsShown() then
-		WORS_U_EmoteBook.frame:Hide()
-	else
-		SetupEmoteButtons()  -- Ensure buttons are set up
-		MicroMenu_ToggleFrame(WORS_U_EmoteBook.frame)--:Show()
-	end
+	SetupEmoteButtons()  -- Ensure buttons are set up
+	MicroMenu_ToggleFrame(WORS_U_EmoteBook.frame)--:Show()
+
 end
 EmotesMicroButton:SetScript("OnClick", OnEmoteClick)
 EmotesMicroButton:HookScript("OnEnter", function(self)

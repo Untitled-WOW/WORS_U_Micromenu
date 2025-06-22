@@ -135,37 +135,43 @@ function AttachMicroButtonsTo(parentFrame)
 end
 
 function RestoreMicroButtonsFromMicroMenu()
-    local targetFrame
+    -- List all frames that can use the micro buttons
+    local candidateFrames = {WORS_U_SpellBookFrame, WORS_U_PrayBookFrame, WORS_U_EmoteBookFrame, WORS_U_MusicPlayerFrame, CombatStylePanel, Backpack}
 
-    if WORS_U_SpellBookFrame and WORS_U_SpellBookFrame:IsShown() then
-        targetFrame = WORS_U_SpellBookFrame
-        print("Debug: SpellBookFrame is shown.")
-    elseif WORS_U_PrayBookFrame and WORS_U_PrayBookFrame:IsShown() then
-        targetFrame = WORS_U_PrayBookFrame
-        print("Debug: PrayBookFrame is shown.")
-    else
-        print("Debug: Neither frame is shown.")
+
+
+
+    -- Find the topmost visible frame
+    local targetFrame = nil
+    for _, frame in ipairs(candidateFrames) do
+        if frame and frame:IsShown() then
+            targetFrame = frame
+            print("Debug: Frame is shown:", frame:GetName())
+            break
+        end
     end
+
+
 
     if targetFrame then
         print("Debug: Attaching micro buttons to", targetFrame:GetName())
         AttachMicroButtonsTo(targetFrame)
     else
+        -- Restore to original UI positions
+        for _, btn in ipairs(microButtonsRow1) do
+            safeRestore(btn, microBackup[tostring(btn)])
+            print("Debug: Restoring micro button from row 1:", btn:GetName())
+        end
+        for _, btn in ipairs(microButtonsRow2) do
+            safeRestore(btn, microBackup[tostring(btn)])
+            print("Debug: Restoring micro button from row 2:", btn:GetName())
+        end
 
-		for _, btn in ipairs(microButtonsRow1) do
-			safeRestore(btn, microBackup[tostring(btn)])
-			print("Debug: Restoring micro button from row 1:", btn:GetName())
-		end
-		for _, btn in ipairs(microButtonsRow2) do
-			safeRestore(btn, microBackup[tostring(btn)])
-			print("Debug: Restoring micro button from row 2:", btn:GetName())
-		end
-
-		if MicroButtonContainer then
-			MicroButtonContainer:Hide()
-			print("Debug: MicroButtonContainer hidden.")
-		end
-	end
+        if MicroButtonContainer then
+            MicroButtonContainer:Hide()
+            print("Debug: MicroButtonContainer hidden.")
+        end
+    end
 end
 
 -- Initialize backups after entering the world

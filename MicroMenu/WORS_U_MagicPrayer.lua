@@ -8,11 +8,11 @@ function InitializeMagicPrayerLevels()
 	prayerLevel = GetLevelFromFactionReputation(prayerID)
 end
 
-local magicButtons = {}
-local prayerButtons = {}
+-- local magicButtons = {}
+-- local prayerButtons = {}
 
 -- Function to set up magic buttons dynamically
-function SetupMagicButtons(YOffset, frameName)
+function SetupMagicButtons(YOffset, frameName, magicButtons)
     if InCombatLockdown() then return end
 
     -- Clear existing buttons
@@ -81,7 +81,7 @@ function SetupMagicButtons(YOffset, frameName)
     end
 end
 
-function SetupPrayerButtons(YOffset, frameName)
+function SetupPrayerButtons(YOffset, frameName, prayerButtons)
     if InCombatLockdown() then return end
     -- clear old buttons
     for _, btn in pairs(prayerButtons) do

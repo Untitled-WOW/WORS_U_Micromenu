@@ -1,3 +1,7 @@
+local magicButtons = {}
+local prayerButtons = {}
+
+
 -- Create the main frame for the custom spell book
 WORS_U_SpellBook.frame = CreateFrame("Frame", "WORS_U_SpellBookFrame", UIParent)
 WORS_U_SpellBook.frame:SetSize(192, 280)
@@ -30,50 +34,55 @@ closeButton:SetScript("OnClick", function()
 		print("|cff00ff00MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
 		return
 	else
-		WORS_U_SpellBook.frame:Hide()
+		MicroMenu_ToggleFrame(WORS_U_SpellBookFrame)
 		SpellbookMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
 	end
 end)
 
--- Function to update the button's background color
-local function UpdateButtonBackground()
-    if WORS_U_SpellBook.frame:IsShown() then
-		
-		SpellbookMicroButton:GetNormalTexture():SetVertexColor(1, 0, 0) -- Set the color to red
-	else
-		SpellbookMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color to red
+function UpdateSpellMicroButtonBackground()
+    local spellBookShown = WORS_U_SpellBookFrame and WORS_U_SpellBookFrame:IsShown()
+
+    -- Count how many of your custom frames are visible
+    local visibleCount = 0
+    for _, frame in ipairs(MicroMenu_Frames) do
+        if frame and frame:IsShown() then
+            visibleCount = visibleCount + 1
+        end
+    end
+	if Backpack and Backpack:IsShown() then
+		visibleCount = visibleCount + 1
 	end
+    local buttonTexture = SpellbookMicroButton:GetNormalTexture()
+
+    if spellBookShown then
+        if visibleCount == 1 then
+            buttonTexture:SetVertexColor(1, 0, 0)  -- red = only frame open
+        else
+            buttonTexture:SetVertexColor(0, 1, 0)  -- green = stealth/preloaded
+        end
+    else
+        buttonTexture:SetVertexColor(1, 1, 1)      -- white = hidden
+    end
 end
-WORS_U_SpellBook.frame:SetScript("OnShow", UpdateButtonBackground)
-WORS_U_SpellBook.frame:SetScript("OnHide", UpdateButtonBackground)
+
+
+
+
+WORS_U_SpellBook.frame:SetScript("OnShow", UpdateSpellMicroButtonBackground)
+WORS_U_SpellBook.frame:SetScript("OnHide", UpdateSpellMicroButtonBackground)
 
 -- Function to handle MagicMicroButton clicks
 local function OnMagicClick(self)
-    local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
-	if not InCombatLockdown() then
-		if pos and not InCombatLockdown() then
-			local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
-			WORS_U_SpellBook.frame:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
-		else
-			WORS_U_SpellBook.frame:SetPoint("CENTER")
-		end
-	else
-		print("|cff00ff00MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
-	end
     if IsShiftKeyDown() then
 		ToggleSpellBook(BOOKTYPE_SPELL)
     else
-        if not InCombatLockdown() then		
-			if WORS_U_SpellBook.frame:IsShown() then
-				WORS_U_SpellBook.frame:Hide()
-			else
-				InitializeMagicPrayerLevels()
-				SetupMagicButtons(-10, WORS_U_SpellBookFrame)
-				if WORS_U_MicroMenuSettings.showMagicandPrayer then				
-					SetupPrayerButtons(155, WORS_U_SpellBookFrame)		
-				end		
-				MicroMenu_ToggleFrame(WORS_U_SpellBook.frame)--:Show()
-			end
+        if not InCombatLockdown() then	
+			InitializeMagicPrayerLevels()
+			SetupMagicButtons(-10, WORS_U_SpellBookFrame, magicButtons)
+			if WORS_U_MicroMenuSettings.showMagicandPrayer then				
+				SetupPrayerButtons(155, WORS_U_SpellBookFrame, prayerButtons)		
+			end		
+			MicroMenu_ToggleFrame(WORS_U_SpellBook.frame)--:Show()
 		elseif WORS_U_MicroMenuSettings.AutoCloseEnabled then	
 			WORS_U_EmoteBookFrame:Hide()
 			WORS_U_MusicPlayerFrame:Hide()
@@ -83,18 +92,36 @@ local function OnMagicClick(self)
     end
 end
 
--- Event used to check if magic run requirments are met
+
+
+
 local eventFrame = CreateFrame("Frame")
+local hasSetSpellBookPosition = false  -- track this internally, not saved
+
+eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 eventFrame:RegisterEvent("BAG_UPDATE")
 eventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 eventFrame:SetScript("OnEvent", function(self, event, ...)
+    if not hasSetSpellBookPosition and not InCombatLockdown() then
+        local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
+        if pos then
+            local rel = pos.relativeTo and _G[pos.relativeTo] or UIParent
+            WORS_U_SpellBook.frame:SetPoint(pos.point, rel, pos.relativePoint, pos.xOfs, pos.yOfs)
+        else
+            WORS_U_SpellBook.frame:SetPoint("CENTER")
+        end
+        hasSetSpellBookPosition = true
+    elseif not hasSetSpellBookPosition and InCombatLockdown() then
+        print("|cff00ff00MicroMenu: You cannot reposition the Prayer Book in combat.|r")
+    end
     if InCombatLockdown() then return end
-    if not WORS_U_SpellBook.frame:IsShown() then return end
 	InitializeMagicPrayerLevels()
-	SetupMagicButtons(-10, WORS_U_SpellBookFrame)	
-	if WORS_U_MicroMenuSettings.showMagicandPrayer then	
-		SetupPrayerButtons(155, WORS_U_SpellBookFrame)		
-	end
+	SetupMagicButtons(-10, WORS_U_SpellBookFrame, magicButtons)
+	if WORS_U_MicroMenuSettings.showMagicandPrayer then				
+		SetupPrayerButtons(155, WORS_U_SpellBookFrame, prayerButtons)		
+	end		
+	MicroMenu_ToggleFrame(WORS_U_SpellBook.frame)--:Show()
+	UpdateSpellMicroButtonBackground()
 end)
 
 SpellbookMicroButton:SetScript("OnClick", OnMagicClick)
