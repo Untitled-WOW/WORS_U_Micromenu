@@ -2,102 +2,14 @@
 WORS_U_MicroMenuSettings = WORS_U_MicroMenuSettings or {
     transparency = 1,  -- Default transparency value
 	AutoCloseEnabled = true,
-	MicroMenuPOS = { point = "CENTER", relativeTo = nil, relativePoint = "CENTER", xOfs = 0, yOfs = 0 }
+	MicroMenuPOS = { point = "CENTER", relativeTo = nil, relativePoint = "CENTER", xOfs = 0, yOfs = 0 },
+	showMagicandPrayer = true,
 }
+
 
 
 WORS_U_SpellBook = {}
 -- WORS_U_SpellBook Data
-
-
--- WORS_U_SpellBook.spells = {
-    -- {level = 0, name = "Lumbridge Home Teleport", id = 99561},
-    -- {level = 1, name = "Wind Strike", id = 98952, runes = {["Air Rune"] = 1, ["Mind Rune"] = 1}},
-    -- {level = 3, name = "Confuse", id = 99311, runes = {["Body Rune"] = 1, ["Earth Rune"] = 2, ["Water Rune"] = 3}},
- -- -- {level = 4, name = "Enchant Crossbow Bolt (Opal)", id = nil, runes = {["Cosmic Rune"] = 1, ["Fire Rune"] = 1}},
-    -- {level = 5, name = "Water Strike", id = 79535, runes = {["Water Rune"] = 1, ["Mind Rune"] = 1}},
-    -- {level = 7, name = "Lvl-1 Enchant", id = 460022, runes = {["Cosmic Rune"] = 1, ["Water Rune"] = 1}, openInv = true},
- -- -- {level = 7, name = "Enchant Crossbow Bolt (Sapphire)", id = nil, runes = {["Cosmic Rune"] = 1, ["Water Rune"] = 1}},
-    -- {level = 9, name = "Earth Strike", id = 79540, runes = {["Earth Rune"] = 2, ["Mind Rune"] = 1}},
-    -- {level = 11, name = "Weaken", id = 99312, runes = {["Body Rune"] = 1, ["Earth Rune"] = 3, ["Water Rune"] = 3}},
-    -- {level = 13, name = "Fire Strike", id = 79545, runes = {["Fire Rune"] = 3, ["Mind Rune"] = 1}},
- -- -- {level = 14, name = "Enchant Crossbow Bolt (Jade)", id = nil, runes = {["Cosmic Rune"] = 1, ["Fire Rune"] = 1}},
-    -- {level = 15, name = "Bones to Bananas", id = 99313, runes = {["Nature Rune"] = 1, ["Earth Rune"] = 2, ["Water Rune"] = 2, ["Bones"] = 1}, openInv = true},
-    -- {level = 17, name = "Wind Bolt", id = 79531, runes = {["Air Rune"] = 2, ["Chaos Rune"] = 1}},
-    -- {level = 19, name = "Curse", id = 99314, runes = {["Body Rune"] = 2, ["Earth Rune"] = 3, ["Water Rune"] = 3}},
-    -- {level = 20, name = "Bind", id = 99316, runes = {["Nature Rune"] = 2, ["Earth Rune"] = 3, ["Water Rune"] = 3}},
-    -- {level = 21, name = "Low Level Alchemy", id = 114135, runes = {["Nature Rune"] = 1, ["Fire Rune"] = 3}, openInv = true},
-    -- {level = 23, name = "Water Bolt", id = 79536, runes = {["Water Rune"] = 2, ["Chaos Rune"] = 1}},
- -- -- {level = 24, name = "Enchant Crossbow Bolt (Pearl)", id = nil, runes = {["Cosmic Rune"] = 1, ["Water Rune"] = 1}},
-    -- {level = 25, name = "Varrock Teleport", id = 114193, runes = {["Law Rune"] = 1, ["Fire Rune"] = 1, ["Air Rune"] = 3}},
-    -- {level = 27, name = "Lvl-2 Enchant", id = 460023, runes = {["Cosmic Rune"] = 1, ["Earth Rune"] = 1}, openInv = true},
- -- -- {level = 27, name = "Enchant Crossbow Bolt (Emerald)", id = nil, runes = {["Cosmic Rune"] = 1, ["Earth Rune"] = 1}},
-    -- {level = 29, name = "Earth Bolt", id = 79541, runes = {["Earth Rune"] = 2, ["Chaos Rune"] = 1}},
- -- -- {level = 29, name = "Enchant Crossbow Bolt (Red Topaz)", id = nil, runes = {["Cosmic Rune"] = 1, ["Fire Rune"] = 1}},
-    -- {level = 31, name = "Lumbridge Teleport", id = 114196, runes = {["Law Rune"] = 1, ["Earth Rune"] = 1, ["Air Rune"] = 3}},
-    -- {level = 33, name = "Telekinetic Grab (Corpse)", id = 114134, runes = {["Law Rune"] = 1, ["Air Rune"] = 1}},
-    -- {level = 33, name = "Telekinetic Grab (Gameobject)", id = 1812, runes = {["Law Rune"] = 1, ["Air Rune"] = 1}},
-    -- {level = 35, name = "Fire Bolt", id = 79546, runes = {["Fire Rune"] = 3, ["Chaos Rune"] = 1}},
-    -- {level = 37, name = "Falador Teleport", id = 114194, runes = {["Law Rune"] = 1, ["Water Rune"] = 1, ["Air Rune"] = 3}},
-    -- {level = 39, name = "Crumble Undead", id = 99317, runes = {["Earth Rune"] = 2, ["Air Rune"] = 2, ["Chaos Rune"] = 1}},
- -- -- {level = 40, name = "Teleport to House", id = nil, runes = {["Law Rune"] = 1, ["Earth Rune"] = 1, ["Air Rune"] = 1}},
-    -- {level = 41, name = "Wind Blast", id = 79532, runes = {["Air Rune"] = 3, ["Death Rune"] = 1}},
-    -- {level = 43, name = "Superheat Item", id = 99318, runes = {["Fire Rune"] = 4, ["Nature Rune"] = 1}, openInv = true},
-    -- {level = 45, name = "Camelot Teleport", id = 114197, runes = {["Law Rune"] = 1, ["Air Rune"] = 5}},
-    -- {level = 47, name = "Water Blast", id = 79537, runes = {["Water Rune"] = 3, ["Death Rune"] = 1}},
- -- -- {level = 48, name = "Kourend Castle Teleport", id = nil, runes = {["Law Rune"] = 2, ["Soul Rune"] = 2}},
-    -- {level = 49, name = "Lvl-3 Enchant", id = 460024, runes = {["Cosmic Rune"] = 1, ["Fire Rune"] = 5}, openInv = true},
- -- -- {level = 49, name = "Enchant Crossbow Bolt (Ruby)", id = nil, runes = {["Cosmic Rune"] = 1, ["Fire Rune"] = 5}},
- -- -- {level = 50, name = "Iban Blast", id = nil, runes = {["Fire Rune"] = 5, ["Death Rune"] = 1}},
-    -- {level = 50, name = "Snare", id = 99537, runes = {["Nature Rune"] = 2, ["Earth Rune"] = 4, ["Water Rune"] = 4}},
- -- -- {level = 50, name = "Magic Dart", id = nil, runes = {["Air Rune"] = 1, ["Death Rune"] = 1}},
-    -- {level = 51, name = "Ardougne Teleport", id = 114198, runes = {["Law Rune"] = 2, ["Water Rune"] = 2}},
-    -- {level = 53, name = "Earth Blast", id = 79542, runes = {["Earth Rune"] = 3, ["Death Rune"] = 1}},
- -- -- {level = 54, name = "Civitas illa Fortis Teleport", id = nil, runes = {["Law Rune"] = 2, ["Fire Rune"] = 2}},
-    -- {level = 55, name = "High Level Alchemy", id = 200090, runes = {["Nature Rune"] = 1, ["Fire Rune"] = 5}, openInv = true},
-    -- {level = 56, name = "Charge Water Orb", id = 99233, runes = {["Water Rune"] = 30, ["Cosmic Rune"] = 3, ["Unpowered Orb"] = 1}, openInv = true},
-    -- {level = 57, name = "Lvl-4 Enchant", id = 460025, runes = {["Cosmic Rune"] = 1, ["Earth Rune"] = 10}, openInv = true},
- -- -- {level = 57, name = "Enchant Crossbow Bolt (Diamond)", id = nil, runes = {["Cosmic Rune"] = 1, ["Earth Rune"] = 10}},
-    -- {level = 58, name = "Watchtower Teleport", id = 114200, runes = {["Law Rune"] = 2, ["Earth Rune"] = 2}},
-    -- {level = 59, name = "Fire Blast", id = 79547, runes = {["Fire Rune"] = 4, ["Death Rune"] = 1}},
-    -- {level = 60, name = "Charge Earth Orb", id = 99234, runes = {["Earth Rune"] = 30, ["Cosmic Rune"] = 3, ["Unpowered Orb"] = 1}, openInv = true},
- -- -- {level = 60, name = "Bones to Peaches", id = nil, runes = {["Nature Rune"] = 2, ["Earth Rune"] = 4, ["Water Rune"] = 4}},
- -- -- {level = 60, name = "Saradomin Strike", id = nil, runes = {["Fire Rune"] = 2, ["Blood Rune"] = 2}},
- -- -- {level = 60, name = "Flames of Zamorak", id = nil, runes = {["Fire Rune"] = 2, ["Blood Rune"] = 2}},
- -- -- {level = 60, name = "Claws of Guthix", id = nil, runes = {["Air Rune"] = 2, ["Blood Rune"] = 2}},
-    -- {level = 61, name = "Trollheim Teleport", id = 114199, runes = {["Law Rune"] = 2, ["Fire Rune"] = 2}},
-    -- {level = 62, name = "Wind Wave", id = 79533, runes = {["Air Rune"] = 5, ["Blood Rune"] = 1}},
-    -- {level = 63, name = "Charge Fire Orb", id = 99235, runes = {["Fire Rune"] = 30, ["Cosmic Rune"] = 3, ["Unpowered Orb"] = 1}, openInv = true},
- -- -- {level = 64, name = "Ape Atoll Teleport", id = nil, runes = {["Law Rune"] = 2, ["Fire Rune"] = 3}},
-    -- {level = 65, name = "Water Wave", id = 79538, runes = {["Water Rune"] = 7, ["Blood Rune"] = 1, ["Air Rune"] = 5}},
-    -- {level = 66, name = "Charge Air Orb",id = 99236, runes = {["Air Rune"] = 30, ["Cosmic Rune"] = 3, ["Unpowered Orb"] = 1}, openInv = true},     -- Charge Air Orb
- -- -- {level = 66, name = "Vulnerability", id = nil, runes = {["Body Rune"] = 1, ["Earth Rune"] = 5, ["Water Rune"] = 5}},
-    -- {level = 68, name = "Lvl-5 Enchant", id = 460026, runes = {["Cosmic Rune"] = 1, ["Earth Rune"] = 15}, openInv = true},
- -- -- {level = 68, name = "Enchant Crossbow Bolt (Dragonstone)", id = nil, runes = {["Cosmic Rune"] = 1, ["Earth Rune"] = 15}},
-    -- {level = 70, name = "Earth Wave", id = 79543, runes = {["Earth Rune"] = 7, ["Blood Rune"] = 1}},
- -- -- {level = 73, name = "Enfeeble", id = nil, runes = {["Body Rune"] = 1, ["Earth Rune"] = 8, ["Water Rune"] = 8}},
- -- -- {level = 74, name = "Teleother Lumbridge", id = nil, runes = {["Law Rune"] = 1, ["Soul Rune"] = 1, ["Earth Rune"] = 1}},
-    -- {level = 75, name = "Fire Wave", id = 79548, runes = {["Fire Rune"] = 7, ["Blood Rune"] = 1}},
-    -- {level = 79, name = "Entangle", id = 99315, runes = {["Nature Rune"] = 3, ["Earth Rune"] = 5, ["Water Rune"] = 5}},
- -- -- {level = 80, name = "Stun", id = nil, runes = {["Body Rune"] = 1, ["Earth Rune"] = 12, ["Water Rune"] = 12}},
-    -- {level = 80, name = "Charge", id = 707049, runes = {["Blood Rune"] = 3, ["Fire Rune"] = 3, ["Air Rune"] = 3}},
- -- -- {level = 81, name = "Wind Surge", id = 79534, runes = {["Air Rune"] = 7, ["Death Rune"] = 1}},
- -- -- {level = 82, name = "Teleother Falador", id = nil, runes = {["Law Rune"] = 1, ["Soul Rune"] = 1, ["Water Rune"] = 1}},
- -- -- {level = 85, name = "Water Surge", id = 79539, runes = {["Water Rune"] = 7, ["Death Rune"] = 1}},
-    -- {level = 85, name = "Tele Block", id = 99542, runes = {["Law Rune"] = 1, ["Chaos Rune"] = 1, ["Death Rune"] = 1}},
- -- -- {level = 85, name = "Teleport to Target", id = nil, runes = {["Law Rune"] = 2, ["Soul Rune"] = 2}},
- -- -- {level = 87, name = "Lvl-6 Enchant", id = nil, runes = {["Cosmic Rune"] = 1, ["Soul Rune"] = 20}},
- -- -- {level = 87, name = "Enchant Crossbow Bolt (Onyx)", id = nil, runes = {["Cosmic Rune"] = 1, ["Soul Rune"] = 20}},
- -- -- {level = 90, name = "Teleother Camelot", id = nil, runes = {["Law Rune"] = 1, ["Soul Rune"] = 1, ["Fire Rune"] = 1}},
- -- -- {level = 90, name = "Earth Surge", id = 79544, runes = {["Earth Rune"] = 7, ["Death Rune"] = 1}},
- -- -- {level = 93, name = "Lvl-7 Enchant", id = nil, runes = {["Cosmic Rune"] = 1, ["Soul Rune"] = 20}},
- -- -- {level = 95, name = "Fire Surge", id = 79549, runes = {["Fire Rune"] = 10, ["Death Rune"] = 1}},
-    -- {level = 102, name = "Wind Surge", id = 79534, runes = {["Air Rune"] = 7, ["Death Rune"] = 1}},
-    -- {level = 103, name = "Water Surge", id = 79539, runes = {["Water Rune"] = 7, ["Death Rune"] = 1}},
-	-- {level = 104, name = "Earth Surge", id = 79544, runes = {["Earth Rune"] = 7, ["Death Rune"] = 1}},
-	-- {level = 105, name = "Fire Surge", id = 79549, runes = {["Fire Rune"] = 10, ["Death Rune"] = 1}},
--- }
-
 WORS_U_SpellBook.spells = {
     {level = 0,  name = "Lumbridge Home Teleport",     id = 99561,  icon = "Interface\\Icons\\hometele.blp"},
     {level = 1,  name = "Wind Strike",                 id = 98952,  runes = {["Air Rune"]=1,["Mind Rune"]=1},                          icon = "Interface\\Icons\\windstrike.blp"},
@@ -180,16 +92,11 @@ WORS_U_SpellBook.spells = {
     -- {level = 90, name = "Earth Surge",                id = nil,     runes = {["Earth Rune"]=7,["Death Rune"]=1},                         icon = "Interface\\Icons\\earthsurge.blp"},
     -- {level = 93, name = "Lvl-7 Enchant",               id = nil,     runes = {["Cosmic Rune"]=1,["Soul Rune"]=20},                        icon = "Interface\\Icons\\lvl7enchant.blp"},
     -- {level = 95, name = "Fire Surge",                 id = nil,     runes = {["Fire Rune"]=10,["Death Rune"]=1},                        icon = "Interface\\Icons\\firesurge.blp"},
-    {level = 102, name = "Wind Surge",                 id = 79534,  runes = {["Air Rune"]=7,["Death Rune"]=1},                         icon = "Interface\\Icons\\windsurge.blp"},
-    {level = 103, name = "Water Surge",                id = 79539,  runes = {["Water Rune"]=7,["Death Rune"]=1},                        icon = "Interface\\Icons\\watersurge.blp"},
-    {level = 104, name = "Earth Surge",                id = 79544,  runes = {["Earth Rune"]=7,["Death Rune"]=1},                       icon = "Interface\\Icons\\earthsurge.blp"},
-    {level = 105, name = "Fire Surge",                 id = 79549,  runes = {["Fire Rune"]=10,["Death Rune"]=1},                      icon = "Interface\\Icons\\firesurge.blp"},
+    --{level = 102, name = "Wind Surge",                 id = 79534,  runes = {["Air Rune"]=7,["Death Rune"]=1},                         icon = "Interface\\Icons\\windsurge.blp"},
+    --{level = 103, name = "Water Surge",                id = 79539,  runes = {["Water Rune"]=7,["Death Rune"]=1},                        icon = "Interface\\Icons\\watersurge.blp"},
+    --{level = 104, name = "Earth Surge",                id = 79544,  runes = {["Earth Rune"]=7,["Death Rune"]=1},                       icon = "Interface\\Icons\\earthsurge.blp"},
+    --{level = 105, name = "Fire Surge",                 id = 79549,  runes = {["Fire Rune"]=10,["Death Rune"]=1},                      icon = "Interface\\Icons\\firesurge.blp"},
 }
-
-
-
-
-
 
 WORS_U_SpellBook.runeInfo = {
     ["Air Rune"]    = { itemID = 90120, staffIDs = {90838, 90404} },
@@ -215,9 +122,7 @@ WORS_U_SpellBook.runeInfo = {
 }
 
 function WORS_U_SpellBook:HasRequiredRunes(runeTable)
-    if runeTable == nil then
-        return true
-    end
+    if runeTable == nil then return true end
 	
 	for runeName, count in pairs(runeTable) do
         local runeData = self.runeInfo[runeName]
@@ -250,8 +155,6 @@ function WORS_U_SpellBook:HasRequiredRunes(runeTable)
     end
     return true
 end
-
-
 
 -- WORS_U_PrayBook Data
 WORS_U_PrayBook = {}  -- Create the main table for the PrayBook
@@ -439,25 +342,73 @@ function GetLevelFromFactionReputation(factionID)
     return 1
 end
 
--- Used to cycle thru transparancy levels on Alt clicking MicroMenuButtons
-transparencyLevels = {1, 0.75, 0.5, 0.25}
-currentTransparencyIndex = 1
 
--- Function to save transparency to saved variables
-function SaveTransparency()
-    -- WORS_U_MicroMenuSettings.transparency = transparencyLevels[currentTransparencyIndex]
-	-- print("|cff00ff00MicroMenu: Transparency saved:", WORS_U_MicroMenuSettings.transparency * 100 .. "%|r")
-	-- print("|cff00ff00MicroMenu: |r" .. "|cffff0000Error: |r" .. "|cff00ff00Transparency saved:", WORS_U_MicroMenuSettings.transparency * 100 .. "%|r")
 
-end
 
--- Function to load transparency from saved variables
-function LoadTransparency()
-    -- local savedAlpha = WORS_U_MicroMenuSettings.transparency or 1  -- Default to 1 (100%) if not saved
-    -- -- Apply transparency to each frame in the list
-	-- for _, frame in ipairs(MicroMenu_Frames) do
-        -- if frame then
-            -- frame:SetAlpha(savedAlpha)  -- Set transparency for the frame
-        -- end
-    -- end
+function SaveFramePosition(self)
+    print("|cff00ff00[MicroMenu Debug]|r SaveFramePosition for", self:GetName())
+
+    if not WORS_U_MicroMenuSettings.AutoCloseEnabled then
+        print("|cff00ff00[MicroMenu Debug]|r AutoClose disabled, marking user-placed")
+        for _, f in ipairs(MicroMenu_Frames) do f:SetUserPlaced(true) end
+        if Backpack then Backpack:SetUserPlaced(true) end
+        return
+    end
+
+    -- 1) raw anchor
+    local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
+    local relName = relativeTo and relativeTo:GetName() or "UIParent"
+    print(string.format("|cff00ff00[MicroMenu Debug]|r raw GetPoint: %s:SetPoint(%s, %s, %s, %.1f, %.1f)", self:GetName(), point, relName, relativePoint, xOfs, yOfs))
+    -- 2) persist
+    WORS_U_MicroMenuSettings.MicroMenuPOS = {point = point, relativeTo = relName, relativePoint = relativePoint, xOfs = xOfs, yOfs = yOfs}
+    local reference = _G[relName] or UIParent
+
+    -- 3) two offset tables
+    local bpOffsets = {
+        RIGHT       = { -6,  -25 }, TOPRIGHT    = { -6,    0 }, BOTTOMRIGHT = { -6,  -50 },
+        LEFT        = {  6,  -25 }, TOPLEFT     = {  6,    0 }, BOTTOMLEFT  = {  6,  -50 },
+        CENTER      = {  0,  -25 }, TOP         = {  0,    0 }, BOTTOM      = {  0,  -50 },
+    }-- MM ofsets for when backpack is moved to apply to Micromenu frames but is not working atm
+    local mmOffsets = {
+        RIGHT       = { 0, 0 }, TOPRIGHT    = { 0, 0 }, BOTTOMRIGHT = { 0, 0 },
+        LEFT        = { 0, 0 }, TOPLEFT     = { 0, 0 }, BOTTOMLEFT  = { 0, 0 },
+        CENTER      = { 0, 0 }, TOP         = { 0, 0 }, BOTTOM      = { 0, 0 },
+    }
+    local bpX, bpY = unpack(bpOffsets[relativePoint] or { xOfs, yOfs })
+    local mmX, mmY = unpack(mmOffsets[relativePoint] or { xOfs, yOfs })
+
+    -- 4a) you dragged the Backpack → move all micro-menu frames with mmOffsets
+    if self == Backpack then
+        for _, frame in ipairs(MicroMenu_Frames) do
+            local fx, fy = mmX, mmY
+            print(string.format("|cff00ff00[MicroMenu Debug]|r moving %s relative to Backpack: %s:SetPoint(%s, Backpack, %s, %.1f, %.1f)", frame:GetName(), frame:GetName(), point, relativePoint, fx, fy))
+            frame:ClearAllPoints()
+            frame:SetPoint(point, Backpack, relativePoint, fx, fy)
+            frame:SetUserPlaced(false)
+        end
+        print(string.format("|cff00ff00[MicroMenu Debug]|r Backpack remains: Backpack:SetPoint(%s, %s, %s, %.1f, %.1f)", point, relName, relativePoint, xOfs, yOfs))
+        Backpack:ClearAllPoints()
+        Backpack:SetPoint(point, reference, relativePoint, xOfs, yOfs)
+        Backpack:SetUserPlaced(false)
+        return
+    --end
+
+    -- 4b) you dragged a MicroMenu frame → snap peers raw, then move Backpack with bpOffsets
+    else
+        for _, frame in ipairs(MicroMenu_Frames) do
+            if frame ~= self then
+                print(string.format("|cff00ff00[MicroMenu Debug]|r snapping %s:SetPoint(%s, %s, %s, %.1f, %.1f)", frame:GetName(), point, relName, relativePoint, xOfs, yOfs))
+                frame:ClearAllPoints()
+                frame:SetPoint(point, reference, relativePoint, xOfs, yOfs)
+                frame:SetUserPlaced(false)
+            end
+        end
+        if Backpack then
+            local bx, by = xOfs + bpX, yOfs + bpY
+            print(string.format("|cff00ff00[MicroMenu Debug]|r positioning Backpack:SetPoint(%s, %s, %s, %.1f, %.1f)", point, relName, relativePoint, bx, by))
+            Backpack:ClearAllPoints()
+            Backpack:SetPoint(point, reference, relativePoint, bx, by)
+            Backpack:SetUserPlaced(false)
+        end
+    end
 end

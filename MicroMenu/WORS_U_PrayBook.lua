@@ -1,81 +1,5 @@
 -- WORS_U_PrayBook.lua
 
--- Function to initialize Prayer level from rep
-local factionID = 1170
-local prayerLevel = 1
-local function InitializePrayerLevel()
-    prayerLevel = GetLevelFromFactionReputation(factionID)
-end
-
-local prayerButtons = {}
-
-local function SetupPrayerButtons()
-    if InCombatLockdown() then return end
-
-    -- clear old buttons
-    for _, btn in pairs(prayerButtons) do
-        btn:Hide()
-        btn:SetParent(nil)
-    end
-    wipe(prayerButtons)
-
-    local buttonSize, padding, margin, columns = 35, 2, 5, 5
-    for i, data in ipairs(WORS_U_PrayBook.prayers) do
-        local id, reqLvl = data.id, data.level
-        -- Grab the localized name just once for buff checks & tooltips
-        local prayerName = select(1, GetSpellInfo(id))
-
-        -- Create the secure button
-        local btn = CreateFrame("Button", nil, WORS_U_PrayBook.frame, "SecureActionButtonTemplate")
-        btn:SetSize(buttonSize, buttonSize)
-        -- Position in grid
-        local row, col = math.floor((i-1)/columns), (i-1) % columns
-        btn:SetPoint("TOPLEFT",
-            WORS_U_PrayBook.frame,
-            "TOPLEFT",
-            margin + (buttonSize+padding)*col,
-            -margin - (buttonSize+padding)*row
-        )
-        btn:SetNormalTexture(data.icon)
-        --btn:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square", "ADD")
-
-        -- Gray out if not high enough level
-        local nt = btn:GetNormalTexture()
-        nt:SetVertexColor(prayerLevel < reqLvl and .2 or 1, prayerLevel < reqLvl and .2 or 1, prayerLevel < reqLvl and .2 or 1)
-
-        -- PreClick: cast or remove
-        btn:SetScript("PreClick", function(self)
-            if UnitBuff("player", prayerName) then
-                self:SetAttribute("type","macro")
-                self:SetAttribute("macrotext","/cancelaura "..prayerName)
-            else
-                self:SetAttribute("type","spell")
-                self:SetAttribute("spell", id)
-            end
-        end)
-
-        -- Tooltip
-        btn:SetScript("OnEnter", function()
-            GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-            GameTooltip:SetSpellByID(id)
-            GameTooltip:Show()
-        end)
-        btn:SetScript("OnLeave", GameTooltip_Hide)
-
-        -- OnUpdate: swap between your two static textures
-        btn:SetScript("OnUpdate", function()
-            if UnitBuff("player", prayerName) then
-                btn:SetNormalTexture(data.buffIcon)
-            else
-                btn:SetNormalTexture(data.icon)
-            end
-        end)
-
-        --tinsert(prayerButtons, btn)
-		table.insert(prayerButtons, btn)
-    end
-end
-
 -- Create the prayer book frame
 WORS_U_PrayBook.frame = CreateFrame("Frame", "WORS_U_PrayBookFrame", UIParent)
 WORS_U_PrayBook.frame:SetSize(192, 280)
@@ -143,8 +67,11 @@ local function OnPrayerClick(self)
             if WORS_U_PrayBook.frame:IsShown() then
                 WORS_U_PrayBook.frame:Hide()
             else
-                InitializePrayerLevel()
-                SetupPrayerButtons()
+                InitializeMagicPrayerLevels()
+                SetupPrayerButtons(-10, WORS_U_PrayBookFrame)				
+				if WORS_U_MicroMenuSettings.showMagicandPrayer then
+					SetupMagicButtons(155, WORS_U_PrayBookFrame)
+				end
                 MicroMenu_ToggleFrame(WORS_U_PrayBook.frame)
             end
         elseif WORS_U_MicroMenuSettings.AutoCloseEnabled then
@@ -155,6 +82,21 @@ local function OnPrayerClick(self)
         end
     end
 end
+
+-- Event used to check if magic run requirments are met
+local eventFrame = CreateFrame("Frame")
+eventFrame:RegisterEvent("BAG_UPDATE")
+eventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+eventFrame:SetScript("OnEvent", function(self, event, ...)
+    if InCombatLockdown() then return end
+    if not WORS_U_SpellBook.frame:IsShown() then return end
+	InitializeMagicPrayerLevels()
+	SetupPrayerButtons(-10, WORS_U_PrayBookFrame)	
+	if WORS_U_MicroMenuSettings.showMagicandPrayer then	
+		SetupMagicButtons(155, WORS_U_PrayBookFrame)		
+	end
+end)
+
 PrayerMicroButton:SetScript("OnClick", OnPrayerClick)
 PrayerMicroButton:HookScript("OnEnter", function(self)
     if GameTooltip:IsOwned(self) then

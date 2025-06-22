@@ -90,6 +90,26 @@ function AttachMicroButtonsTo(parentFrame)
             bgFile = "Interface\\AddOns\\MicroMenu\\Textures\\MenuBG_Test_256x512CROP.tga"
         })
         MicroButtonContainer:SetBackdropColor(1, 1, 1, 1)
+		MicroButtonContainer:SetMovable(true)
+		MicroButtonContainer:EnableMouse(true)
+		MicroButtonContainer:RegisterForDrag("LeftButton")
+		MicroButtonContainer:SetClampedToScreen(true)	
+		MicroButtonContainer:SetScript("OnDragStart", function(self) 			
+			local parent = self:GetParent()
+			if parent then
+				parent:StartMoving()
+			end
+		end)
+		MicroButtonContainer:SetScript("OnDragStop", function(self)
+			local parent = self:GetParent()
+			if parent then
+				parent:StopMovingOrSizing()		
+
+				print("SaveFramePosition true")
+				SaveFramePosition(parent)
+
+			end		
+		end)		
     else
         MicroButtonContainer:SetParent(parentFrame)
         MicroButtonContainer:ClearAllPoints()
@@ -115,15 +135,37 @@ function AttachMicroButtonsTo(parentFrame)
 end
 
 function RestoreMicroButtonsFromMicroMenu()
-    for _, btn in ipairs(microButtonsRow1) do
-        safeRestore(btn, microBackup[tostring(btn)])
+    local targetFrame
+
+    if WORS_U_SpellBookFrame and WORS_U_SpellBookFrame:IsShown() then
+        targetFrame = WORS_U_SpellBookFrame
+        print("Debug: SpellBookFrame is shown.")
+    elseif WORS_U_PrayBookFrame and WORS_U_PrayBookFrame:IsShown() then
+        targetFrame = WORS_U_PrayBookFrame
+        print("Debug: PrayBookFrame is shown.")
+    else
+        print("Debug: Neither frame is shown.")
     end
-    for _, btn in ipairs(microButtonsRow2) do
-        safeRestore(btn, microBackup[tostring(btn)])
-    end
-    if MicroButtonContainer then
-        MicroButtonContainer:Hide()
-    end
+
+    if targetFrame then
+        print("Debug: Attaching micro buttons to", targetFrame:GetName())
+        AttachMicroButtonsTo(targetFrame)
+    else
+
+		for _, btn in ipairs(microButtonsRow1) do
+			safeRestore(btn, microBackup[tostring(btn)])
+			print("Debug: Restoring micro button from row 1:", btn:GetName())
+		end
+		for _, btn in ipairs(microButtonsRow2) do
+			safeRestore(btn, microBackup[tostring(btn)])
+			print("Debug: Restoring micro button from row 2:", btn:GetName())
+		end
+
+		if MicroButtonContainer then
+			MicroButtonContainer:Hide()
+			print("Debug: MicroButtonContainer hidden.")
+		end
+	end
 end
 
 -- Initialize backups after entering the world

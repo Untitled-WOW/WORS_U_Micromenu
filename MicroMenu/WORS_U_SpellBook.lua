@@ -1,108 +1,3 @@
--- Function to initialize Prayer level from rep
--- Ensure this is after the MicroMenuButtons file is loaded
---AttachMicroButtonsTo(WORS_U_SpellBook.frame)
-local factionID = 1169
-local magicLevel = 1
-local function InitializeMagicLevel()
-    magicLevel = GetLevelFromFactionReputation(factionID)
-end
-
-local magicButtons = {}
---Function to set up magic buttons dynamically
-local function SetupMagicButtons()
-    if InCombatLockdown() then return end
-
-    -- Clear existing buttons
-    for _, btn in pairs(magicButtons) do
-        btn:Hide()
-        btn:SetParent(nil)
-    end
-    wipe(magicButtons)
-
-    local buttonSize, padding, margin, columns = 20, 5, 10, 7
-
-    for i, spellData in ipairs(WORS_U_SpellBook.spells) do
-        local spellID       = spellData.id
-        local requiredLevel = spellData.level
-
-        -- Create the secure button
-        local spellButton = CreateFrame("Button", nil, WORS_U_SpellBook.frame, "SecureActionButtonTemplate")
-        spellButton:SetSize(buttonSize, buttonSize)
-
-        -- Position in grid
-        local row    = math.floor((i - 1) / columns)
-        local column = (i - 1) % columns
-        spellButton:SetPoint(
-            "TOPLEFT",
-            WORS_U_SpellBook.frame,
-            "TOPLEFT",
-            margin + (buttonSize + padding) * column,
-            -margin - (buttonSize + padding) * row
-        )
-
-        -- ICON: create our own texture in ARTWORK layer
-        local icon = spellButton:CreateTexture(nil, "ARTWORK")
-        icon:SetAllPoints()
-        icon:SetTexture(spellData.icon)
-
-        -- Color based on level/runes
-        if magicLevel < requiredLevel then
-            icon:SetVertexColor(0.1, 0.1, 0.1)
-        else
-            local hasRunes = WORS_U_SpellBook:HasRequiredRunes(spellData.runes)
-            if hasRunes then
-                icon:SetVertexColor(1, 1, 1)
-				if spellData.openInv then
-					spellButton:SetScript("PostClick", function()
-						ToggleBackpack()
-						local names = {"High Alchemy", "Low Alchemy","Superheat", "Level-1 Enchant", "Level-2 Enchant",	"Level-3 Enchant", "Level-4 Enchant", "Level-5 Enchant"}
-						local watcher = CreateFrame("Frame")
-						watcher:RegisterEvent("UNIT_SPELLCAST_SENT")
-						watcher:SetScript("OnEvent", function(self, _, unit, spellName)
-							if unit == "player" then
-								for _, name in ipairs(names) do
-									if spellName == name then
-										MicroMenu_ToggleFrame(WORS_U_SpellBook.frame)
-										self:UnregisterAllEvents()
-										self:SetScript("OnEvent", nil)
-										break
-									end
-								end
-							end
-						end)
-					end)
-				end
-            else
-                icon:SetVertexColor(0.25, 0.25, 0.25)
-            end
-        end
-        -- Set up secure spell attributes
-        spellButton:SetAttribute("type", "spell")
-        spellButton:SetAttribute("spell", spellID)
-
-        -- Tooltip
-        spellButton:SetScript("OnEnter", function(self)
-            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-            GameTooltip:SetSpellByID(spellID)
-            GameTooltip:Show()
-        end)
-        spellButton:SetScript("OnLeave", GameTooltip_Hide)
-
-        table.insert(magicButtons, spellButton)
-    end
-end
-
-
--- Event used to check if magic run requirments are met
-local eventFrame = CreateFrame("Frame")
-eventFrame:RegisterEvent("BAG_UPDATE")
-eventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
-eventFrame:SetScript("OnEvent", function(self, event, ...)
-    if InCombatLockdown() then return end
-    if not WORS_U_SpellBook.frame:IsShown() then return end
-    SetupMagicButtons()
-end)
-
 -- Create the main frame for the custom spell book
 WORS_U_SpellBook.frame = CreateFrame("Frame", "WORS_U_SpellBookFrame", UIParent)
 WORS_U_SpellBook.frame:SetSize(192, 280)
@@ -165,7 +60,6 @@ local function OnMagicClick(self)
 	else
 		print("|cff00ff00MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
 	end
-
     if IsShiftKeyDown() then
 		ToggleSpellBook(BOOKTYPE_SPELL)
     else
@@ -173,8 +67,11 @@ local function OnMagicClick(self)
 			if WORS_U_SpellBook.frame:IsShown() then
 				WORS_U_SpellBook.frame:Hide()
 			else
-				InitializeMagicLevel()
-				SetupMagicButtons()
+				InitializeMagicPrayerLevels()
+				SetupMagicButtons(-10, WORS_U_SpellBookFrame)
+				if WORS_U_MicroMenuSettings.showMagicandPrayer then				
+					SetupPrayerButtons(155, WORS_U_SpellBookFrame)		
+				end		
 				MicroMenu_ToggleFrame(WORS_U_SpellBook.frame)--:Show()
 			end
 		elseif WORS_U_MicroMenuSettings.AutoCloseEnabled then	
@@ -185,6 +82,21 @@ local function OnMagicClick(self)
 		end
     end
 end
+
+-- Event used to check if magic run requirments are met
+local eventFrame = CreateFrame("Frame")
+eventFrame:RegisterEvent("BAG_UPDATE")
+eventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+eventFrame:SetScript("OnEvent", function(self, event, ...)
+    if InCombatLockdown() then return end
+    if not WORS_U_SpellBook.frame:IsShown() then return end
+	InitializeMagicPrayerLevels()
+	SetupMagicButtons(-10, WORS_U_SpellBookFrame)	
+	if WORS_U_MicroMenuSettings.showMagicandPrayer then	
+		SetupPrayerButtons(155, WORS_U_SpellBookFrame)		
+	end
+end)
+
 SpellbookMicroButton:SetScript("OnClick", OnMagicClick)
 SpellbookMicroButton:HookScript("OnEnter", function(self)
     if GameTooltip:IsOwned(self) then

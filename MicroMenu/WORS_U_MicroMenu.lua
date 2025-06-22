@@ -1,9 +1,3 @@
--- Initialize saved variable WORS_U_MicroMenuSettings
-WORS_U_MicroMenuSettings = WORS_U_MicroMenuSettings or {
-    transparency = 1,  -- Default transparency value
-    AutoCloseEnabled = true,
-    MicroMenuPOS = { point = "CENTER", relativeTo = nil, relativePoint = "CENTER", xOfs = 0, yOfs = 0 }
-}
 
 -- Store all MicroMenu frames and CombatStylePanel
 MicroMenu_Frames = {WORS_U_SpellBookFrame, WORS_U_PrayBookFrame, WORS_U_EmoteBookFrame, WORS_U_MusicPlayerFrame, CombatStylePanel}
@@ -126,6 +120,8 @@ local function SaveFramePosition(self)
     end
 end
 
+
+
 -- Hook Blizzard frames to hide micro-menu on show
 local function HookAFrames()
     if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
@@ -237,6 +233,19 @@ f:SetScript("OnEvent", function(self, event)
             HookAFrames()
             HookMicroMenuFrames()
             HookMicroMenuButtonRestores()
+			
+			-- -- Safely hook OnDragStop without overwriting
+			-- MicroButtonContainer:SetScript("OnDragStop", function(self)
+				-- local parent = self:GetParent()
+				-- if parent then
+					-- -- Don't call parent:StopMovingOrSizing() if the original already does
+					-- -- Just call SaveFramePosition (once it's implemented)
+					-- if SaveFramePosition then
+						-- SaveFramePosition()
+					-- end
+				-- end
+			-- end)
+			
         end)
         self:UnregisterEvent("PLAYER_ENTERING_WORLD")
     end
