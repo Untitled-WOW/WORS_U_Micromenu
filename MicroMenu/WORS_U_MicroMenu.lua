@@ -1,8 +1,8 @@
 -- Initialize saved variable WORS_U_MicroMenuSettings
 WORS_U_MicroMenuSettings = WORS_U_MicroMenuSettings or {
     transparency = 1,  -- Default transparency value
-	AutoCloseEnabled = true,
-	MicroMenuPOS = { point = "CENTER", relativeTo = nil, relativePoint = "CENTER", xOfs = 0, yOfs = 0 }
+    AutoCloseEnabled = true,
+    MicroMenuPOS = { point = "CENTER", relativeTo = nil, relativePoint = "CENTER", xOfs = 0, yOfs = 0 }
 }
 
 -- Store all MicroMenu frames and CombatStylePanel
@@ -11,177 +11,292 @@ MicroMenu_Frames = {
     WORS_U_PrayBookFrame,
     WORS_U_EmoteBookFrame,
     WORS_U_MusicPlayerFrame,
-	CombatStylePanel,	
+    CombatStylePanel,
 }
 
 -- Hide all frames and reset button colors
 function MicroMenu_HideAll()
-	for _, frame in ipairs(MicroMenu_Frames) do
-		if InCombatLockdown() and (frame == WORS_U_SpellBookFrame or frame == WORS_U_PrayBookFrame) then
-			-- Skip hiding this frame during combat
-		elseif frame == WORS_U_SpellBookFrame or frame == WORS_U_PrayBookFrame then
-			frame:SetFrameStrata("High")
-			frame:SetFrameLevel(10)
-			frame:Hide()
-		else
-			frame:SetFrameStrata("High")
-			frame:SetFrameLevel(20)
-			frame:Hide()
-		end
-		
-	end
-	CloseBackpack()
+    for _, frame in ipairs(MicroMenu_Frames) do
+        if InCombatLockdown() and (frame == WORS_U_SpellBookFrame or frame == WORS_U_PrayBookFrame) then
+            -- Skip hiding this frame during combat
+        elseif frame == WORS_U_SpellBookFrame or frame == WORS_U_PrayBookFrame then
+            frame:SetFrameStrata("High")
+            frame:SetFrameLevel(10)
+            frame:Hide()
+        else
+            frame:SetFrameStrata("High")
+            frame:SetFrameLevel(20)
+            frame:Hide()
+        end
+    end
+    CloseBackpack()
 end
 
--- Toggle a frame if target and open or hidesall frames if AutoCloseEnabled true
+-- Toggle target frame and attach/restore micro-buttons
 function MicroMenu_ToggleFrame(targetFrame)
-	if InCombatLockdown() then
-		if targetFrame ==  WORS_U_SpellBookFrame or targetFrame ==  WORS_U_PrayBookFrame then
-			print("|cff00ff00MicroMenu: MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
-			return
-		end		
-	end
-	if targetFrame:IsShown() then
+    if InCombatLockdown() then
+        if targetFrame == WORS_U_SpellBookFrame or targetFrame == WORS_U_PrayBookFrame then
+            print("|cff00ff00MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
+            return
+        end        
+    end
+
+    local function isMicroMenuFrame(frame)
+        for _, f in ipairs(MicroMenu_Frames) do
+            if f == frame then return true end
+        end
+        return false
+    end
+
+    if targetFrame:IsShown() then
         targetFrame:Hide()
+        if isMicroMenuFrame(targetFrame) then
+            RestoreMicroButtonsFromMicroMenu()
+        end
     else
-        if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then
+        if WORS_U_MicroMenuSettings.AutoCloseEnabled then
             MicroMenu_HideAll()
         end
         targetFrame:Show()
+        if isMicroMenuFrame(targetFrame) then
+            AttachMicroButtonsTo(targetFrame)
+        end
     end
 end
 
--- Function to save the position of the frame
 local function SaveFramePosition(self)
-    if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then
-		local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
-		WORS_U_MicroMenuSettings.MicroMenuPOS = {
-			point = point,
-			relativeTo = relativeTo and relativeTo:GetName() or nil,
-			relativePoint = relativePoint,
-			xOfs = xOfs,
-			yOfs = yOfs
-		}--print("Frame position saved:", point, relativePoint, xOfs, yOfs)  -- Debug output
-		
-		-- Apply this position to all other frames 
-        local relativeFrame = relativeTo and _G[relativeTo] or UIParent
-        for _, frame in ipairs(MicroMenu_Frames) do
-            if frame and frame ~= self then
-				if InCombatLockdown() and (frame == WORS_U_SpellBookFrame or frame == WORS_U_PrayBookFrame) then
-				--print("Skipped position update for", frame:GetName(), "due to combat lockdown")
-				else
-					frame:ClearAllPoints()
-					frame:SetPoint(point, relativeFrame, relativePoint, xOfs, yOfs)
-					frame:SetUserPlaced(false)
-				end
-            end
-        end		
-		Backpack:ClearAllPoints()
-		Backpack:SetPoint(point, relativeFrame, relativePoint, xOfs, yOfs+25)
-        Backpack:SetUserPlaced(false)
-	else
-		for _, frame in ipairs(MicroMenu_Frames) do
-            if frame and frame ~= self then
-                frame:SetUserPlaced(true)
-            end
-        end
-		Backpack:SetUserPlaced(true)
-	end
-end
+    print("|cff00ff00[MicroMenu Debug]|r SaveFramePosition for", self:GetName())
 
--- Hook into Backpack and CombatStylePanel to hide MicroMenu frames and set postion
-local function HookAFrames()
-    if WORS_U_MicroMenuSettings.AutoCloseEnabled ~= true then
+    if not WORS_U_MicroMenuSettings.AutoCloseEnabled then
+        print("|cff00ff00[MicroMenu Debug]|r AutoClose disabled, marking user-placed")
+        for _, f in ipairs(MicroMenu_Frames) do f:SetUserPlaced(true) end
+        if Backpack then Backpack:SetUserPlaced(true) end
         return
     end
+
+    -- 1) raw anchor
+    local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
+    local relName = relativeTo and relativeTo:GetName() or "UIParent"
+    print(string.format(
+        "|cff00ff00[MicroMenu Debug]|r raw GetPoint: %s:SetPoint(%s, %s, %s, %.1f, %.1f)",
+        self:GetName(), point, relName, relativePoint, xOfs, yOfs
+    ))
+
+    -- 2) persist
+    WORS_U_MicroMenuSettings.MicroMenuPOS = {point = point, relativeTo = relName, relativePoint = relativePoint, xOfs = xOfs, yOfs = yOfs}
+    local reference = _G[relName] or UIParent
+
+    -- 3) two offset tables
+    local bpOffsets = {
+        RIGHT       = { -6,  -25 },
+        TOPRIGHT    = { -6,    0 },
+        BOTTOMRIGHT = { -6,  -50 },
+        LEFT        = {  6,  -25 },
+        TOPLEFT     = {  6,    0 },
+        BOTTOMLEFT  = {  6,  -50 },
+        CENTER      = {  0,  -25 },
+        TOP         = {  0,    0 },
+        BOTTOM      = {  0,  -50 },
+    }-- MM ofsets for when backpack is moved to apply to Micromenu frames but is not working atm
+    local mmOffsets = {
+        RIGHT       = { 0, 0 },
+        TOPRIGHT    = { 0, 0 },
+        BOTTOMRIGHT = { 0, 0 },
+        LEFT        = { 0, 0 },
+        TOPLEFT     = { 0, 0 },
+        BOTTOMLEFT  = { 0, 0 },
+        CENTER      = { 0, 0 },
+        TOP         = { 0, 0 },
+        BOTTOM      = { 0, 0 },
+    }
+
+    local bpX, bpY = unpack(bpOffsets[relativePoint] or { xOfs, yOfs })
+    local mmX, mmY = unpack(mmOffsets[relativePoint] or { xOfs, yOfs })
+
+    -- 4a) you dragged the Backpack → move all micro-menu frames with mmOffsets
+    -- 4a) you dragged the Backpack → move all micro-menu frames with mmOffsets
+    if self == Backpack then
+        for _, frame in ipairs(MicroMenu_Frames) do
+            local fx, fy = mmX, mmY
+            print(string.format(
+                "|cff00ff00[MicroMenu Debug]|r moving %s relative to Backpack: %s:SetPoint(%s, Backpack, %s, %.1f, %.1f)",
+                frame:GetName(), frame:GetName(), point, relativePoint, fx, fy
+            ))
+            frame:ClearAllPoints()
+            frame:SetPoint(point, Backpack, relativePoint, fx, fy)
+            frame:SetUserPlaced(false)
+        end
+
+        -- leave Backpack exactly where you dropped it
+        print(string.format(
+            "|cff00ff00[MicroMenu Debug]|r Backpack remains: Backpack:SetPoint(%s, %s, %s, %.1f, %.1f)",
+            point, relName, relativePoint, xOfs, yOfs
+        ))
+        Backpack:ClearAllPoints()
+        Backpack:SetPoint(point, reference, relativePoint, xOfs, yOfs)
+        Backpack:SetUserPlaced(false)
+        return
+    --end
+
+    -- 4b) you dragged a MicroMenu frame → snap peers raw, then move Backpack with bpOffsets
+    else
+        for _, frame in ipairs(MicroMenu_Frames) do
+            if frame ~= self then
+                print(string.format(
+                    "|cff00ff00[MicroMenu Debug]|r snapping %s:SetPoint(%s, %s, %s, %.1f, %.1f)",
+                    frame:GetName(), point, relName, relativePoint, xOfs, yOfs
+                ))
+                frame:ClearAllPoints()
+                frame:SetPoint(point, reference, relativePoint, xOfs, yOfs)
+                frame:SetUserPlaced(false)
+            end
+        end
+        if Backpack then
+            local bx, by = xOfs + bpX, yOfs + bpY
+            print(string.format(
+                "|cff00ff00[MicroMenu Debug]|r positioning Backpack:SetPoint(%s, %s, %s, %.1f, %.1f)",
+                point, relName, relativePoint, bx, by
+            ))
+            Backpack:ClearAllPoints()
+            Backpack:SetPoint(point, reference, relativePoint, bx, by)
+            Backpack:SetUserPlaced(false)
+        end
+    end
+end
+
+
+
+
+-- Hook Blizzard frames to hide micro-menu on show
+local function HookAFrames()
+    if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
     if Backpack then
-       if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then 
-			Backpack:HookScript("OnShow", function()
-				if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then
-					if not InCombatLockdown() then
-						WORS_U_SpellBook.frame:Hide()
-						WORS_U_PrayBook.frame:Hide()
-					end
-					WORS_U_EmoteBook.frame:Hide()
-					WORS_U_MusicBook.musicPlayer:Hide()
-					CombatStylePanel:Hide()
-				end
-			end)
-			local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
-			if pos then
-				local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
-				Backpack:ClearAllPoints()
-				Backpack:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs+25)
-				Backpack:SetUserPlaced(false)
-			end
-		else
-			print("AutoCloseEnabled set to false")
-		end
+        Backpack:HookScript("OnShow", function()
+            AttachMicroButtonsTo(Backpack)
+            if WORS_U_MicroMenuSettings.AutoCloseEnabled then
+                if not InCombatLockdown() then
+                    WORS_U_SpellBook.frame:Hide()
+                    WORS_U_PrayBook.frame:Hide()
+                end
+                WORS_U_EmoteBook.frame:Hide()
+                WORS_U_MusicBook.musicPlayer:Hide()
+                CombatStylePanel:Hide()
+            end
+        end)
+        local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
+        if pos then
+            local ref = pos.relativeTo and _G[pos.relativeTo] or UIParent
+            Backpack:ClearAllPoints()
+            Backpack:SetPoint(pos.point, ref, pos.relativePoint, pos.xOfs, pos.yOfs)
+            Backpack:SetUserPlaced(false)
+        end
+		hooksecurefunc(Backpack, "StopMovingOrSizing", function(self)
+			-- only run if AutoClose is on
+			if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
+			print("|cff00ff00[MicroMenu Debug]|r Backpack drag ended, saving position")
+			SaveFramePosition(self)
+		end)
+	
     end
     if CombatStylePanel then
-		if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then 
-			CombatStylePanel:HookScript("OnShow", function()
-				if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then
-					if not InCombatLockdown() then
-						WORS_U_SpellBook.frame:Hide()
-						WORS_U_PrayBook.frame:Hide()
-					end
-					WORS_U_EmoteBook.frame:Hide()
-					WORS_U_MusicBook.musicPlayer:Hide()
-					CloseBackpack()
-				end
-			end)
-			local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
-			if pos then
-				local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
-				CombatStylePanel:ClearAllPoints()
-				CombatStylePanel:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
-				CombatStylePanel:SetUserPlaced(false)
-			else
-				
-			end			
-		else
-			print("AutoCloseEnabled set to false")
-		end
-		LoadTransparency()
+        CombatStylePanel:HookScript("OnShow", function()
+            AttachMicroButtonsTo(CombatStylePanel)
+            if WORS_U_MicroMenuSettings.AutoCloseEnabled then
+                if not InCombatLockdown() then
+                    WORS_U_SpellBook.frame:Hide()
+                    WORS_U_PrayBook.frame:Hide()
+                end
+                WORS_U_EmoteBook.frame:Hide()
+                WORS_U_MusicBook.musicPlayer:Hide()
+                CloseBackpack()
+            end
+        end)
+		-- Button click handlers
+		CombatStyleMicroButton:SetScript("OnClick", function()
+			MicroMenu_ToggleFrame(CombatStylePanel)
+		end)
+		
+		CombatStylePanel:SetFrameStrata("DIALOG")
+		CombatStylePanel:SetFrameLevel(50)
+
+		
+        local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
+        if pos then
+            local ref = pos.relativeTo and _G[pos.relativeTo] or UIParent
+            CombatStylePanel:ClearAllPoints()
+            CombatStylePanel:SetPoint(pos.point, ref, pos.relativePoint, pos.xOfs, pos.yOfs)
+            CombatStylePanel:SetUserPlaced(false)
+        end
+        LoadTransparency()
     end
-    -- If neither are available, retry after a short delay
     if not Backpack and not CombatStylePanel then
         C_Timer.After(0.1, HookAFrames)
     end
-	--print("Backpack and CombatStylePanel Hooked")
 end
 
+-- Hook drag-stop on micro-menu frames for saving positions
 local function HookMicroMenuFrames()
-	if WORS_U_MicroMenuSettings.AutoCloseEnabled ~= true then
-		for _, frame in ipairs(MicroMenu_Frames) do
-			if frame then
-				frame:SetUserPlaced(true)
-			end
-		end 
-		return
+    if not WORS_U_MicroMenuSettings.AutoCloseEnabled then
+        for _, frame in ipairs(MicroMenu_Frames) do
+            if frame then frame:SetUserPlaced(true) end
+        end
+        return
     end
-	-- Hook into the OnDragStop handler for MicroMenu and CombatStylePanel frames
-	for _, frame in ipairs(MicroMenu_Frames) do
-		if frame then
-			frame:HookScript("OnDragStop", function(self)
-				SaveFramePosition(self)  -- Save the position after drag
-			end)
-		end
-	end
+    for _, frame in ipairs(MicroMenu_Frames) do
+        if frame then frame:HookScript("OnDragStop", SaveFramePosition) end
+    end
 end
 
+-- Hook hide on micro-menu frames to restore buttons
+local function HookMicroMenuRestores()
+    for _, frame in ipairs(MicroMenu_Frames) do
+        if frame then frame:HookScript("OnHide", RestoreMicroButtonsFromMicroMenu) end
+    end
+	-- Hook the Backpack frame Show/Hide once it exists
+	local hookedBackpack = false
+	C_Timer.NewTicker(0.2, function(ticker)
+		if hookedBackpack then
+			ticker:Cancel()
+			return
+		end
+		local bf = _G["Backpack"]
+		if bf and type(bf.Hide) == "function" then
+			hooksecurefunc(bf, "Hide", function(self)
+				RestoreMicroButtonsFromMicroMenu()
+			end)
+			hooksecurefunc(bf, "Show", function(self)
+				AttachMicroButtonsTo(self)
+			end)
+			hookedBackpack = true
+			ticker:Cancel()
+			print("|cff00ff00[MicroMenu]|r Backpack.Show/Hide hooked!")
+		end
+	end)	
+end
+
+-- Main initialization event
 local f = CreateFrame("Frame")
-f:RegisterEvent("PLAYER_ENTERING_WORLD")  -- Ensure it's only triggered after login
+f:RegisterEvent("PLAYER_ENTERING_WORLD")
 f:SetScript("OnEvent", function(self, event)
-    if event == "PLAYER_ENTERING_WORLD" then		
-		C_Timer.After(0.5, function()
-			HookAFrames()			
-			HookMicroMenuFrames()
-		end)		
-        self:UnregisterEvent("PLAYER_LOGIN")  -- Unregister the event after hooking
+    if event == "PLAYER_ENTERING_WORLD" then
+        C_Timer.After(0.5, function()
+            HookAFrames()
+            HookMicroMenuFrames()
+            HookMicroMenuRestores()
+			
+        end)
+        self:UnregisterEvent("PLAYER_ENTERING_WORLD")
     end
 end)
+
+
+
+
+
+
+
+
+
 
 ---------------------------------------------------------------------------------------------------
 
@@ -219,57 +334,6 @@ autoCloseEnabledCheckbox:SetScript("OnClick", function(self)
 	HookAFrames()
 	HookMicroMenuFrames()
 end)
-
--- local transparencyLabel = contentFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
--- transparencyLabel:SetPoint("TOPLEFT", autoCloseEnabledCheckbox, "BOTTOMLEFT", 0, -50)
--- transparencyLabel:SetText("Transparency")
-
--- local transparencyDropdown = CreateFrame("Frame", "WORS_TransparencyDropdown", contentFrame, "UIDropDownMenuTemplate")
--- transparencyDropdown:SetPoint("TOPLEFT", transparencyLabel, "BOTTOMLEFT", -16, -5)
-
--- local transparencyOptions = {25, 50, 75, 100}
-
--- UIDropDownMenu_Initialize(transparencyDropdown, function(self, level)
-    -- for _, value in ipairs(transparencyOptions) do
-        -- local info = UIDropDownMenu_CreateInfo()
-        -- info.text = value .. "%"
-        -- info.value = value
-        -- info.func = function()
-            -- UIDropDownMenu_SetSelectedValue(transparencyDropdown, value)
-            -- UIDropDownMenu_SetText(transparencyDropdown, value .. "%")
-
-            -- -- Inline application of alpha
-            -- local alpha = value / 100
-            -- WORS_U_MicroMenuSettings.transparency = value
-            -- if WORS_U_EmoteBook and WORS_U_EmoteBook.frame then
-                -- WORS_U_EmoteBook.frame:SetAlpha(alpha)
-            -- end
-            -- if WORS_U_PrayBook and WORS_U_PrayBook.frame then
-                -- WORS_U_PrayBook.frame:SetAlpha(alpha)
-            -- end
-            -- if WORS_U_SpellBook and WORS_U_SpellBook.frame then
-                -- WORS_U_SpellBook.frame:SetAlpha(alpha)
-            -- end
-            -- if WORS_U_MusicBook and WORS_U_MusicBook.musicPlayer then
-                -- WORS_U_MusicBook.musicPlayer:SetAlpha(alpha)
-            -- end
-			-- WORS_U_MicroMenuSettings.transparency = value
-			
-
-        -- end
-        -- UIDropDownMenu_AddButton(info, level)
-    -- end
--- end)
-
--- transparencyDropdown:SetScript("OnShow", function()
-    -- local selected = WORS_U_MicroMenuSettings.transparency * 100 or 100
-    -- UIDropDownMenu_SetSelectedValue(transparencyDropdown, selected)
-    -- UIDropDownMenu_SetText(transparencyDropdown, selected .. "%")
--- end)
-
-
-
-
 
 -- Register the options frame
 InterfaceOptions_AddCategory(optionsFrame)

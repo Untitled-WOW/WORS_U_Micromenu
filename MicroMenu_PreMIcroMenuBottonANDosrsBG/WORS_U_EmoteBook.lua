@@ -29,19 +29,11 @@ closeButton:SetScript("OnClick", function()
     EmotesMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
 	
 end)
--- make a mini-frame just for the title
-local titleFrame = CreateFrame("Frame", nil, WORS_U_EmoteBook.frame)
-titleFrame:SetAllPoints(WORS_U_EmoteBook.frame)
--- bump this frame 2 levels above its parent
-titleFrame:SetFrameLevel(WORS_U_EmoteBook.frame:GetFrameLevel() + 2)
-
--- now create the FontString normally
-local title = titleFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+-- Create the title for the emote book
+local title = WORS_U_EmoteBook.frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
 title:SetText("Emote Book")
-title:SetPoint("TOP", titleFrame, "TOP", 0, -5)
-title:SetTextColor(1,1,1)
-
-
+title:SetPoint("TOP", WORS_U_EmoteBook.frame, "TOP", 0, -10)  -- Position title
+title:SetTextColor(1, 1, 1)  -- Set title color to white
 -- Create a scrollable frame for the buttons
 local scrollFrame = CreateFrame("ScrollFrame", nil, WORS_U_EmoteBook.frame, "UIPanelScrollFrameTemplate")
 scrollFrame:SetSize(180, 210)  -- Size of the scrollable area

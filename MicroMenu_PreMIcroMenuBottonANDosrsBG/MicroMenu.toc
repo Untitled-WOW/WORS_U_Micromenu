@@ -8,7 +8,6 @@
 
 # Main
 WORS_U_MicroMenuData.lua
-MicroMenuButtons.lua
 WORS_U_SpellBook.lua
 WORS_U_EmoteBook.lua
 WORS_U_MusicBook.lua

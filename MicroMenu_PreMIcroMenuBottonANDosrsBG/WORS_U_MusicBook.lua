@@ -29,21 +29,9 @@ closeButton:SetScript("OnClick", function()
     MusicMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
 	
 end)
-
-
-
--- 1. Create a tiny frame parented to the musicPlayer
-local trackFrame = CreateFrame("Frame", nil, WORS_U_MusicBook.musicPlayer)
-trackFrame:SetAllPoints(WORS_U_MusicBook.musicPlayer)
--- bump it 2 levels above the musicPlayer itself
-trackFrame:SetFrameLevel(WORS_U_MusicBook.musicPlayer:GetFrameLevel() + 2)
-
--- 2. Create your FontString on that frame instead of directly on musicPlayer
-WORS_U_MusicBook.trackLabel = trackFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-WORS_U_MusicBook.trackLabel:SetPoint("TOP", trackFrame, "TOP", 0, -10)
+WORS_U_MusicBook.trackLabel = WORS_U_MusicBook.musicPlayer:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+WORS_U_MusicBook.trackLabel:SetPoint("TOP", WORS_U_MusicBook.musicPlayer, "TOP", 0, -10)
 WORS_U_MusicBook.trackLabel:SetText("No track playing")
-WORS_U_MusicBook.trackLabel:SetTextColor(1, 1, 1)
-
 local scrollFrame = CreateFrame("ScrollFrame", nil, WORS_U_MusicBook.musicPlayer, "UIPanelScrollFrameTemplate")
 scrollFrame:SetSize(160, 180)
 scrollFrame:SetPoint("TOP", WORS_U_MusicBook.trackLabel, "BOTTOM", 0, -10)

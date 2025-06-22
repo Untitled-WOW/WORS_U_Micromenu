@@ -1,6 +1,4 @@
 -- Function to initialize Prayer level from rep
--- Ensure this is after the MicroMenuButtons file is loaded
---AttachMicroButtonsTo(WORS_U_SpellBook.frame)
 local factionID = 1169
 local magicLevel = 1
 local function InitializeMagicLevel()
@@ -8,76 +6,69 @@ local function InitializeMagicLevel()
 end
 
 local magicButtons = {}
---Function to set up magic buttons dynamically
+-- Function to set up magic buttons dynamically
 local function SetupMagicButtons()
-    if InCombatLockdown() then return end
-
-    -- Clear existing buttons
-    for _, btn in pairs(magicButtons) do
-        btn:Hide()
-        btn:SetParent(nil)
+    if InCombatLockdown() then
+		return
+	end	
+	-- Clear existing buttons before creating new ones
+    for _, button in pairs(magicButtons) do
+        button:Hide()
+        button:SetParent(nil)
     end
     wipe(magicButtons)
-
-    local buttonSize, padding, margin, columns = 20, 5, 10, 7
+	local buttonSize = 20
+	local padding 	 = 5         -- space between buttons
+	local margin 	 = 10        -- space from frame edge
+	local columns 	 = 7
 
     for i, spellData in ipairs(WORS_U_SpellBook.spells) do
-        local spellID       = spellData.id
+        local spellID = spellData.id
         local requiredLevel = spellData.level
-
-        -- Create the secure button
+        local spellName, _, spellIcon = GetSpellInfo(spellID)
         local spellButton = CreateFrame("Button", nil, WORS_U_SpellBook.frame, "SecureActionButtonTemplate")
         spellButton:SetSize(buttonSize, buttonSize)
-
-        -- Position in grid
-        local row    = math.floor((i - 1) / columns)
-        local column = (i - 1) % columns
-        spellButton:SetPoint(
-            "TOPLEFT",
-            WORS_U_SpellBook.frame,
-            "TOPLEFT",
-            margin + (buttonSize + padding) * column,
-            -margin - (buttonSize + padding) * row
-        )
-
-        -- ICON: create our own texture in ARTWORK layer
-        local icon = spellButton:CreateTexture(nil, "ARTWORK")
+        -- Calculate position
+        local row = math.floor((i - 1) / columns)
+        local column = (i - 1) % columns        
+		spellButton:SetPoint("TOPLEFT", WORS_U_SpellBook.frame, "TOPLEFT", margin + (buttonSize + padding) * column, -margin - (buttonSize + padding) * row)
+        local icon = spellButton:CreateTexture(nil, "BACKGROUND")
         icon:SetAllPoints()
-        icon:SetTexture(spellData.icon)
-
-        -- Color based on level/runes
-        if magicLevel < requiredLevel then
-            icon:SetVertexColor(0.1, 0.1, 0.1)
-        else
-            local hasRunes = WORS_U_SpellBook:HasRequiredRunes(spellData.runes)
-            if hasRunes then
-                icon:SetVertexColor(1, 1, 1)
-                if spellData.openInv then
-                    spellButton:SetScript("PostClick", ToggleBackpack)
-                end
-            else
-                icon:SetVertexColor(0.25, 0.25, 0.25)
-            end
-        end
-
-        -- Set up secure spell attributes
+        icon:SetTexture(spellIcon)
+		-- Check Magic level and Rune requirments and set icon color
+		if magicLevel < requiredLevel then
+			icon:SetVertexColor(0.1, 0.1, 0.1) -- No magic level: Dark Gray
+		else
+			local hasRunes = WORS_U_SpellBook:HasRequiredRunes(spellData.runes)
+			if hasRunes then
+				icon:SetVertexColor(1, 1, 1) -- Can cast: Normal icon
+				-- Backpack open logic for spells like hi alch
+				if spellData.openInv then
+					spellButton:SetScript("PostClick", function()
+						ToggleBackpack()
+					end)
+				end
+			else				
+				icon:SetVertexColor(0.25, 0.25, 0.25) -- No runes: Gray
+				--icon:SetVertexColor(1, 0.03, 0.03) -- No runes: Red 
+			end
+		end
+        -- Set up secure attributes for spell button
         spellButton:SetAttribute("type", "spell")
         spellButton:SetAttribute("spell", spellID)
-
-        -- Tooltip
-        spellButton:SetScript("OnEnter", function(self)
-            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+		
+        spellButton:SetScript("OnEnter", function()
+            GameTooltip:SetOwner(spellButton, "ANCHOR_RIGHT")
             GameTooltip:SetSpellByID(spellID)
             GameTooltip:Show()
         end)
-        spellButton:SetScript("OnLeave", GameTooltip_Hide)
-
+        spellButton:SetScript("OnLeave", function()
+            GameTooltip:Hide()
+        end)
         table.insert(magicButtons, spellButton)
     end
-
     LoadTransparency()
 end
-
 
 -- Event used to check if magic run requirments are met
 local eventFrame = CreateFrame("Frame")
@@ -130,7 +121,6 @@ end)
 -- Function to update the button's background color
 local function UpdateButtonBackground()
     if WORS_U_SpellBook.frame:IsShown() then
-		
 		SpellbookMicroButton:GetNormalTexture():SetVertexColor(1, 0, 0) -- Set the color to red
 	else
 		SpellbookMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color to red
