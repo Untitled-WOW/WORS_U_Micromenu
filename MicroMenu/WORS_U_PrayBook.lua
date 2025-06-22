@@ -40,33 +40,66 @@ closeButton:SetScript("OnClick", function()
 end)
 
 -- Micro button highlight update
-local function UpdateButtonBackground()
-    if WORS_U_PrayBook.frame:IsShown() then
-        PrayerMicroButton:GetNormalTexture():SetVertexColor(1, 0, 0)
+function UpdatePrayMicroButtonBackground()
+    local prayerBookShown = WORS_U_PrayBookFrame and WORS_U_PrayBookFrame:IsShown()
+
+    -- Count how many of your custom frames are visible
+    local visibleCount = 0
+    for _, frame in ipairs(MicroMenu_Frames) do
+        if frame and frame:IsShown() then
+            visibleCount = visibleCount + 1
+        end
+    end
+	if Backpack and Backpack:IsShown() then
+		visibleCount = visibleCount + 1
+	end
+    local buttonTexture = PrayerMicroButton:GetNormalTexture()
+    if prayerBookShown then
+        if visibleCount == 1 then
+	        buttonTexture:SetVertexColor(1, 0, 0)  -- red = only frame open
+        else
+            buttonTexture:SetVertexColor(0, 1, 0)  -- green = stealth/preloaded
+        end
     else
-        PrayerMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1)
+        buttonTexture:SetVertexColor(1, 1, 1)      -- white = hidden
     end
 end
-WORS_U_PrayBook.frame:SetScript("OnShow", UpdateButtonBackground)
-WORS_U_PrayBook.frame:SetScript("OnHide", UpdateButtonBackground)
+
+
+WORS_U_PrayBook.frame:SetScript("OnShow", UpdatePrayMicroButtonBackground)
+WORS_U_PrayBook.frame:SetScript("OnHide", UpdatePrayMicroButtonBackground)
 
 -- PrayerMicroButton click handler
 local function OnPrayerClick(self)
     if IsShiftKeyDown() then
+		print("[PrayerMicro] Shift-click detected: Opening default spellbook")
         ToggleSpellBook(BOOKTYPE_SPELL)
     else
         if not InCombatLockdown() then
+			print("[PrayerMicro] Normal click detected: Preparing custom spellbook frame")
+			WORS_U_SpellBookFrame:Hide()
 			InitializeMagicPrayerLevels()
 			SetupPrayerButtons(-10, WORS_U_PrayBookFrame, prayerButtons)				
 			if WORS_U_MicroMenuSettings.showMagicandPrayer then
 				SetupMagicButtons(155, WORS_U_PrayBookFrame, magicButtons)
 			end
-			MicroMenu_ToggleFrame(WORS_U_PrayBook.frame)
-        elseif WORS_U_MicroMenuSettings.AutoCloseEnabled then
-            WORS_U_EmoteBookFrame:Hide()
+			
+			if not WORS_U_PrayBook.frame:IsShown() then
+				print("[PrayerMicro] Spellbook frame is hidden: Toggling it on")
+
+				MicroMenu_ToggleFrame(WORS_U_PrayBook.frame)
+			else
+                print("[PrayerMicro] Spellbook frame is already shown: No toggle")
+            end
+		end
+        if WORS_U_MicroMenuSettings.AutoCloseEnabled then
+            print("[PrayerMicro] In combat and AutoClose is enabled: Hiding other frames")
+			WORS_U_EmoteBookFrame:Hide()
             WORS_U_MusicPlayerFrame:Hide()
             CombatStylePanel:Hide()
             CloseBackpack()
+        else
+            print("[PrayerMicro] In combat and AutoClose is disabled: No action taken")
         end
     end
 end

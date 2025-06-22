@@ -88,6 +88,7 @@ function MicroMenu_ToggleFrame(targetFrame)
 
     -- ✅ Always update the button appearance after toggling
     UpdateSpellMicroButtonBackground()
+	UpdatePrayMicroButtonBackground()
 end
 
 
@@ -171,7 +172,7 @@ local function HookAFrames()
             AttachMicroButtonsTo(Backpack)
             if WORS_U_MicroMenuSettings.AutoCloseEnabled then
                 if not InCombatLockdown() then
-                    WORS_U_SpellBook.frame:Show()
+                    --WORS_U_SpellBook.frame:Show()
                     --WORS_U_PrayBook.frame:Hide()
                 end
                 WORS_U_EmoteBook.frame:Hide()
@@ -179,9 +180,11 @@ local function HookAFrames()
                 CombatStylePanel:Hide()
             end
 			UpdateSpellMicroButtonBackground()
+			UpdatePrayMicroButtonBackground()
         end)
 		Backpack:HookScript("OnHide", function()
 			UpdateSpellMicroButtonBackground()
+			UpdatePrayMicroButtonBackground()
         end)
         local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
         if pos then
@@ -202,21 +205,34 @@ local function HookAFrames()
             AttachMicroButtonsTo(CombatStylePanel)
             if WORS_U_MicroMenuSettings.AutoCloseEnabled then
                 if not InCombatLockdown() then
-                    WORS_U_SpellBook.frame:Show()
+                    --WORS_U_SpellBook.frame:Show()
                     --WORS_U_PrayBook.frame:Hide()
                 end
                 WORS_U_EmoteBook.frame:Hide()
                 WORS_U_MusicBook.musicPlayer:Hide()
                 CloseBackpack()
             end
-			UpdateSpellMicroButtonBackground()
+			--UpdateSpellMicroButtonBackground()
+			--UpdatePrayMicroButtonBackground()
         end)
 		CombatStylePanel:HookScript("OnHide", function()
-			UpdateSpellMicroButtonBackground()
+			--UpdateSpellMicroButtonBackground()
+			--UpdatePrayMicroButtonBackground()
         end)
 		-- Button click handlers
 		CombatStyleMicroButton:SetScript("OnClick", function()
-			MicroMenu_ToggleFrame(CombatStylePanel)
+			if not CombatStylePanel:IsShown() then
+				print("[CombatStylePanel] CombatStylePanel frame is hidden: Toggling it on")
+				WORS_U_EmoteBook.frame:Hide()
+                WORS_U_MusicBook.musicPlayer:Hide()
+                CloseBackpack()
+				CombatStylePanel:Show()				
+			else
+                print("[CombatStylePanel] CombatStylePanel frame is already shown: HIDE")
+				CombatStylePanel:Hide()	
+			end
+
+			
 		end)		
 		CombatStylePanel:SetFrameStrata("DIALOG")
 		CombatStylePanel:SetFrameLevel(50)		
@@ -273,6 +289,7 @@ local function HookMicroMenuButtonRestores()
 	end)	
 end
 
+
 -- Main initialization event
 local f = CreateFrame("Frame")
 f:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -282,19 +299,23 @@ f:SetScript("OnEvent", function(self, event)
             HookAFrames()
             HookMicroMenuFrames()
             HookMicroMenuButtonRestores()
-			
-			-- -- Safely hook OnDragStop without overwriting
-			-- MicroButtonContainer:SetScript("OnDragStop", function(self)
-				-- local parent = self:GetParent()
-				-- if parent then
-					-- -- Don't call parent:StopMovingOrSizing() if the original already does
-					-- -- Just call SaveFramePosition (once it's implemented)
-					-- if SaveFramePosition then
-						-- SaveFramePosition()
-					-- end
-				-- end
-			-- end)
-			
+			local spellbookTriggered = false
+			C_Timer.NewTicker(0.2, function(ticker)
+				if spellbookTriggered then
+					ticker:Cancel()
+					return
+				end
+				if not InCombatLockdown() then
+					print("[MagicMicro] Out of combat: Showing spellbook and opening backpack")
+					WORS_U_SpellBookFrame:Show()
+					SaveFramePosition(WORS_U_SpellBookFrame)
+					MainMenuBarBackpackButton:Click()
+					spellbookTriggered = true
+					ticker:Cancel()
+				else
+					print("[MagicMicro] Still in combat: Waiting...")
+				end
+			end)		
         end)
         self:UnregisterEvent("PLAYER_ENTERING_WORLD")
     end

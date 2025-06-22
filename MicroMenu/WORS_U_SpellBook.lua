@@ -72,25 +72,42 @@ WORS_U_SpellBook.frame:SetScript("OnShow", UpdateSpellMicroButtonBackground)
 WORS_U_SpellBook.frame:SetScript("OnHide", UpdateSpellMicroButtonBackground)
 
 -- Function to handle MagicMicroButton clicks
+-- Function to handle MagicMicroButton clicks
 local function OnMagicClick(self)
     if IsShiftKeyDown() then
-		ToggleSpellBook(BOOKTYPE_SPELL)
+        print("[MagicMicro] Shift-click detected: Opening default spellbook")
+        ToggleSpellBook(BOOKTYPE_SPELL)
     else
-        if not InCombatLockdown() then	
+        if not InCombatLockdown() then
+            print("[MagicMicro] Normal click detected: Preparing custom spellbook frame")
+            WORS_U_PrayBookFrame:Hide()
 			InitializeMagicPrayerLevels()
-			SetupMagicButtons(-10, WORS_U_SpellBookFrame, magicButtons)
-			if WORS_U_MicroMenuSettings.showMagicandPrayer then				
-				SetupPrayerButtons(155, WORS_U_SpellBookFrame, prayerButtons)		
-			end		
-			MicroMenu_ToggleFrame(WORS_U_SpellBook.frame)--:Show()
-		elseif WORS_U_MicroMenuSettings.AutoCloseEnabled then	
-			WORS_U_EmoteBookFrame:Hide()
-			WORS_U_MusicPlayerFrame:Hide()
-			CombatStylePanel:Hide()
-			CloseBackpack()
+            SetupMagicButtons(-10, WORS_U_SpellBookFrame, magicButtons)
+            if WORS_U_MicroMenuSettings.showMagicandPrayer then
+                print("[MagicMicro] Setting up prayer buttons")
+                SetupPrayerButtons(155, WORS_U_SpellBookFrame, prayerButtons)
+            end
+
+            if not WORS_U_SpellBook.frame:IsShown() then
+                print("[MagicMicro] Spellbook frame is hidden: Toggling it on")
+                MicroMenu_ToggleFrame(WORS_U_SpellBook.frame)
+            else
+                print("[MagicMicro] Spellbook frame is already shown: No toggle")
+            end
 		end
+        if WORS_U_MicroMenuSettings.AutoCloseEnabled then
+            print("[MagicMicro] In combat and AutoClose is enabled: Hiding other frames")
+            WORS_U_EmoteBookFrame:Hide()
+            WORS_U_MusicPlayerFrame:Hide()
+            CombatStylePanel:Hide()
+            CloseBackpack()
+        else
+            print("[MagicMicro] In combat and AutoClose is disabled: No action taken")
+        end
     end
 end
+
+
 
 
 
