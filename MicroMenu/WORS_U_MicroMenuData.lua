@@ -347,32 +347,32 @@ end
 
 function SaveFramePosition(self)
     print("|cff00ff00[MicroMenu Debug]|r SaveFramePosition for", self:GetName())
-
     if not WORS_U_MicroMenuSettings.AutoCloseEnabled then
-        print("|cff00ff00[MicroMenu Debug]|r AutoClose disabled, marking user-placed")
+        --print("|cff00ff00[MicroMenu Debug]|r AutoClose disabled, marking user-placed")
         for _, f in ipairs(MicroMenu_Frames) do f:SetUserPlaced(true) end
         if Backpack then Backpack:SetUserPlaced(true) end
+		if CombatStylePanel then CombatStylePanel:SetUserPlaced(true) end
+
         return
     end
-
     -- 1) raw anchor
     local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
     local relName = relativeTo and relativeTo:GetName() or "UIParent"
-    print(string.format("|cff00ff00[MicroMenu Debug]|r raw GetPoint: %s:SetPoint(%s, %s, %s, %.1f, %.1f)", self:GetName(), point, relName, relativePoint, xOfs, yOfs))
+    --print(string.format("|cff00ff00[MicroMenu Debug]|r raw GetPoint: %s:SetPoint(%s, %s, %s, %.1f, %.1f)", self:GetName(), point, relName, relativePoint, xOfs, yOfs))
     -- 2) persist
     WORS_U_MicroMenuSettings.MicroMenuPOS = {point = point, relativeTo = relName, relativePoint = relativePoint, xOfs = xOfs, yOfs = yOfs}
     local reference = _G[relName] or UIParent
 
     -- 3) two offset tables
     local bpOffsets = {
-        RIGHT       = { -6,  -25 }, TOPRIGHT    = { -6,    0 }, BOTTOMRIGHT = { -6,  -50 },
-        LEFT        = {  6,  -25 }, TOPLEFT     = {  6,    0 }, BOTTOMLEFT  = {  6,  -50 },
-        CENTER      = {  0,  -25 }, TOP         = {  0,    0 }, BOTTOM      = {  0,  -50 },
+        RIGHT       = { -6, -25 }, TOPRIGHT     = { -6, 0 }, BOTTOMRIGHT = { -6, -50 },
+        LEFT        = {  6, -25 }, TOPLEFT      = {  6, 0 }, BOTTOMLEFT  = {  6, -50 },
+        CENTER      = {  0, -25 }, TOP          = {  0, 0 }, BOTTOM      = {  0, -50 },
     }-- MM ofsets for when backpack is moved to apply to Micromenu frames but is not working atm
     local mmOffsets = {
-        RIGHT       = { 0, 0 }, TOPRIGHT    = { 0, 0 }, BOTTOMRIGHT = { 0, 0 },
-        LEFT        = { 0, 0 }, TOPLEFT     = { 0, 0 }, BOTTOMLEFT  = { 0, 0 },
-        CENTER      = { 0, 0 }, TOP         = { 0, 0 }, BOTTOM      = { 0, 0 },
+        RIGHT       = {  6, 25 },   TOPRIGHT    = {  6, 0 }, BOTTOMRIGHT = {  6, 50 },
+        LEFT        = { -6, 25 },   TOPLEFT     = { -6, 0 }, BOTTOMLEFT  = { -6, 50 },
+        CENTER      = {  0, 25 },   TOP         = {  0, 0 }, BOTTOM      = {  0, 50 },
     }
     local bpX, bpY = unpack(bpOffsets[relativePoint] or { xOfs, yOfs })
     local mmX, mmY = unpack(mmOffsets[relativePoint] or { xOfs, yOfs })
@@ -387,12 +387,33 @@ function SaveFramePosition(self)
             frame:SetUserPlaced(false)
         end
         print(string.format("|cff00ff00[MicroMenu Debug]|r Backpack remains: Backpack:SetPoint(%s, %s, %s, %.1f, %.1f)", point, relName, relativePoint, xOfs, yOfs))
-        Backpack:ClearAllPoints()
+        -- CombatStylePanel:ClearAllPoints()
+        -- CombatStylePanel:SetPoint(point, Backpack, relativePoint, fx, fy)
+        -- CombatStylePanel:SetUserPlaced(false)     
+		Backpack:ClearAllPoints()
         Backpack:SetPoint(point, reference, relativePoint, xOfs, yOfs)
         Backpack:SetUserPlaced(false)
         return
     --end
-
+    -- elseif self == CombatStylePanel then
+        -- for _, frame in ipairs(MicroMenu_Frames) do
+            -- local fx, fy = mmX, mmY
+            -- frame:ClearAllPoints()
+            -- frame:SetPoint(point, CombatStylePanel, relativePoint, fx, fy)
+            -- frame:SetUserPlaced(false)
+        -- end
+		-- if CombatStylePanel then
+			-- CombatStylePanel:ClearAllPoints()
+			-- CombatStylePanel:SetPoint(point, reference, relativePoint, xOfs, yOfs)
+			-- CombatStylePanel:SetUserPlaced(false)
+		-- end
+		-- local bx, by = xOfs + bpX, yOfs + bpY
+        -- if Backpack then
+			-- Backpack:ClearAllPoints()
+			-- Backpack:SetPoint(point, reference, relativePoint, bx, by)
+			-- Backpack:SetUserPlaced(false)
+		-- end
+        -- return
     -- 4b) you dragged a MicroMenu frame → snap peers raw, then move Backpack with bpOffsets
     else
         for _, frame in ipairs(MicroMenu_Frames) do
@@ -403,6 +424,11 @@ function SaveFramePosition(self)
                 frame:SetUserPlaced(false)
             end
         end
+		-- if CombatStylePanel then		
+			-- CombatStylePanel:ClearAllPoints()
+			-- CombatStylePanel:SetPoint(point, reference, relativePoint, xOfs, yOfs)
+			-- CombatStylePanel:SetUserPlaced(false)
+		-- end
         if Backpack then
             local bx, by = xOfs + bpX, yOfs + bpY
             print(string.format("|cff00ff00[MicroMenu Debug]|r positioning Backpack:SetPoint(%s, %s, %s, %.1f, %.1f)", point, relName, relativePoint, bx, by))
@@ -412,3 +438,111 @@ function SaveFramePosition(self)
         end
     end
 end
+
+-- function SaveFramePosition(self)
+    -- print("|cff00ff00[MicroMenu Debug]|r SaveFramePosition for", self:GetName())
+
+    -- -- If AutoClose is disabled, just mark everything user-placed
+    -- if not WORS_U_MicroMenuSettings.AutoCloseEnabled then
+        -- for _, f in ipairs(MicroMenu_Frames) do
+            -- f:SetUserPlaced(true)
+        -- end
+        -- if Backpack then Backpack:SetUserPlaced(true) end
+        -- if CombatStylePanel then CombatStylePanel:SetUserPlaced(true) end
+        -- return
+    -- end
+
+    -- -- 1) raw anchor data
+    -- local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
+    -- local relName = relativeTo and relativeTo:GetName() or "UIParent"
+    -- local reference = _G[relName] or UIParent
+
+    -- -- 2) persist to SavedVariables
+    -- WORS_U_MicroMenuSettings.MicroMenuPOS = {
+        -- point         = point,
+        -- relativeTo    = relName,
+        -- relativePoint = relativePoint,
+        -- xOfs          = xOfs,
+        -- yOfs          = yOfs,
+    -- }
+
+    -- -- 3) offset tables
+    -- local bpOffsets = {
+        -- RIGHT       = { -6, -25 }, TOPRIGHT     = { -6,   0 }, BOTTOMRIGHT = { -6, -50 },
+        -- LEFT        = {  6, -25 }, TOPLEFT      = {  6,   0 }, BOTTOMLEFT  = {  6, -50 },
+        -- CENTER      = {  0, -25 }, TOP          = {  0,   0 }, BOTTOM      = {  0, -50 },
+    -- }
+    -- local mmOffsets = {
+        -- RIGHT       = {  6,  25 }, TOPRIGHT     = {  6,   0 }, BOTTOMRIGHT = {  6,  50 },
+        -- LEFT        = { -6,  25 }, TOPLEFT      = { -6,   0 }, BOTTOMLEFT  = { -6,  50 },
+        -- CENTER      = {  0,  25 }, TOP          = {  0,   0 }, BOTTOM      = {  0,  50 },
+    -- }
+
+    -- local bpX, bpY = unpack(bpOffsets[relativePoint] or { xOfs, yOfs })
+    -- local mmX, mmY = unpack(mmOffsets[relativePoint] or { xOfs, yOfs })
+
+    -- -- 4a) Dragging the Backpack
+    -- if self == Backpack then
+        -- -- move all micro-menu frames + CombatStylePanel relative to Backpack
+        -- for _, frame in ipairs(MicroMenu_Frames) do
+            -- frame:ClearAllPoints()
+            -- frame:SetPoint(point, Backpack, relativePoint, mmX, mmY)
+            -- frame:SetUserPlaced(false)
+        -- end
+        -- if CombatStylePanel then
+            -- CombatStylePanel:ClearAllPoints()
+            -- CombatStylePanel:SetPoint(point, Backpack, relativePoint, mmX, mmY)
+            -- CombatStylePanel:SetUserPlaced(false)
+        -- end
+
+        -- -- then re-anchor Backpack itself to its reference
+        -- Backpack:ClearAllPoints()
+        -- Backpack:SetPoint(point, reference, relativePoint, xOfs, yOfs)
+        -- Backpack:SetUserPlaced(false)
+        -- return
+
+    -- -- 4b) Dragging the CombatStylePanel
+    -- elseif self == CombatStylePanel then
+        -- -- move all micro-menu frames relative to CombatStylePanel
+        -- for _, frame in ipairs(MicroMenu_Frames) do
+            -- frame:ClearAllPoints()
+            -- frame:SetPoint(point, CombatStylePanel, relativePoint, mmX, mmY)
+            -- frame:SetUserPlaced(false)
+        -- end
+        -- -- snap CombatStylePanel itself to its reference
+        -- CombatStylePanel:ClearAllPoints()
+        -- CombatStylePanel:SetPoint(point, reference, relativePoint, xOfs, yOfs)
+        -- CombatStylePanel:SetUserPlaced(false)
+
+        -- -- finally reposition Backpack with its offsets
+        -- if Backpack then
+            -- Backpack:ClearAllPoints()
+            -- Backpack:SetPoint(point, reference, relativePoint, xOfs + bpX, yOfs + bpY)
+            -- Backpack:SetUserPlaced(false)
+        -- end
+        -- return
+
+    -- -- 4c) Dragging any other MicroMenu frame
+    -- else
+        -- -- snap all peers to the raw point
+        -- for _, frame in ipairs(MicroMenu_Frames) do
+            -- if frame ~= self then
+                -- frame:ClearAllPoints()
+                -- frame:SetPoint(point, reference, relativePoint, xOfs, yOfs)
+                -- frame:SetUserPlaced(false)
+            -- end
+        -- end
+        -- -- include CombatStylePanel in the snap
+        -- if CombatStylePanel then
+            -- CombatStylePanel:ClearAllPoints()
+            -- CombatStylePanel:SetPoint(point, reference, relativePoint, xOfs, yOfs)
+            -- CombatStylePanel:SetUserPlaced(false)
+        -- end
+        -- -- offset Backpack accordingly
+        -- if Backpack then
+            -- Backpack:ClearAllPoints()
+            -- Backpack:SetPoint(point, reference, relativePoint, xOfs + bpX, yOfs + bpY)
+            -- Backpack:SetUserPlaced(false)
+        -- end
+    -- end
+-- end

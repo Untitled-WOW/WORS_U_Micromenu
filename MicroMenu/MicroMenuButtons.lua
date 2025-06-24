@@ -84,10 +84,10 @@ function AttachMicroButtonsTo(parentFrame)
     -- create or re-parent the container frame
     if not MicroButtonContainer then
         MicroButtonContainer = CreateFrame("Frame", "WORS_U_MicroButtonContainer", parentFrame)
-        MicroButtonContainer:SetSize(210, 425)
+        MicroButtonContainer:SetSize(210, 400)
         MicroButtonContainer:SetPoint("TOP", parentFrame, "TOP", 0, 50)
         MicroButtonContainer:SetBackdrop({
-            bgFile = "Interface\\AddOns\\MicroMenu\\Textures\\MenuBG_Test_256x512CROP.tga"
+			bgFile = "Interface\\AddOns\\MicroMenu\\Textures\\MenuBG_Test_256x512CROP - Copy.tga"
         })
         MicroButtonContainer:SetBackdropColor(1, 1, 1, 1)
 		MicroButtonContainer:SetMovable(true)
@@ -104,8 +104,6 @@ function AttachMicroButtonsTo(parentFrame)
 			local parent = self:GetParent()
 			if parent then
 				parent:StopMovingOrSizing()		
-
-				print("SaveFramePosition true")
 				SaveFramePosition(parent)
 
 			end		
@@ -113,13 +111,13 @@ function AttachMicroButtonsTo(parentFrame)
     else
         MicroButtonContainer:SetParent(parentFrame)
         MicroButtonContainer:ClearAllPoints()
-        MicroButtonContainer:SetPoint("TOP", parentFrame, "TOP", 0, 50)
+        MicroButtonContainer:SetPoint("TOP", parentFrame, "TOP", 0, 40)
         MicroButtonContainer:Show()
     end
 
     -- attach each row of micro buttons
-    AttachMicroRow(microButtonsRow1, "TOP", -10)
-    AttachMicroRow(microButtonsRow2, "BOTTOM", 10)
+    AttachMicroRow(microButtonsRow1, "TOP", 0)
+    AttachMicroRow(microButtonsRow2, "BOTTOM", -8)
 
     -- if we're on the CombatStyle panel, bump its strata/level above the background
     if isStylePanel then
@@ -146,7 +144,7 @@ function RestoreMicroButtonsFromMicroMenu()
     for _, frame in ipairs(candidateFrames) do
         if frame and frame:IsShown() then
             targetFrame = frame
-            print("Debug: Frame is shown:", frame:GetName())
+            --print("Debug: Frame is shown:", frame:GetName())
             break
         end
     end
@@ -154,22 +152,22 @@ function RestoreMicroButtonsFromMicroMenu()
 
 
     if targetFrame then
-        print("Debug: Attaching micro buttons to", targetFrame:GetName())
+        --print("Debug: Attaching micro buttons to", targetFrame:GetName())
         AttachMicroButtonsTo(targetFrame)
     else
         -- Restore to original UI positions
         for _, btn in ipairs(microButtonsRow1) do
             safeRestore(btn, microBackup[tostring(btn)])
-            print("Debug: Restoring micro button from row 1:", btn:GetName())
+            --print("Debug: Restoring micro button from row 1:", btn:GetName())
         end
         for _, btn in ipairs(microButtonsRow2) do
             safeRestore(btn, microBackup[tostring(btn)])
-            print("Debug: Restoring micro button from row 2:", btn:GetName())
+            --print("Debug: Restoring micro button from row 2:", btn:GetName())
         end
 
         if MicroButtonContainer then
             MicroButtonContainer:Hide()
-            print("Debug: MicroButtonContainer hidden.")
+            --print("Debug: MicroButtonContainer hidden.")
         end
     end
 end

@@ -94,81 +94,22 @@ end
 
 
 
-local function SaveFramePosition(self)
-    print("|cff00ff00[MicroMenu Debug]|r SaveFramePosition for", self:GetName())
-
-    if not WORS_U_MicroMenuSettings.AutoCloseEnabled then
-        print("|cff00ff00[MicroMenu Debug]|r AutoClose disabled, marking user-placed")
-        for _, f in ipairs(MicroMenu_Frames) do f:SetUserPlaced(true) end
-        if Backpack then Backpack:SetUserPlaced(true) end
-        return
-    end
-
-    -- 1) raw anchor
-    local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
-    local relName = relativeTo and relativeTo:GetName() or "UIParent"
-    print(string.format("|cff00ff00[MicroMenu Debug]|r raw GetPoint: %s:SetPoint(%s, %s, %s, %.1f, %.1f)", self:GetName(), point, relName, relativePoint, xOfs, yOfs))
-    -- 2) persist
-    WORS_U_MicroMenuSettings.MicroMenuPOS = {point = point, relativeTo = relName, relativePoint = relativePoint, xOfs = xOfs, yOfs = yOfs}
-    local reference = _G[relName] or UIParent
-
-    -- 3) two offset tables
-    local bpOffsets = {
-        RIGHT       = { -6,  -25 }, TOPRIGHT    = { -6,    0 }, BOTTOMRIGHT = { -6,  -50 },
-        LEFT        = {  6,  -25 }, TOPLEFT     = {  6,    0 }, BOTTOMLEFT  = {  6,  -50 },
-        CENTER      = {  0,  -25 }, TOP         = {  0,    0 }, BOTTOM      = {  0,  -50 },
-    }-- MM ofsets for when backpack is moved to apply to Micromenu frames but is not working atm
-    local mmOffsets = {
-        RIGHT       = { 0, 0 }, TOPRIGHT    = { 0, 0 }, BOTTOMRIGHT = { 0, 0 },
-        LEFT        = { 0, 0 }, TOPLEFT     = { 0, 0 }, BOTTOMLEFT  = { 0, 0 },
-        CENTER      = { 0, 0 }, TOP         = { 0, 0 }, BOTTOM      = { 0, 0 },
-    }
-    local bpX, bpY = unpack(bpOffsets[relativePoint] or { xOfs, yOfs })
-    local mmX, mmY = unpack(mmOffsets[relativePoint] or { xOfs, yOfs })
-
-    -- 4a) you dragged the Backpack → move all micro-menu frames with mmOffsets
-    if self == Backpack then
-        for _, frame in ipairs(MicroMenu_Frames) do
-            local fx, fy = mmX, mmY
-            print(string.format("|cff00ff00[MicroMenu Debug]|r moving %s relative to Backpack: %s:SetPoint(%s, Backpack, %s, %.1f, %.1f)", frame:GetName(), frame:GetName(), point, relativePoint, fx, fy))
-            frame:ClearAllPoints()
-            frame:SetPoint(point, Backpack, relativePoint, fx, fy)
-            frame:SetUserPlaced(false)
-        end
-        print(string.format("|cff00ff00[MicroMenu Debug]|r Backpack remains: Backpack:SetPoint(%s, %s, %s, %.1f, %.1f)", point, relName, relativePoint, xOfs, yOfs))
-        Backpack:ClearAllPoints()
-        Backpack:SetPoint(point, reference, relativePoint, xOfs, yOfs)
-        Backpack:SetUserPlaced(false)
-        return
-    --end
-
-    -- 4b) you dragged a MicroMenu frame → snap peers raw, then move Backpack with bpOffsets
-    else
-        for _, frame in ipairs(MicroMenu_Frames) do
-            if frame ~= self then
-                print(string.format("|cff00ff00[MicroMenu Debug]|r snapping %s:SetPoint(%s, %s, %s, %.1f, %.1f)", frame:GetName(), point, relName, relativePoint, xOfs, yOfs))
-                frame:ClearAllPoints()
-                frame:SetPoint(point, reference, relativePoint, xOfs, yOfs)
-                frame:SetUserPlaced(false)
-            end
-        end
-        if Backpack then
-            local bx, by = xOfs + bpX, yOfs + bpY
-            print(string.format("|cff00ff00[MicroMenu Debug]|r positioning Backpack:SetPoint(%s, %s, %s, %.1f, %.1f)", point, relName, relativePoint, bx, by))
-            Backpack:ClearAllPoints()
-            Backpack:SetPoint(point, reference, relativePoint, bx, by)
-            Backpack:SetUserPlaced(false)
-        end
-    end
-end
-
 
 
 -- Hook Blizzard frames to hide micro-menu on show
 local function HookAFrames()
     if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
     if Backpack then
-        Backpack:HookScript("OnShow", function()
+        local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
+        if pos then
+            local ref = pos.relativeTo and _G[pos.relativeTo] or UIParent
+            Backpack:ClearAllPoints()
+            Backpack:SetPoint(pos.point, ref, pos.relativePoint, pos.xOfs, pos.yOfs)
+            Backpack:SetUserPlaced(false)
+        end
+		Backpack:SetWidth( Backpack:GetWidth() +  12 )
+
+		Backpack:HookScript("OnShow", function()
             AttachMicroButtonsTo(Backpack)
             if WORS_U_MicroMenuSettings.AutoCloseEnabled then
                 if not InCombatLockdown() then
@@ -181,19 +122,15 @@ local function HookAFrames()
             end
 			UpdateSpellMicroButtonBackground()
 			UpdatePrayMicroButtonBackground()
+			
         end)
+		
 		Backpack:HookScript("OnHide", function()
 			RestoreMicroButtonsFromMicroMenu()
 			UpdateSpellMicroButtonBackground()
 			UpdatePrayMicroButtonBackground()
         end)
-        local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
-        if pos then
-            local ref = pos.relativeTo and _G[pos.relativeTo] or UIParent
-            Backpack:ClearAllPoints()
-            Backpack:SetPoint(pos.point, ref, pos.relativePoint, pos.xOfs, pos.yOfs)
-            Backpack:SetUserPlaced(false)
-        end
+		
 		hooksecurefunc(Backpack, "OnDragStart", function(self)
 			if InCombatLockdown() then return end
 			WORS_U_SpellBook.frame:Hide()
@@ -203,15 +140,25 @@ local function HookAFrames()
 		hooksecurefunc(Backpack, "StopMovingOrSizing", function(self)
 			-- only run if AutoClose is on
 			if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
-			print("|cff00ff00[MicroMenu Debug]|r Backpack drag ended, saving position")
+			--print("|cff00ff00[MicroMenu Debug]|r Backpack drag ended, saving position")
 			SaveFramePosition(self)
 			if InCombatLockdown() then return end
 			WORS_U_SpellBook.frame:Show()
-			
 		end)	
     end
     if CombatStylePanel then
-        CombatStylePanel:HookScript("OnShow", function()
+        local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
+        if pos then
+            local ref = pos.relativeTo and _G[pos.relativeTo] or UIParent
+            CombatStylePanel:ClearAllPoints()
+            CombatStylePanel:SetPoint(pos.point, ref, pos.relativePoint, pos.xOfs, pos.yOfs)
+            CombatStylePanel:SetUserPlaced(false)
+        end		
+		-- 1) Hide combatstylebg 
+
+		for _, r in ipairs({CombatStylePanel:GetRegions()}) do if r:GetObjectType()=="Texture" then r:Hide() end end
+
+		CombatStylePanel:HookScript("OnShow", function()
             AttachMicroButtonsTo(CombatStylePanel)
             if WORS_U_MicroMenuSettings.AutoCloseEnabled then
                 if not InCombatLockdown() then
@@ -222,40 +169,65 @@ local function HookAFrames()
                 WORS_U_MusicBook.musicPlayer:Hide()
                 CloseBackpack()
             end
-			--UpdateSpellMicroButtonBackground()
-			--UpdatePrayMicroButtonBackground()
         end)
 		CombatStylePanel:HookScript("OnHide", function()
 			RestoreMicroButtonsFromMicroMenu()
-			--UpdateSpellMicroButtonBackground()
-			--UpdatePrayMicroButtonBackground()
-        end)
+			UpdateSpellMicroButtonBackground()
+			UpdatePrayMicroButtonBackground()
+
+        end)		
+
+		
+		
+		CombatStylePanel:HookScript("OnDragStart", function(self)
+			if InCombatLockdown() then return end
+			WORS_U_SpellBookFrame:Hide()
+			WORS_U_PrayBookFrame:Hide()
+		end)
+
+		CombatStylePanel:HookScript("OnDragStop", function(self)
+			if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
+			if InCombatLockdown() then return end
+			SaveFramePosition(self)
+			--WORS_U_SpellBookFrame:Show()
+			
+		end)
+		
+		
+		
+		-- hooksecurefunc(CombatStylePanel, "OnDragStart", function(self)
+			-- if InCombatLockdown() then return end
+			-- WORS_U_SpellBook.frame:Hide()
+			-- WORS_U_PrayBook.frame:Hide()
+		-- end)
+		
+		-- hooksecurefunc(CombatStylePanel, "StopMovingOrSizing", function(self)
+			-- -- only run if AutoClose is on
+			-- if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
+			-- --print("|cff00ff00[MicroMenu Debug]|r CombatStylePanel drag ended, saving position")
+			-- SaveFramePosition(self)
+			-- if InCombatLockdown() then return end
+			-- --WORS_U_SpellBook.frame:Show()
+		-- end)	
+		
+		
+		
 		-- Button click handlers
 		CombatStyleMicroButton:SetScript("OnClick", function()
 			if not CombatStylePanel:IsShown() then
-				print("[CombatStylePanel] CombatStylePanel frame is hidden: Toggling it on")
+				--print("[CombatStylePanel] CombatStylePanel frame is hidden: Toggling it on")
 				WORS_U_EmoteBook.frame:Hide()
                 WORS_U_MusicBook.musicPlayer:Hide()
                 CloseBackpack()
 				CombatStylePanel:Show()				
 			else
-                print("[CombatStylePanel] CombatStylePanel frame is already shown: HIDE")
+                --print("[CombatStylePanel] CombatStylePanel frame is already shown: HIDE")
 				CombatStylePanel:Hide()	
-			end
-
-			
-		end)		
-		CombatStylePanel:SetFrameStrata("DIALOG")
-		CombatStylePanel:SetFrameLevel(50)		
-        local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
-        if pos then
-            local ref = pos.relativeTo and _G[pos.relativeTo] or UIParent
-            CombatStylePanel:ClearAllPoints()
-            CombatStylePanel:SetPoint(pos.point, ref, pos.relativePoint, pos.xOfs, pos.yOfs)
-            CombatStylePanel:SetUserPlaced(false)
-        end
+			end			
+		end)	
     end
-    if not Backpack and not CombatStylePanel then
+    
+	if not Backpack and not CombatStylePanel then
         C_Timer.After(0.1, HookAFrames)
     end
 end
@@ -271,10 +243,10 @@ local function HookMicroMenuFrames()
 
     for _, frame in ipairs(MicroMenu_Frames) do
         if frame then
-            frame:HookScript("OnDragStop", SaveFramePosition)
+
 
             -- Skip hiding logic for SpellBook and PrayBook themselves
-            if frame ~= WORS_U_SpellBookFrame and frame ~= WORS_U_PrayBookFrame then
+            if frame ~= WORS_U_SpellBookFrame and frame ~= WORS_U_PrayBookFrame and frame ~= CombatStylePanel then
 				
 				----- this and hooks comments not working
 				frame:HookScript("OnDragStart", function(self)
@@ -287,21 +259,8 @@ local function HookMicroMenuFrames()
 					if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
 					if InCombatLockdown() then return end
 					WORS_U_SpellBookFrame:Show()
-					WORS_U_PrayBookFrame:Show()
+					
 				end)
-
-                -- hooksecurefunc(frame, "OnDragStart", function(self)
-					-- if InCombatLockdown() then return end
-					-- WORS_U_SpellBook.frame:Hide()
-					-- WORS_U_PrayBook.frame:Hide()
-				-- end)				
-				
-				-- hooksecurefunc(frame, "StopMovingOrSizing", function(self)
-                    -- if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
-                    -- SaveFramePosition(self)
-                    -- if InCombatLockdown() then return end
-                    -- WORS_U_SpellBook.frame:Show()
-                -- end)
             end
         end
     end
@@ -331,7 +290,7 @@ local function HookMicroMenuButtonRestores()
 			end)
 			hookedBackpack = true
 			ticker:Cancel()
-			print("|cff00ff00[MicroMenu]|r Backpack.Show/Hide hooked!")
+			--print("|cff00ff00[MicroMenu]|r Backpack.Show/Hide hooked!")
 		end
 	end)	
 end
@@ -355,9 +314,7 @@ f:SetScript("OnEvent", function(self, event)
 				if not InCombatLockdown() then
 					print("[MagicMicro] Out of combat: Showing spellbook and opening backpack")
 					WORS_U_SpellBookFrame:Show()
-					SaveFramePosition(WORS_U_SpellBookFrame)
-					
-					
+					SaveFramePosition(WORS_U_SpellBookFrame)					
 					InventoryMicroButton:Click()
 					spellbookTriggered = true
 					ticker:Cancel()
