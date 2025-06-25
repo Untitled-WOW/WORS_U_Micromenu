@@ -11,6 +11,15 @@ WORS_U_SpellBook.frame:SetBackdrop({
     tile = false, tileSize = 32, edgeSize = 32,
     insets = { left = 5, right = 5, top = 5, bottom = 5 }
 })
+local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
+if pos then
+	local rel = pos.relativeTo and _G[pos.relativeTo] or UIParent
+	WORS_U_SpellBook.frame:SetPoint(
+		pos.point, rel, pos.relativePoint, pos.xOfs, pos.yOfs
+	)
+else
+	WORS_U_SpellBook.frame:SetPoint("CENTER")
+end
 WORS_U_SpellBook.frame:SetFrameStrata("High")
 WORS_U_SpellBook.frame:SetFrameLevel(10)
 WORS_U_SpellBook.frame:Hide()
@@ -157,12 +166,14 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
     elseif event == "PLAYER_REGEN_ENABLED" or event == "BAG_UPDATE_COOLDOWN" then
         -- combat just ended (or cooldown info arrived): do any deferred refresh
         if needsRefresh then
-            needsRefresh = false
 			print("spell needsRefresh set false")
-            if WORS_U_SpellBook.frame:IsShown() and not Backpack:IsShown() then
-                refreshMagicFrame()
+            if WORS_U_SpellBook.frame:IsShown() and not InCombatLockdown() then
+                print("refreshMagicFrame")
+				refreshMagicFrame()
+				needsRefresh = false
             end
         end
+		
     end
 end)
 

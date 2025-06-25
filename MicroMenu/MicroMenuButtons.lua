@@ -88,7 +88,9 @@ function AttachMicroButtonsTo(parentFrame)
         MicroButtonContainer:SetPoint("TOP", parentFrame, "TOP", 0, 50)
         MicroButtonContainer:SetBackdrop({
 			bgFile = "Interface\\AddOns\\MicroMenu\\Textures\\MenuBG_Test_256x512CROP - Copy.tga"
-        })
+			--bgFile = "Interface\\AddOns\\MicroMenu\\Textures\\tga_output\\1_Yes_emote_icon.tga",
+
+		})
         MicroButtonContainer:SetBackdropColor(1, 1, 1, 1)
 		MicroButtonContainer:SetMovable(true)
 		MicroButtonContainer:EnableMouse(true)

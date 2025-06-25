@@ -92,10 +92,6 @@ function MicroMenu_ToggleFrame(targetFrame)
 end
 
 
-
-
-
-
 -- Hook Blizzard frames to hide micro-menu on show
 local function HookAFrames()
     if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
@@ -107,7 +103,7 @@ local function HookAFrames()
             Backpack:SetPoint(pos.point, ref, pos.relativePoint, pos.xOfs, pos.yOfs)
             Backpack:SetUserPlaced(false)
         end
-		Backpack:SetWidth( Backpack:GetWidth() +  12 )
+		--Backpack:SetWidth( Backpack:GetWidth() +  12 )
 
 		Backpack:HookScript("OnShow", function()
             AttachMicroButtonsTo(Backpack)

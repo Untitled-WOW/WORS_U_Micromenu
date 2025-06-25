@@ -12,7 +12,17 @@ WORS_U_MusicBook.musicPlayer:SetMovable(true)
 WORS_U_MusicBook.musicPlayer:EnableMouse(true)
 WORS_U_MusicBook.musicPlayer:RegisterForDrag("LeftButton")
 WORS_U_MusicBook.musicPlayer:SetClampedToScreen(true)
-tinsert(UISpecialFrames, "WORS_U_MusicPlayerFrame")
+local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
+if pos then
+	local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
+	WORS_U_MusicBook.musicPlayer:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
+else
+	WORS_U_MusicBook.musicPlayer:SetPoint("CENTER")
+end	
+
+
+
+
 WORS_U_MusicBook.musicPlayer:SetScript("OnDragStart", function(self) self:StartMoving() end)
 WORS_U_MusicBook.musicPlayer:SetScript("OnDragStop", function(self)
     self:StopMovingOrSizing()
@@ -120,7 +130,7 @@ local function CreateMusicButtons()
 
 
 end
-CreateMusicButtons()
+--CreateMusicButtons()
 
 -- Update background color based on visibility
 local function UpdateButtonBackground()
@@ -133,19 +143,26 @@ end
 WORS_U_MusicBook.musicPlayer:SetScript("OnShow", UpdateButtonBackground)
 WORS_U_MusicBook.musicPlayer:SetScript("OnHide", UpdateButtonBackground)
 
--- Toggle function 
-local function OnMusicClick(self)
-	local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
-	if pos then
-		local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
-		WORS_U_MusicBook.musicPlayer:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
-	else
-		WORS_U_MusicBook.musicPlayer:SetPoint("CENTER")
-	end	
-	MicroMenu_ToggleFrame(WORS_U_MusicBook.musicPlayer)--:Show()   
+-- -- Toggle function 
+-- local function OnMusicClick(self)
+	-- local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
+	-- if pos then
+		-- local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
+		-- WORS_U_MusicBook.musicPlayer:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
+	-- else
+		-- WORS_U_MusicBook.musicPlayer:SetPoint("CENTER")
+	-- end	
+	-- MicroMenu_ToggleFrame(WORS_U_MusicBook.musicPlayer)--:Show()   
+-- end
 
 
+
+local function OnMusicClick(self)	
+	CreateMusicButtons()
+	MicroMenu_ToggleFrame(WORS_U_MusicBook.musicPlayer)--:Show()
+	
 end
+
 MusicMicroButton:SetScript("OnClick", OnMusicClick)
 MusicMicroButton:HookScript("OnEnter", function(self)
     if GameTooltip:IsOwned(self) then

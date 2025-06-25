@@ -129,7 +129,8 @@ local eventFrame = CreateFrame("Frame")
 eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 eventFrame:RegisterEvent("BAG_UPDATE")
 eventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
-eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")     -- fires on combat end
+eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+eventFrame:RegisterEvent("BAG_UPDATE_COOLDOWN")    -- fires when you leave combat
 
 eventFrame:SetScript("OnEvent", function(self, event, ...)
     if not positioned then
@@ -164,16 +165,16 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
 			print("prayer needsRefresh set true")
 		end
 
-    elseif event == "PLAYER_REGEN_ENABLED" then
+    elseif event == "PLAYER_REGEN_ENABLED" or event == "BAG_UPDATE_COOLDOWN" then
         -- combat just ended (or cooldown info arrived): do any deferred refresh
-        if needsRefresh then
-            needsRefresh = false
-			print("prayer needsRefresh set false")
-
-            if WORS_U_PrayBook.frame:IsShown() and not Backpack:IsShown() then
-                refreshPrayerFrame()
-            end
-        end
+        if needsRefresh then            
+			print("pray needsRefresh set false")
+            if WORS_U_PrayBook.frame:IsShown() and not InCombatLockdown() then
+                print("refreshprayFrame")
+				refreshPrayerFrame()
+				needsRefresh = false
+            end			
+        end		
     end
 end)
 
