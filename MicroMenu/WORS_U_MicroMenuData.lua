@@ -359,7 +359,7 @@ experienceTable = {
 function GetLevelFromFactionReputation(factionID)
     local _, _, _, _, _, repValue = GetFactionInfoByID(factionID)
     if not repValue then
-        print("|cff00ff00MicroMenu: |r" .. "|cffff0000Error Message Untitled: |r" .. "|cff00ff00 GetFactionInfoByIDFaction Failed. factionID: ", factionID, " not found.|r")
+        print("|cff00ff00MicroMenu: |r" .. "|cffff0000Error D1 Message Untitled: |r" .. "|cff00ff00 GetFactionInfoByIDFaction Failed. factionID: ", factionID, " not found.|r")
         return 1
     end
     local adjustedXP = repValue - 43000

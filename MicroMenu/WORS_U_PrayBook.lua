@@ -78,35 +78,40 @@ WORS_U_PrayBook.frame:SetScript("OnHide", UpdatePrayMicroButtonBackground)
 local function OnPrayerClick(self)
     if IsShiftKeyDown() then
 		--print("[PrayerMicro] Shift-click detected: Opening default spellbook")
-        ToggleSpellBook(BOOKTYPE_SPELL)
-    else
-        if not InCombatLockdown() then
-			--print("[PrayerMicro] Normal click detected: Preparing custom spellbook frame")
-			WORS_U_SpellBookFrame:Hide()
-			InitializeMagicPrayerLevels()
-			SetupPrayerButtons(-8, -5, WORS_U_PrayBookFrame, prayerButtons)				
-			if WORS_U_MicroMenuSettings.showMagicandPrayer then
-				SetupMagicButtons(-8, 160, WORS_U_PrayBookFrame, magicButtons)
-			end
-			
-			if not WORS_U_PrayBook.frame:IsShown() then
-				--print("[PrayerMicro] Spellbook frame is hidden: Toggling it on")
-
-				MicroMenu_ToggleFrame(WORS_U_PrayBook.frame)
-			else
-                --print("[PrayerMicro] Spellbook frame is already shown: No toggle")
-            end
+        --ToggleSpellBook(BOOKTYPE_SPELL)
+	end
+	
+	if not InCombatLockdown() then
+		--print("[PrayerMicro] Normal click detected: Preparing custom spellbook frame")
+		WORS_U_SpellBookFrame:Hide()
+		InitializeMagicPrayerLevels()
+		SetupPrayerButtons(-8, -5, WORS_U_PrayBookFrame, prayerButtons)				
+		if WORS_U_MicroMenuSettings.showMagicandPrayer then
+			SetupMagicButtons(-8, 160, WORS_U_PrayBookFrame, magicButtons)
 		end
-        if WORS_U_MicroMenuSettings.AutoCloseEnabled then
-            --print("[PrayerMicro] In combat and AutoClose is enabled: Hiding other frames")
-			WORS_U_EmoteBookFrame:Hide()
-            WORS_U_MusicPlayerFrame:Hide()
-            CombatStylePanel:Hide()
-            CloseBackpack()
-        else
-            --print("[PrayerMicro] In combat and AutoClose is disabled: No action taken")
-        end
-    end
+		
+		if not WORS_U_PrayBook.frame:IsShown() then
+			--print("[PrayerMicro] Spellbook frame is hidden: Toggling it on")
+			MicroMenu_ToggleFrame(WORS_U_PrayBook.frame)
+		else
+			--print("[MagicMicro] Spellbook frame is already shown: No toggle")
+		end
+	else			
+		if not WORS_U_SpellBookFrame:IsShown() and not WORS_U_PrayBook.frame:IsShown() then
+			print("|cff00ff00MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
+		end			
+	end
+
+	if WORS_U_MicroMenuSettings.AutoCloseEnabled then
+		--print("[PrayerMicro] In combat and AutoClose is enabled: Hiding other frames")
+		WORS_U_EmoteBookFrame:Hide()
+		WORS_U_MusicPlayerFrame:Hide()
+		CombatStylePanel:Hide()
+		CloseBackpack()
+	else
+		--print("[PrayerMicro] In combat and AutoClose is disabled: No action taken")
+	end
+
 end
 
 local function refreshPrayerFrame()
@@ -177,7 +182,9 @@ end)
 PrayerMicroButton:SetScript("OnClick", OnPrayerClick)
 PrayerMicroButton:HookScript("OnEnter", function(self)
     if GameTooltip:IsOwned(self) then
-        GameTooltip:AddLine("Shift + Click to open WOW Spellbook.", 1, 1, 0, true)
-        GameTooltip:Show()
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")    -- anchor the tooltip below the button
+		GameTooltip:SetText("Prayer", 1, 1, 1, 1, true) -- white text, wrap if needed
+		GameTooltip:AddLine("Open Prayer menu for spells, to open WOW Prayer book ui click Spellbook & Abilities", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
+		GameTooltip:Show()
     end
 end)

@@ -1,8 +1,30 @@
 -- WORS_U_MicroMenuButtons.lua
 local MicroButtonContainer = nil
 local microBackup = {}
-local microButtonsRow1TOP = 	{CombatStyleMicroButton, SkillsMicroButton, QuestsMicroButton, InventoryMicroButton, CharacterMicroButton, PrayerMicroButton, SpellbookMicroButton}
-local microButtonsRow2BOTTOM = 	{SocialMicroButton, IgnoreMicroButton, AchievementsMicroButton, GameMenuMicroButton, CompanionsMicroButton, EmotesMicroButton, MusicMicroButton}
+
+-- 1) Create a new micro-menu-style button by inheriting WORS template
+U_SpellMicroMenuButton = CreateFrame("Button", "U_SpellBookMicroButtonCopy", SpellbookMicroButton:GetParent(), "MicroMenuButtonTemplate", 1)
+U_SpellMicroMenuButton:ClearAllPoints()
+U_SpellMicroMenuButton.Icon:SetTexture("Interface\\Icons\\magicicon")
+U_SpellMicroMenuButton.Icon:ClearAllPoints()
+U_SpellMicroMenuButton.Icon:SetPoint("CENTER", 0, 0)
+U_SpellMicroMenuButton.Icon:SetSize(24, 24)
+U_SpellMicroMenuButton.Icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+U_SpellMicroMenuButton:SetFrameStrata("MEDIUM")	-- 3) (Optional) tweak strata/level so it doesn’t sit under something else
+U_SpellMicroMenuButton:SetFrameLevel(SpellbookMicroButton:GetFrameLevel())
+
+U_SpellMicroMenuButton:HookScript("OnEnter", function(self)
+    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")    -- anchor the tooltip below the button
+    GameTooltip:SetText("Magic", 1, 1, 1, 1, true) -- white text, wrap if needed
+	GameTooltip:AddLine("Open Magic menu for spells, to open WOW spell book ui click Spellbook & Abilities", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
+    GameTooltip:Show()
+end)
+
+-- local microButtonsRow1TOP = 	{CombatStyleMicroButton, SkillsMicroButton, QuestsMicroButton, InventoryMicroButton, CharacterMicroButton, PrayerMicroButton, SpellbookMicroButton}
+-- local microButtonsRow2BOTTOM = 	{SocialMicroButton, IgnoreMicroButton, AchievementsMicroButton, GameMenuMicroButton, CompanionsMicroButton, EmotesMicroButton, MusicMicroButton}
+
+local microButtonsRow1TOP = 	{CombatStyleMicroButton, SkillsMicroButton, QuestsMicroButton, InventoryMicroButton, CharacterMicroButton, PrayerMicroButton, U_SpellBookMicroButtonCopy}
+local microButtonsRow2BOTTOM = 	{SpellbookMicroButton, SocialMicroButton, IgnoreMicroButton, AchievementsMicroButton, GameMenuMicroButton, CompanionsMicroButton, EmotesMicroButton, MusicMicroButton}
 
 -- function to take backup a micromenu button default location
 local function safeBackup(btn)
@@ -42,8 +64,9 @@ local function BackupOriginalMicroButtonPositions()
     end
 end
 
+
 -- function to attach micromenu button rows to a frame
-local function AttachMicroRow(buttons, anchorPoint, yOffset)
+local function AttachMicroRow(buttons, anchorPoint, xOffset, yOffset)
     local spacing = 30
     local validButtons = {}
 
@@ -63,13 +86,13 @@ local function AttachMicroRow(buttons, anchorPoint, yOffset)
         end
         btn:SetParent(MicroButtonContainer)
         btn:ClearAllPoints()
-        local x = startX + (i - 1) * spacing
-        btn:SetPoint(anchorPoint, MicroButtonContainer, anchorPoint, x, yOffset)
+        -- compute x including the new xOffset
+        local x = startX + (i - 1) * spacing + (xOffset or 0)
+        btn:SetPoint(anchorPoint, MicroButtonContainer, anchorPoint, x, yOffset or 0)
     end
 end
 
 -- function to attach micromenu button rows to a frame
-
 function AttachMicroButtonsTo(parentFrame)
     if not parentFrame then return end
     -- determine if this is the CombatStyle panel
@@ -82,34 +105,9 @@ function AttachMicroButtonsTo(parentFrame)
         MicroButtonContainer:SetSize(210, 400)
         MicroButtonContainer:SetPoint("TOP", parentFrame, "TOP", 0, 50)
         MicroButtonContainer:SetBackdrop({
-			bgFile = "Interface\\AddOns\\MicroMenu\\Textures\\MenuBG_Test_256x512CROP - Copy.tga"
+			bgFile = "Interface\\AddOns\\MicroMenu\\Textures\\MicroMenuBG_256x512.tga"
 		})
         MicroButtonContainer:SetBackdropColor(1, 1, 1, 1)
-		-- MicroButtonContainer:SetMovable(true)
-		-- MicroButtonContainer:EnableMouse(true)
-		-- MicroButtonContainer:RegisterForDrag("LeftButton")
-		-- MicroButtonContainer:SetClampedToScreen(true)	
-		
-		-- MicroButtonContainer:SetScript("OnDragStart", function(self) 			
-			-- local parent = self:GetParent()
-			-- if parent then
-				-- parent:StartMoving()
-			-- end
-			-- if InCombatLockdown() then return end
-			-- WORS_U_SpellBookFrame:Hide()
-			-- WORS_U_PrayBookFrame:Hide()
-		-- end)
-		
-		-- MicroButtonContainer:SetScript("OnDragStop", function(self)
-			-- local parent = self:GetParent()
-			-- if parent then
-				-- parent:StopMovingOrSizing()		
-				-- SaveFramePosition(parent)
-			-- end	
-			-- if InCombatLockdown() then return end
-			-- WORS_U_SpellBookFrame:Show()
-			-- parent:Show		
-		-- end)		
     else
         MicroButtonContainer:SetParent(parentFrame)
         MicroButtonContainer:ClearAllPoints()
@@ -118,8 +116,9 @@ function AttachMicroButtonsTo(parentFrame)
     end
 	
     -- attach each row of micro buttons
-    AttachMicroRow(microButtonsRow1TOP, "TOP", 0)
-    AttachMicroRow(microButtonsRow2BOTTOM, "BOTTOM", -8)
+	-- remove -16 x offset on row 2 if going back to 7 buttons top and 7 buttons bottom
+    AttachMicroRow(microButtonsRow1TOP, "TOP", 0, 0)
+    AttachMicroRow(microButtonsRow2BOTTOM, "BOTTOM", -16, -8)
 
     -- if we're on the CombatStyle panel, bump its strata/level
     if isCombatStylePannel then
@@ -134,33 +133,62 @@ function AttachMicroButtonsTo(parentFrame)
     end
 end
 
--- function to restore micromenu buttons checks is another frame is open and will atach to it or restore buttons to default
+-- helper: lay out a row of buttons on *any* container frame
+local function AttachRowToContainer(buttons, container, anchorPoint, xOffset, yOffset)
+    local spacing = 30
+    local valid = {}
+    for _, btn in ipairs(buttons) do
+        if btn and btn:IsObjectType("Button") then
+            table.insert(valid, btn)
+        end
+    end
+    local totalW = spacing * (#valid - 1)
+    local startX = -(totalW / 2)
+    for i, btn in ipairs(valid) do
+        btn:SetParent(container)
+        btn:ClearAllPoints()
+        local x = startX + (i - 1) * spacing + (xOffset or 0)
+        btn:SetPoint(anchorPoint, container, anchorPoint, x, yOffset or 0)
+    end
+end
+
+
 function RestoreMicroButtonsFromMicroMenu()
-    local candidateFrames = {WORS_U_SpellBookFrame, WORS_U_PrayBookFrame, WORS_U_EmoteBookFrame, WORS_U_MusicPlayerFrame, CombatStylePanel, Backpack}
-    -- Find the topmost visible frame
-    local targetFrame = nil
-    for _, frame in ipairs(candidateFrames) do
-        if frame and frame:IsShown() then
-            targetFrame = frame
-            --print("Debug: Frame is shown:", frame:GetName())
+    local candidateFrames = {
+      WORS_U_SpellBookFrame, WORS_U_PrayBookFrame,
+      WORS_U_EmoteBookFrame, WORS_U_MusicPlayerFrame,
+      CombatStylePanel, Backpack
+    }
+    local target = nil
+    for _, f in ipairs(candidateFrames) do
+        if f and f:IsShown() then
+            target = f
             break
         end
     end
-    if targetFrame then
-        AttachMicroButtonsTo(targetFrame)
+
+    if target then
+        -- panel is open → use your container & rows as before
+        AttachMicroButtonsTo(target)
+
     else
-        -- Restore to original UI positions
-        for _, btn in ipairs(microButtonsRow1TOP) do
-            safeRestore(btn, microBackup[tostring(btn)])
-        end
-        for _, btn in ipairs(microButtonsRow2BOTTOM) do
-            safeRestore(btn, microBackup[tostring(btn)])
-        end
+        -- default view → hide your special container
         if MicroButtonContainer then
             MicroButtonContainer:Hide()
         end
+
+        -- find the Blizzard‐original parent of the first top‐row button:
+        -- (we backed that up at login)
+        local backup = microBackup[tostring(microButtonsRow1TOP[1])]
+        local origParent = backup and backup.parent or UIParent
+
+        -- but in your custom order
+		-- remove 16 variation if going back to 7 buttons top and 7 buttons bottom
+        AttachRowToContainer(microButtonsRow1TOP,    UIParent, "BOTTOMRIGHT", -134, 35)
+        AttachRowToContainer(microButtonsRow2BOTTOM, UIParent, "BOTTOMRIGHT", -150, 0)
     end
 end
+
 
 -- Initialize backups after entering the world
 local f = CreateFrame("Frame")

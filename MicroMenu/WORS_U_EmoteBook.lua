@@ -176,7 +176,23 @@ WORS_U_EmoteBook.frame:SetScript("OnHide", UpdateButtonBackground)
 -- function to replace EmotesMicroButton on click
 local function OnEmoteClick(self)	
 	SetupEmoteButtons(-8, -10)
-	MicroMenu_ToggleFrame(WORS_U_EmoteBook.frame)--:Show()
+	if not InCombatLockdown() then
+		MicroMenu_ToggleFrame(WORS_U_EmoteBook.frame)--:Show()
+	elseif not WORS_U_PrayBook.frame:IsShown() then
+		--print("[PrayerMicro] Spellbook frame is hidden: Toggling it on")
+		WORS_U_EmoteBook.frame:Show()
+		AttachMicroButtonsTo(WORS_U_EmoteBook.frame)
+	else
+		WORS_U_EmoteBook.frame:Hide()
+	end
+	if WORS_U_MicroMenuSettings.AutoCloseEnabled then
+	--print("[PrayerMicro] In combat and AutoClose is enabled: Hiding other frames")
+	WORS_U_MusicPlayerFrame:Hide()
+	CombatStylePanel:Hide()
+	CloseBackpack()
+	else
+		--print("[PrayerMicro] In combat and AutoClose is disabled: No action taken")
+	end
 end
 
 EmotesMicroButton:SetScript("OnClick", OnEmoteClick)
@@ -202,12 +218,3 @@ for _, emoteData in ipairs(WORS_U_EmoteBook.emotes) do
         end
     end
 end
-
--- local custom_emotes = {"_joy","_goblinbow","_goblinsalute","_glassbox","_lean","_flap","_slaphead","_zombiewalk","_zombiedance","_rabbithop","_pushup","_starjump","_zombiehand","_hypermobiledrinker","_airguitar","_smoothdance","_crazydance","_premiershield","_fortissalute"}
-
--- for _, cmd in ipairs(custom_emotes) do
-    -- local slash = cmd:sub(2)
-    -- local slashUpper = slash:upper()
-    -- _G["SLASH_"..slashUpper.."1"] = "/"..slash
-    -- SlashCmdList[slashUpper] = function(msg) SendChatMessage(cmd, "SAY") end
--- end

@@ -1,7 +1,6 @@
 local magicButtons = {}
 local prayerButtons = {}
 
-
 -- Create the main frame for the custom spell book
 WORS_U_SpellBook.frame = CreateFrame("Frame", "WORS_U_SpellBookFrame", UIParent)
 WORS_U_SpellBook.frame:SetSize(180, 330)
@@ -52,7 +51,6 @@ end)
 
 function UpdateSpellMicroButtonBackground()
     local spellBookShown = WORS_U_SpellBookFrame and WORS_U_SpellBookFrame:IsShown()
-
     -- Count how many of your custom frames are visible
     local visibleCount = 0
     for _, frame in ipairs(MicroMenu_Frames) do
@@ -63,7 +61,7 @@ function UpdateSpellMicroButtonBackground()
 	if Backpack and Backpack:IsShown() then
 		visibleCount = visibleCount + 1
 	end
-    local buttonTexture = SpellbookMicroButton:GetNormalTexture()
+    local buttonTexture = U_SpellBookMicroButtonCopy:GetNormalTexture()
 
     if spellBookShown then
         if visibleCount == 1 then
@@ -81,47 +79,49 @@ WORS_U_SpellBook.frame:SetScript("OnHide", UpdateSpellMicroButtonBackground)
 
 -- Function to handle MagicMicroButton clicks
 local function OnMagicClick(self)
-    if IsShiftKeyDown() then
+    if IsShiftKeyDown() then -- not used preserving original spell book icon to open WOW spell book ui now using U_SpellBookMicroButtonCopy /
         --print("[MagicMicro] Shift-click detected: Opening default spellbook")
-        ToggleSpellBook(BOOKTYPE_SPELL)
-    else
-        if not InCombatLockdown() then
-            --print("[MagicMicro] Normal click detected: Preparing custom spellbook frame")
-            WORS_U_PrayBookFrame:Hide()
-			InitializeMagicPrayerLevels()
-            SetupMagicButtons(-8, -5, WORS_U_SpellBookFrame, magicButtons)
-            if WORS_U_MicroMenuSettings.showMagicandPrayer then
-                --print("[MagicMicro] Setting up prayer buttons")
-                SetupPrayerButtons(-8, 160, WORS_U_SpellBookFrame, prayerButtons)
-            end
-
-            if not WORS_U_SpellBook.frame:IsShown() then
-                --print("[MagicMicro] Spellbook frame is hidden: Toggling it on")
-                MicroMenu_ToggleFrame(WORS_U_SpellBook.frame)
-            else
-                --print("[MagicMicro] Spellbook frame is already shown: No toggle")
-            end
+        --ToggleSpellBook(BOOKTYPE_SPELL)
+	end
+	if not InCombatLockdown() then
+		--print("[MagicMicro] Normal click detected: Preparing custom spellbook frame")
+		WORS_U_PrayBookFrame:Hide()
+		InitializeMagicPrayerLevels()
+		SetupMagicButtons(-8, -5, WORS_U_SpellBookFrame, magicButtons)
+		if WORS_U_MicroMenuSettings.showMagicandPrayer then
+			SetupPrayerButtons(-8, 160, WORS_U_SpellBookFrame, prayerButtons)
 		end
-        if WORS_U_MicroMenuSettings.AutoCloseEnabled then
-            --print("[MagicMicro] In combat and AutoClose is enabled: Hiding other frames")
-            WORS_U_EmoteBookFrame:Hide()
-            WORS_U_MusicPlayerFrame:Hide()
-            CombatStylePanel:Hide()
-            CloseBackpack()
-        else
-            --print("[MagicMicro] In combat and AutoClose is disabled: No action taken")
-        end
-    end
+
+		if not WORS_U_SpellBook.frame:IsShown() then
+			--print("[MagicMicro] Spellbook frame is hidden: Toggling it on")
+			MicroMenu_ToggleFrame(WORS_U_SpellBook.frame)
+		else
+			--print("[MagicMicro] Spellbook frame is already shown: No toggle")
+		end
+	else
+		if not WORS_U_SpellBook.frame:IsShown() and not WORS_U_PrayBookFrame:IsShown()then
+			print("|cff00ff00MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
+		end		
+	end
+	
+	if WORS_U_MicroMenuSettings.AutoCloseEnabled then
+		--print("[MagicMicro] In combat and AutoClose is enabled: Hiding other frames")
+		WORS_U_EmoteBookFrame:Hide()
+		WORS_U_MusicPlayerFrame:Hide()
+		CombatStylePanel:Hide()
+		CloseBackpack()
+	else
+		--print("[MagicMicro] In combat and AutoClose is disabled: No action taken")
+	end
 end
 
-SpellbookMicroButton:SetScript("OnClick", OnMagicClick)
+--SpellbookMicroButton:SetScript("OnClick", OnMagicClick)
 SpellbookMicroButton:HookScript("OnEnter", function(self)
     if GameTooltip:IsOwned(self) then
         GameTooltip:AddLine("Shift + Click to open WOW Spellbook.", 1, 1, 0, true)
         GameTooltip:Show()
     end
 end)
-
 
 local function refreshMagicFrame()
     InitializeMagicPrayerLevels()
@@ -184,11 +184,12 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
 				refreshMagicFrame()
 				needsRefresh = false
             end
-        end
-		
+        end		
     end
 end)
 
 
 
 
+-- 5) Attach your own OnClick handler, leaving the original completely intact
+U_SpellMicroMenuButton:SetScript("OnClick", OnMagicClick)

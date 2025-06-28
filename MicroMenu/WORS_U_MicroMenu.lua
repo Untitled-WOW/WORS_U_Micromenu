@@ -145,16 +145,13 @@ local function HookAFrames()
             CombatStylePanel:SetPoint(pos.point, ref, pos.relativePoint, pos.xOfs, pos.yOfs)
             CombatStylePanel:SetUserPlaced(false)
         end		
-		-- 1) Hide combatstylebg 
+		-- 1) Hide combatstylebg one line for loop
 		for _, r in ipairs({CombatStylePanel:GetRegions()}) do if r:GetObjectType()=="Texture" then r:Hide() end end
-
 
 		CombatStylePanel:SetFrameStrata("HIGH")
 		CombatStylePanel:SetFrameLevel(50)
 		CombatStylePanel:Raise()
-		CombatStylePanel:SetSize(180, 330)
-		
-		
+		CombatStylePanel:SetSize(180, 330)		
 
 		-- Hock onShow to auto close Micromenu and Backpack
 		CombatStylePanel:HookScript("OnShow", function()
@@ -279,6 +276,8 @@ f:SetScript("OnEvent", function(self, event)
 					InventoryMicroButton:Click()
 					SaveFramePosition(Backpack)
 					WORS_U_SpellBookFrame:Show()
+					InventoryMicroButton:Click()
+					WORS_U_SpellBookFrame:Hide()
 					spellbookTriggered = true
 					ticker:Cancel()
 				else
@@ -313,7 +312,7 @@ local autoCloseEnabledCheckbox = CreateFrame("CheckButton", "MicroMenuAutoCloseE
 autoCloseEnabledCheckbox:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 10, -10)
 autoCloseEnabledCheckbox.text = autoCloseEnabledCheckbox:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
 autoCloseEnabledCheckbox.text:SetPoint("LEFT", autoCloseEnabledCheckbox, "RIGHT", 5, 0)
-autoCloseEnabledCheckbox.text:SetText("Enable Auto Close and Stacking of MicroMenu, Backpack and Combat Style Windows") -- Set the checkbox label
+autoCloseEnabledCheckbox.text:SetText("Enable Auto Close *Not recommended to change not tested much after recent changes likely to be removed*") -- Set the checkbox label
 autoCloseEnabledCheckbox:SetScript("OnShow", function(self)
     if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then
         self:SetChecked(true)

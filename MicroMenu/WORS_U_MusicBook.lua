@@ -69,7 +69,7 @@ function WORS_U_MusicBook:PlayTrack(track)
         self.currentTrack = track
         self.trackLabel:SetText("" .. track.name)
     else
-		print("|cff00ff00MicroMenu: |r" .. "|cffff0000Error Message Untitled: |r" .. "|cff00ff00Invalid track file path or track is nil.|r")
+		print("|cff00ff00MicroMenu: |r" .. "|cffff0000Error M1 Message Untitled: |r Track: " .. track .. "|cff00ff00Invalid track file path or track is nil.|r")
     end
 end
 
@@ -137,7 +137,21 @@ WORS_U_MusicBook.musicPlayer:SetScript("OnHide", UpdateButtonBackground)
 -- Update background color based on visibility
 local function OnMusicClick(self)	
 	CreateMusicButtons()
-	MicroMenu_ToggleFrame(WORS_U_MusicBook.musicPlayer)--:Show()
+	if not InCombatLockdown() then
+		MicroMenu_ToggleFrame(WORS_U_MusicBook.musicPlayer)--:Show()
+	elseif not WORS_U_MusicBook.musicPlayer:IsShown() then
+		WORS_U_MusicBook.musicPlayer:Show()
+		AttachMicroButtonsTo(WORS_U_MusicBook.musicPlayer)
+	else
+		WORS_U_MusicBook.musicPlayer:Hide()
+	end
+	if WORS_U_MicroMenuSettings.AutoCloseEnabled then
+	WORS_U_EmoteBookFrame:Hide()
+	CombatStylePanel:Hide()
+	CloseBackpack()
+	else
+	
+	end
 end
 
 MusicMicroButton:SetScript("OnClick", OnMusicClick)
