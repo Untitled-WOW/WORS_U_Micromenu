@@ -1,16 +1,15 @@
 -- Initialize MicroMenu saved variables
-WORS_U_MicroMenuSettings = WORS_U_MicroMenuSettings or {}
---WORS_U_MicroMenuSettings.transparency = WORS_U_MicroMenuSettings.transparency or 1
-WORS_U_MicroMenuSettings.AutoCloseEnabled = WORS_U_MicroMenuSettings.AutoCloseEnabled or true
-WORS_U_MicroMenuSettings.showMagicandPrayer = WORS_U_MicroMenuSettings.showMagicandPrayer or true
-WORS_U_MicroMenuSettings.MicroMenuPOS = WORS_U_MicroMenuSettings.MicroMenuPOS or {point = "CENTER", relativeTo = nil, relativePoint = "CENTER", xOfs = 0, yOfs = 0}
-
--- All MicroMenu frames and CombatStylePanel
-MicroMenu_Frames = {WORS_U_SpellBookFrame, WORS_U_PrayBookFrame, WORS_U_EmoteBookFrame, WORS_U_MusicPlayerFrame, CombatStylePanel}
+WORS_U_MicroMenuSettings = WORS_U_MicroMenuSettings or {
+    transparency = 1,  -- Default transparency value
+	AutoCloseEnabled = true,
+	MicroMenuPOS = { point = "CENTER", relativeTo = nil, relativePoint = "CENTER", xOfs = 0, yOfs = 0 },
+	showMagicandPrayer = true,
+}
 
 
--- WORS_U_SpellBook.lua Data
+
 WORS_U_SpellBook = {}
+-- WORS_U_SpellBook Data
 WORS_U_SpellBook.spells = {
     {level = 0,  name = "Lumbridge Home Teleport",     		id = 99561,  						icon = "Interface\\Icons\\hometele.blp"},
     {level = 1,  name = "Wind Strike",                 		id = 98952,  runes = {["Air Rune"]=1,["Mind Rune"]=1},                          icon = "Interface\\Icons\\windstrike.blp"},
@@ -97,7 +96,6 @@ WORS_U_SpellBook.spells = {
  -- {level = 105, name = "Fire Surge",                 		id = 79549,  runes = {["Fire Rune"]=10,["Death Rune"]=1},                      icon = "Interface\\Icons\\firesurge.blp"},
 }
 
--- rune and staff ids for spell colours
 WORS_U_SpellBook.runeInfo = {
     ["Air Rune"]    = { itemID = 90120, staffIDs = {90838, 90404} },
     ["Water Rune"]  = { itemID = 90107, staffIDs = {90837, 90533} },
@@ -114,13 +112,13 @@ WORS_U_SpellBook.runeInfo = {
     ["Soul Rune"]   = { itemID = 566, staffIDs = {} },
     ["Astral Rune"] = { itemID = 90123, staffIDs = {} },
     ["Wrath Rune"]  = { itemID = 90109, staffIDs = {} },
+	
 	["Bones"] = { itemID = 90039, staffIDs = {} },
 	--["Monkey Bones"] = { itemID = 90109, staffIDs = {} },
 	["Big Bones"] = { itemID = 90036, staffIDs = {} },
 	["Unpowered Orb"] = { itemID = 69420, staffIDs = {} },
 }
 
--- check if player has runes required to cast spell 
 function WORS_U_SpellBook:HasRequiredRunes(runeTable)
     if runeTable == nil then return true end
 	
@@ -129,7 +127,8 @@ function WORS_U_SpellBook:HasRequiredRunes(runeTable)
         if runeData then
             local hasRune = GetItemCount(runeData.itemID) >= count
             local hasStaff = false
-            -- Check main hand and offhand slot for items that give unlimited runes
+
+            -- Check main hand and offhand slots
             for _, slot in ipairs({16, 17}) do
                 local equippedID = GetInventoryItemID("player", slot)
                 if equippedID then
@@ -142,18 +141,20 @@ function WORS_U_SpellBook:HasRequiredRunes(runeTable)
                 end
                 if hasStaff then break end
             end
+
             if not hasRune and not hasStaff then
                 return false
             end
+
         else
-			--print("|cff00ff00MicroMenu: |r" .. "|cffff0000Error: |r" .. "|cff00ff00Missing rune data for:", runeName,"|r")
+			print("|cff00ff00MicroMenu: |r" .. "|cffff0000Error: |r" .. "|cff00ff00Missing rune data for:", runeName,"|r")
             return false
         end
     end
     return true
 end
 
--- WORS_U_PrayBook.lua Data
+-- WORS_U_PrayBook Data
 WORS_U_PrayBook = {}  -- Create the main table for the PrayBook
 WORS_U_PrayBook.prayers = {
     {level=1,  id=79502,  icon="Interface\\Icons\\thickskin.blp",             buffIcon="Interface\\Icons\\active_thickskin.blp"},           -- Thick Skin
@@ -179,67 +180,75 @@ WORS_U_PrayBook.prayers = {
     {level=45, id=79515,  icon="Interface\\Icons\\mysticmight.blp",          buffIcon="Interface\\Icons\\active_mysticmight.blp"}          -- Mystic Might
 }
 
--- WORS_U_EmoteBook.lua Data
+
 WORS_U_EmoteBook = {}
 WORS_U_EmoteBook.emotes = {
-    { name = "Yes",   		    	--[[using wow]]	command = "nod",   				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\1_Yes_emote_icon.tga" },
-    { name = "No",    		    	--[[using wow]]	command = "no",    				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\2_No_emote_icon.tga" },
-    { name = "Bow",   		    	--[[using wow]]	command = "Bow",   				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\3_Bow_emote_icon.tga" },
-    { name = "Angry", 		    	--[[using wow]]	command = "angry", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\4_Angry_emote_icon.tga" },
-    { name = "Think",		    	--[[using wow]]	command = "think", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\5_Think_emote_icon.tga" },
-    { name = "Wave",		    	--[[using wow]]	command = "wave",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\6_Wave_emote_icon.tga" },
-    { name = "Shrug",		    	--[[using wow]]	command = "shrug", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\7_Shrug_emote_icon.tga" },
-    { name = "Cheer",		    	--[[using wow]]	command = "cheer", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\8_Cheer_emote_icon.tga" },
-    { name = "Beckon",		    	--[[using wow]]	command = "beckon",				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\9_Beckon_emote_icon.tga" },
-    { name = "Laugh", 		    	--[[using wow]]	command = "laugh", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\10_Laugh_emote_icon.tga" },
-    { name = "Joy",        			--[[*_custom*]]	command = "_joy",				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\11_Jump_for_Joy_emote_icon.tga" },
-    { name = "Yawn", 		    	--[[using wow]]	command = "Yawn",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\12_Yawn_emote_icon.tga" },
-    { name = "Dance", 		    	--[[using wow]]	command = "dance", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\13_Dance_emote_icon.tga" },
-    { name = "Shake", 		    	--[[using wow]]	command = "shake", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\14_Jig_emote_icon.tga" },
-    { name = "Tease", 		    	--[[using wow]]	command = "tease", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\15_Spin_emote_icon.tga" },
-    { name = "Bonk",  		    	--[[using wow]]	command = "Bonk",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\16_Headbang_emote_icon.tga" },
-    { name = "Cry",   		    	--[[using wow]]	command = "cry",   				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\17_Cry_emote_icon.tga" },
-    { name = "Blow",  		    	--[[using wow]]	command = "kiss",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\18_Blow_Kiss_emote_icon.tga" },
-    { name = "Panic", 		    	--[[using wow]]	command = "panic", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\19_Panic_emote_icon.tga" },
-    { name = "Fart",  		    	--[[using wow]]	command = "fart", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\20_Raspberry_emote_icon.tga" },
-    { name = "Clap",  		    	--[[using wow]]	command = "clap",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\21_Clap_emote_icon.tga" },
-    { name = "Salute",		    	--[[using wow]]	command = "salute",				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\22_Salute_emote_icon.tga" },
-	{ name = "Goblin Bow", 			--[[*_custom*]]	command = "_goblinbow", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\23_Goblin_Bow_emote_icon.tga" },
-    { name = "Goblin Salute",		--[[*_custom*]]	command = "_goblinsalute", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\24_Goblin_Salute_emote_icon.tga" },
-	{ name = "Glass Box",  			--[[*_custom*]]	command = "_glassbox", 			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\25_Glass_Box_emote_icon.tga" },
-    { name = "Climb Rope",							command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\26_Climb_Rope_emote_icon.tga" },
-    { name = "Lean",	   			--[[*_custom*]]	command = "_lean", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\27_Lean_emote_icon.tga" },
-    { name = "Glass Wall",							command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\28_Glass_Wall_emote_icon.tga" },
-	{ name = "Idea",								command = "",					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\29_Idea_emote_icon.tga" },
-    { name = "Stamp",								command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\30_Stamp_emote_icon.tga" },
-    { name = "Flap",	    		--[[*_custom*]]	command = "_flap", 			 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\31_Flap_emote_icon.tga" },
-    { name = "Slap Head",    		--[[*_custom*]]	command = "_slaphead",			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\32_Slap_Head_emote_icon.tga" },
-	{ name = "Zombie Walk",  		--[[*_custom*]]	command = "_zombiewalk", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\33_Zombie_Walk_emote_icon.tga" },
-    { name = "Zombie Dance",		--[[*_custom*]]	command = "_zombiedance", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\34_Zombie_Dance_emote_icon.tga" },
-    { name = "Scared",				--[[using wow]]	command = "scared",				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\35_Scared_emote_icon.tga" },
-    { name = "Rabbit Hop", 			--[[*_custom]] 	command = "_rabbithop",			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\36_Rabbit_Hop_emote_icon.tga" },
-    { name = "Sit Up",								command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\37_Sit_up_emote_icon.tga" },
-    { name = "Push Up",				--[[*_custom*]]	command = "_pushup", 			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\38_Push_up_emote_icon.tga" },
-    { name = "Star Jump",			--[[*_custom*]]	command = "_starjump", 			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\39_Star_jump_emote_icon.tga" },
-    { name = "Jog",									command = "",					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\40_Jog_emote_icon.tga" },
-    { name = "Flex",            	--[[using wow]] command = "flex", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\41_Flex_emote_icon.tga" },
-    { name = "Zombie Hand",			--[[*_custom*]]	command = "_zombiehand", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\42_Zombie_Hand_emote_icon.tga" },
-    { name = "Hypermobile Drinker",	--[[*_custom*]]	command = "_hypermobiledrinker",icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\43_Hypermobile_Drinker_emote_icon.tga" },
-    { name = "Skill Cape",  						command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\44_Skill_Cape_emote_icon.tga" },
-    { name = "Air Guitar",  		--[[*_custom*]]	command = "_airguitar", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\45_Air_Guitar_emote_icon.tga" },
-    { name = "Uri Transform",     					command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\46_Uri_transform_emote_icon.tga" },
-    { name = "Smooth Dance", 		--[[*_custom*]]	command = "_smoothdance",		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\47_Smooth_dance_emote_icon.tga" },
-    { name = "Crazy Dance",  		--[[*_custom*]]	command = "_crazydance",		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\48_Crazy_dance_emote_icon.tga" },
-    { name = "Premier Shield", 		--[[*_custom*]]	command = "_premiershield", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\49_Premier_Shield_emote_icon.tga" },
-    { name = "Explore",         	  				command = "",					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\50_Explore_emote_icon.tga" },
-    { name = "Relic Unlock",    	  				command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\51_Relic_unlock_emote_icon.tga" },
-    { name = "Party",           	  				command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\52_Party_emote_icon.tga" },
-    { name = "Trick",           	  				command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\53_Trick_emote_icon.tga" },
-    { name = "Fortis Salute",		--[[*_custom*]]	command = "_fortissalute", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\54_Fortis_Salute_emote_icon.tga" },
-    { name = "Sit Down",  			--[[using wow]]	command = "sit", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\55_Sit_down_emote_icon.tga" },
+    { name = "Yes",   				command = "nod",   	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\1_Yes_emote_icon.tga" },
+    { name = "No",    				command = "no",    	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\2_No_emote_icon.tga" },
+    { name = "Bow",   				command = "Bow",   	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\3_Bow_emote_icon.tga" },
+    { name = "Angry", 				command = "angry", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\4_Angry_emote_icon.tga" },
+    { name = "Think",				command = "think", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\5_Think_emote_icon.tga" },
+    { name = "Wave",				command = "wave",  	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\6_Wave_emote_icon.tga" },
+    { name = "Shrug",				command = "shrug", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\7_Shrug_emote_icon.tga" },
+    { name = "Cheer",				command = "cheer", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\8_Cheer_emote_icon.tga" },
+    { name = "Beckon",				command = "beckon",	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\9_Beckon_emote_icon.tga" },
+    { name = "Laugh", 				command = "laugh", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\10_Laugh_emote_icon.tga" },
+    { name = "Joy",   				command = "Bounce",	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\11_Jump_for_Joy_emote_icon.tga" },
+    { name = "Yawn", 				command = "Yawn",  	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\12_Yawn_emote_icon.tga" },
+    { name = "Dance", 				command = "dance", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\13_Dance_emote_icon.tga" },
+    { name = "Shake", 				command = "shake", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\14_Jig_emote_icon.tga" },
+    { name = "Tease", 				command = "tease", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\15_Spin_emote_icon.tga" },
+    { name = "Bonk",  				command = "Bonk",  	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\16_Headbang_emote_icon.tga" },
+    { name = "Cry",   				command = "cry",   	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\17_Cry_emote_icon.tga" },
+    { name = "Blow",  				command = "kiss",  	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\18_Blow_Kiss_emote_icon.tga" },
+    { name = "Panic", 				command = "panic", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\19_Panic_emote_icon.tga" },
+    { name = "Fart",  				command = "fart", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\20_Raspberry_emote_icon.tga" },
+    { name = "Clap",  			   	command = "clap",  	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\21_Clap_emote_icon.tga" },
+    { name = "Salute",				command = "salute",	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\22_Salute_emote_icon.tga" },
+    { name = "Goblin Bow",			command = "bow", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\23_Goblin_Bow_emote_icon.tga" },
+    { name = "Goblin Salute",		command = "salute", icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\24_Goblin_Salute_emote_icon.tga" },
+    { name = "Glass Box",			command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\25_Glass_Box_emote_icon.tga" },
+    { name = "Climb Rope",			command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\26_Climb_Rope_emote_icon.tga" },
+    { name = "Lean",				command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\27_Lean_emote_icon.tga" },
+    { name = "Glass Wall",			command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\28_Glass_Wall_emote_icon.tga" },
+    { name = "Idea",				command = "idea",	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\29_Idea_emote_icon.tga" },
+    { name = "Stamp",				command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\30_Stamp_emote_icon.tga" },
+    { name = "Flap",				command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\31_Flap_emote_icon.tga" },
+    { name = "Slap Head",			command = "smack",	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\32_Slap_Head_emote_icon.tga" },
+    { name = "Zombie Walk",			command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\33_Zombie_Walk_emote_icon.tga" },
+    { name = "Zombie Dance",		command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\34_Zombie_Dance_emote_icon.tga" },
+    { name = "Scared",				command = "scared", icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\35_Scared_emote_icon.tga" },
+    { name = "Rabbit Hop",			command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\36_Rabbit_Hop_emote_icon.tga" },
+    { name = "Sit Up",				command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\37_Sit_up_emote_icon.tga" },
+    { name = "Push Up",				command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\38_Push_up_emote_icon.tga" },
+    { name = "Star Jump",			command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\39_Star_jump_emote_icon.tga" },
+    { name = "Jog",					command = "hurry",	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\40_Jog_emote_icon.tga" },
+    { name = "Flex",				command = "flex",	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\41_Flex_emote_icon.tga" },
+    { name = "Zombie Hand",			command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\42_Zombie_Hand_emote_icon.tga" },
+    { name = "Hypermobile Drinker",	command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\43_Hypermobile_Drinker_emote_icon.tga" },
+    { name = "Skill Cape",			command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\44_Skill_Cape_emote_icon.tga" },
+    { name = "Air Guitar",        	command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\45_Air_Guitar_emote_icon.tga" },
+    { name = "Uri Transform",     	command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\46_Uri_transform_emote_icon.tga" },
+    { name = "Smooth Dance",      	command = "dance", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\47_Smooth_dance_emote_icon.tga" },
+    { name = "Crazy Dance",       	command = "dance", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\48_Crazy_dance_emote_icon.tga" },
+    { name = "Premier Shield",    	command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\49_Premier_Shield_emote_icon.tga" },
+    { name = "Explore",           	command = "map",	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\50_Explore_emote_icon.tga" },
+    { name = "Relic Unlock",      	command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\51_Relic_unlock_emote_icon.tga" },
+    { name = "Party",             	command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\52_Party_emote_icon.tga" },
+    { name = "Trick",             	command = "", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\53_Trick_emote_icon.tga" },
+    { name = "Fortis Salute",     	command = "salute", icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\54_Fortis_Salute_emote_icon.tga" },
+    { name = "Sit Down",          	command = "sit", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\55_Sit_down_emote_icon.tga" },
 }
 
--- WORS_U_MusicBook.lua Data
+
+
+
+
+
+
+
+
+-- WORS_U_MusicBook Data
 WORS_U_MusicBook = {}
 WORS_U_MusicBook.currentTrack = nil
 WORS_U_MusicBook.tracks = {
@@ -250,6 +259,7 @@ WORS_U_MusicBook.tracks = {
 	{ name = "Runescape Theme", file = "Sound\\RuneScape\\Runescape_Theme.ogg" },
 	{ name = "Wilderness", 		file = "Sound\\RuneScape\\Wilderness.ogg" },
 	{ name = "Wilderness 2", 	file = "Sound\\RuneScape\\Wilderness_2.ogg" },
+
 }
 
 -- Experience Table used to calculate skills level from Reputaion
@@ -354,14 +364,14 @@ experienceTable = {
     [98] = 11805606,
     [99] = 13034431,
 }
-
 -- Function to GetLevelFromFactionReputation
 function GetLevelFromFactionReputation(factionID)
     local _, _, _, _, _, repValue = GetFactionInfoByID(factionID)
     if not repValue then
-        print("|cff00ff00MicroMenu: |r" .. "|cffff0000Error Message Untitled: |r" .. "|cff00ff00 GetFactionInfoByIDFaction Failed. factionID: ", factionID, " not found.|r")
+        print("|cff00ff00MicroMenu: |r" .. "|cffff0000Error: |r" .. "|cff00ff00Faction ID", factionID, "not found.|r")
         return 1
     end
+
     local adjustedXP = repValue - 43000
     for level = #experienceTable, 1, -1 do
         if adjustedXP >= experienceTable[level] then
@@ -371,46 +381,38 @@ function GetLevelFromFactionReputation(factionID)
     return 1
 end
 
--- function used to save frame postion of all frames when one is moved offsets used to adjust backpack / micro menu and combat style frames
+
+
+
 function SaveFramePosition(self)
+    print("|cff00ff00[MicroMenu Debug]|r SaveFramePosition for", self:GetName())
     if not WORS_U_MicroMenuSettings.AutoCloseEnabled then
+        --print("|cff00ff00[MicroMenu Debug]|r AutoClose disabled, marking user-placed")
         for _, f in ipairs(MicroMenu_Frames) do f:SetUserPlaced(true) end
         if Backpack then Backpack:SetUserPlaced(true) end
 		if CombatStylePanel then CombatStylePanel:SetUserPlaced(true) end
+
         return
     end
     -- 1) raw anchor
     local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
     local relName = relativeTo and relativeTo:GetName() or "UIParent"
-    
-	-- 2) persist
+    --print(string.format("|cff00ff00[MicroMenu Debug]|r raw GetPoint: %s:SetPoint(%s, %s, %s, %.1f, %.1f)", self:GetName(), point, relName, relativePoint, xOfs, yOfs))
+    -- 2) persist
     WORS_U_MicroMenuSettings.MicroMenuPOS = {point = point, relativeTo = relName, relativePoint = relativePoint, xOfs = xOfs, yOfs = yOfs}
     local reference = _G[relName] or UIParent
 
     -- 3) two offset tables
-    -- local bpOffsets = { -- bp ofsets for when Micromenu frames or combatstylepannel is moved to apply to backpack
-        -- RIGHT       = { -6, -25 }, TOPRIGHT     = { -6, 0 }, BOTTOMRIGHT = { -6, -50 },
-        -- LEFT        = {  6, -25 }, TOPLEFT      = {  6, 0 }, BOTTOMLEFT  = {  6, -50 },
-        -- CENTER      = {  0, -25 }, TOP          = {  0, 0 }, BOTTOM      = {  0, -50 },
-    -- }
-    -- local mmOffsets = { -- mm ofsets for when backpack is moved to apply to Micromenu frames
-        -- RIGHT       = {  6, 25 },   TOPRIGHT    = {  6, 0 }, BOTTOMRIGHT = {  6, 50 },
-        -- LEFT        = { -6, 25 },   TOPLEFT     = { -6, 0 }, BOTTOMLEFT  = { -6, 50 },
-        -- CENTER      = {  0, 25 },   TOP         = {  0, 0 }, BOTTOM      = {  0, 50 },
-    -- }
-	
-	-- 3) two offset tables
-    local bpOffsets = { -- bp ofsets for when Micromenu frames or combatstylepannel is moved to apply to backpack
-        RIGHT       = { 0, 0 }, TOPRIGHT     = { 0, 0 }, BOTTOMRIGHT = { 0, 0 },
-        LEFT        = { 0, 0 }, TOPLEFT      = { 0, 0 }, BOTTOMLEFT  = { 0, 0 },
-        CENTER      = { 0, 0 }, TOP          = { 0, 0 }, BOTTOM      = { 0, 0 },
+    local bpOffsets = {
+        RIGHT       = { -6, -25 }, TOPRIGHT     = { -6, 0 }, BOTTOMRIGHT = { -6, -50 },
+        LEFT        = {  6, -25 }, TOPLEFT      = {  6, 0 }, BOTTOMLEFT  = {  6, -50 },
+        CENTER      = {  0, -25 }, TOP          = {  0, 0 }, BOTTOM      = {  0, -50 },
+    }-- MM ofsets for when backpack is moved to apply to Micromenu frames but is not working atm
+    local mmOffsets = {
+        RIGHT       = {  6, 25 },   TOPRIGHT    = {  6, 0 }, BOTTOMRIGHT = {  6, 50 },
+        LEFT        = { -6, 25 },   TOPLEFT     = { -6, 0 }, BOTTOMLEFT  = { -6, 50 },
+        CENTER      = {  0, 25 },   TOP         = {  0, 0 }, BOTTOM      = {  0, 50 },
     }
-    local mmOffsets = { -- mm ofsets for when backpack is moved to apply to Micromenu frames
-        RIGHT       = { 0, 0 },   TOPRIGHT    = { 0, 0 }, BOTTOMRIGHT = { 0, 0 },
-        LEFT        = { 0, 0 },   TOPLEFT     = { 0, 0 }, BOTTOMLEFT  = { 0, 0 },
-        CENTER      = { 0, 0 },   TOP         = { 0, 0 }, BOTTOM      = { 0, 0 },
-    }
-	
     local bpX, bpY = unpack(bpOffsets[relativePoint] or { xOfs, yOfs })
     local mmX, mmY = unpack(mmOffsets[relativePoint] or { xOfs, yOfs })
 
@@ -418,29 +420,168 @@ function SaveFramePosition(self)
     if self == Backpack then
         for _, frame in ipairs(MicroMenu_Frames) do
             local fx, fy = mmX, mmY
+            print(string.format("|cff00ff00[MicroMenu Debug]|r moving %s relative to Backpack: %s:SetPoint(%s, Backpack, %s, %.1f, %.1f)", frame:GetName(), frame:GetName(), point, relativePoint, fx, fy))
             frame:ClearAllPoints()
             frame:SetPoint(point, Backpack, relativePoint, fx, fy)
             frame:SetUserPlaced(false)
         end
+        print(string.format("|cff00ff00[MicroMenu Debug]|r Backpack remains: Backpack:SetPoint(%s, %s, %s, %.1f, %.1f)", point, relName, relativePoint, xOfs, yOfs))
+        -- CombatStylePanel:ClearAllPoints()
+        -- CombatStylePanel:SetPoint(point, Backpack, relativePoint, fx, fy)
+        -- CombatStylePanel:SetUserPlaced(false)     
 		Backpack:ClearAllPoints()
         Backpack:SetPoint(point, reference, relativePoint, xOfs, yOfs)
         Backpack:SetUserPlaced(false)
         return
-    
-	-- 4b) you dragged a MicroMenu frame → snap peers raw, then move Backpack with bpOffsets
+    --end
+    -- elseif self == CombatStylePanel then
+        -- for _, frame in ipairs(MicroMenu_Frames) do
+            -- local fx, fy = mmX, mmY
+            -- frame:ClearAllPoints()
+            -- frame:SetPoint(point, CombatStylePanel, relativePoint, fx, fy)
+            -- frame:SetUserPlaced(false)
+        -- end
+		-- if CombatStylePanel then
+			-- CombatStylePanel:ClearAllPoints()
+			-- CombatStylePanel:SetPoint(point, reference, relativePoint, xOfs, yOfs)
+			-- CombatStylePanel:SetUserPlaced(false)
+		-- end
+		-- local bx, by = xOfs + bpX, yOfs + bpY
+        -- if Backpack then
+			-- Backpack:ClearAllPoints()
+			-- Backpack:SetPoint(point, reference, relativePoint, bx, by)
+			-- Backpack:SetUserPlaced(false)
+		-- end
+        -- return
+    -- 4b) you dragged a MicroMenu frame → snap peers raw, then move Backpack with bpOffsets
     else
         for _, frame in ipairs(MicroMenu_Frames) do
             if frame ~= self then
+                print(string.format("|cff00ff00[MicroMenu Debug]|r snapping %s:SetPoint(%s, %s, %s, %.1f, %.1f)", frame:GetName(), point, relName, relativePoint, xOfs, yOfs))
                 frame:ClearAllPoints()
                 frame:SetPoint(point, reference, relativePoint, xOfs, yOfs)
                 frame:SetUserPlaced(false)
             end
         end
+		-- if CombatStylePanel then		
+			-- CombatStylePanel:ClearAllPoints()
+			-- CombatStylePanel:SetPoint(point, reference, relativePoint, xOfs, yOfs)
+			-- CombatStylePanel:SetUserPlaced(false)
+		-- end
         if Backpack then
             local bx, by = xOfs + bpX, yOfs + bpY
+            print(string.format("|cff00ff00[MicroMenu Debug]|r positioning Backpack:SetPoint(%s, %s, %s, %.1f, %.1f)", point, relName, relativePoint, bx, by))
             Backpack:ClearAllPoints()
             Backpack:SetPoint(point, reference, relativePoint, bx, by)
             Backpack:SetUserPlaced(false)
         end
     end
 end
+
+-- function SaveFramePosition(self)
+    -- print("|cff00ff00[MicroMenu Debug]|r SaveFramePosition for", self:GetName())
+
+    -- -- If AutoClose is disabled, just mark everything user-placed
+    -- if not WORS_U_MicroMenuSettings.AutoCloseEnabled then
+        -- for _, f in ipairs(MicroMenu_Frames) do
+            -- f:SetUserPlaced(true)
+        -- end
+        -- if Backpack then Backpack:SetUserPlaced(true) end
+        -- if CombatStylePanel then CombatStylePanel:SetUserPlaced(true) end
+        -- return
+    -- end
+
+    -- -- 1) raw anchor data
+    -- local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
+    -- local relName = relativeTo and relativeTo:GetName() or "UIParent"
+    -- local reference = _G[relName] or UIParent
+
+    -- -- 2) persist to SavedVariables
+    -- WORS_U_MicroMenuSettings.MicroMenuPOS = {
+        -- point         = point,
+        -- relativeTo    = relName,
+        -- relativePoint = relativePoint,
+        -- xOfs          = xOfs,
+        -- yOfs          = yOfs,
+    -- }
+
+    -- -- 3) offset tables
+    -- local bpOffsets = {
+        -- RIGHT       = { -6, -25 }, TOPRIGHT     = { -6,   0 }, BOTTOMRIGHT = { -6, -50 },
+        -- LEFT        = {  6, -25 }, TOPLEFT      = {  6,   0 }, BOTTOMLEFT  = {  6, -50 },
+        -- CENTER      = {  0, -25 }, TOP          = {  0,   0 }, BOTTOM      = {  0, -50 },
+    -- }
+    -- local mmOffsets = {
+        -- RIGHT       = {  6,  25 }, TOPRIGHT     = {  6,   0 }, BOTTOMRIGHT = {  6,  50 },
+        -- LEFT        = { -6,  25 }, TOPLEFT      = { -6,   0 }, BOTTOMLEFT  = { -6,  50 },
+        -- CENTER      = {  0,  25 }, TOP          = {  0,   0 }, BOTTOM      = {  0,  50 },
+    -- }
+
+    -- local bpX, bpY = unpack(bpOffsets[relativePoint] or { xOfs, yOfs })
+    -- local mmX, mmY = unpack(mmOffsets[relativePoint] or { xOfs, yOfs })
+
+    -- -- 4a) Dragging the Backpack
+    -- if self == Backpack then
+        -- -- move all micro-menu frames + CombatStylePanel relative to Backpack
+        -- for _, frame in ipairs(MicroMenu_Frames) do
+            -- frame:ClearAllPoints()
+            -- frame:SetPoint(point, Backpack, relativePoint, mmX, mmY)
+            -- frame:SetUserPlaced(false)
+        -- end
+        -- if CombatStylePanel then
+            -- CombatStylePanel:ClearAllPoints()
+            -- CombatStylePanel:SetPoint(point, Backpack, relativePoint, mmX, mmY)
+            -- CombatStylePanel:SetUserPlaced(false)
+        -- end
+
+        -- -- then re-anchor Backpack itself to its reference
+        -- Backpack:ClearAllPoints()
+        -- Backpack:SetPoint(point, reference, relativePoint, xOfs, yOfs)
+        -- Backpack:SetUserPlaced(false)
+        -- return
+
+    -- -- 4b) Dragging the CombatStylePanel
+    -- elseif self == CombatStylePanel then
+        -- -- move all micro-menu frames relative to CombatStylePanel
+        -- for _, frame in ipairs(MicroMenu_Frames) do
+            -- frame:ClearAllPoints()
+            -- frame:SetPoint(point, CombatStylePanel, relativePoint, mmX, mmY)
+            -- frame:SetUserPlaced(false)
+        -- end
+        -- -- snap CombatStylePanel itself to its reference
+        -- CombatStylePanel:ClearAllPoints()
+        -- CombatStylePanel:SetPoint(point, reference, relativePoint, xOfs, yOfs)
+        -- CombatStylePanel:SetUserPlaced(false)
+
+        -- -- finally reposition Backpack with its offsets
+        -- if Backpack then
+            -- Backpack:ClearAllPoints()
+            -- Backpack:SetPoint(point, reference, relativePoint, xOfs + bpX, yOfs + bpY)
+            -- Backpack:SetUserPlaced(false)
+        -- end
+        -- return
+
+    -- -- 4c) Dragging any other MicroMenu frame
+    -- else
+        -- -- snap all peers to the raw point
+        -- for _, frame in ipairs(MicroMenu_Frames) do
+            -- if frame ~= self then
+                -- frame:ClearAllPoints()
+                -- frame:SetPoint(point, reference, relativePoint, xOfs, yOfs)
+                -- frame:SetUserPlaced(false)
+            -- end
+        -- end
+        -- -- include CombatStylePanel in the snap
+        -- if CombatStylePanel then
+            -- CombatStylePanel:ClearAllPoints()
+            -- CombatStylePanel:SetPoint(point, reference, relativePoint, xOfs, yOfs)
+            -- CombatStylePanel:SetUserPlaced(false)
+        -- end
+        -- -- offset Backpack accordingly
+        -- if Backpack then
+            -- Backpack:ClearAllPoints()
+            -- Backpack:SetPoint(point, reference, relativePoint, xOfs + bpX, yOfs + bpY)
+            -- Backpack:SetUserPlaced(false)
+        -- end
+    -- end
+-- end

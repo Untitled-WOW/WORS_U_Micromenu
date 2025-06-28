@@ -1,6 +1,6 @@
 -- Main frame for the music player
 WORS_U_MusicBook.musicPlayer = CreateFrame("Frame", "WORS_U_MusicPlayerFrame", UIParent)
-WORS_U_MusicBook.musicPlayer:SetSize(180, 330)
+WORS_U_MusicBook.musicPlayer:SetSize(192, 280)
 WORS_U_MusicBook.musicPlayer:SetBackdrop({
     bgFile = "Interface\\WORS\\OldSchoolBackground1",
     edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
@@ -20,12 +20,13 @@ else
 	WORS_U_MusicBook.musicPlayer:SetPoint("CENTER")
 end	
 
+
+
+
 WORS_U_MusicBook.musicPlayer:SetScript("OnDragStart", function(self) self:StartMoving() end)
 WORS_U_MusicBook.musicPlayer:SetScript("OnDragStop", function(self)
     self:StopMovingOrSizing()
-	SaveFramePosition(self)
 end)
-
 local closeButton = CreateFrame("Button", nil, WORS_U_MusicPlayerFrame)
 closeButton:SetSize(16, 16)
 closeButton:SetPoint("TOPRIGHT", WORS_U_MusicPlayerFrame, "TOPRIGHT", 4, 4)
@@ -36,20 +37,25 @@ closeButton:SetPushedTexture("Interface\\WORS\\OldSchool-CloseButton-Down.blp")
 closeButton:SetScript("OnClick", function()
 	WORS_U_MusicBook.musicPlayer:Hide()
     MusicMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
+	
 end)
 
+
+
+-- 1. Create a tiny frame parented to the musicPlayer
 local trackFrame = CreateFrame("Frame", nil, WORS_U_MusicBook.musicPlayer)
 trackFrame:SetAllPoints(WORS_U_MusicBook.musicPlayer)
 -- bump it 2 levels above the musicPlayer itself
 trackFrame:SetFrameLevel(WORS_U_MusicBook.musicPlayer:GetFrameLevel() + 2)
 
+-- 2. Create your FontString on that frame instead of directly on musicPlayer
 WORS_U_MusicBook.trackLabel = trackFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
 WORS_U_MusicBook.trackLabel:SetPoint("TOP", trackFrame, "TOP", 0, -10)
 WORS_U_MusicBook.trackLabel:SetText("No track playing")
 WORS_U_MusicBook.trackLabel:SetTextColor(1, 1, 1)
 
 local scrollFrame = CreateFrame("ScrollFrame", nil, WORS_U_MusicBook.musicPlayer, "UIPanelScrollFrameTemplate")
-scrollFrame:SetSize(180, 240)
+scrollFrame:SetSize(160, 180)
 scrollFrame:SetPoint("TOP", WORS_U_MusicBook.trackLabel, "BOTTOM", 0, -10)
 local scrollBar = scrollFrame.ScrollBar 
 local scrollUpButton = _G[scrollBar:GetName() .. "ScrollUpButton"]
@@ -57,8 +63,9 @@ local scrollDownButton = _G[scrollBar:GetName() .. "ScrollDownButton"]
 scrollBar:Hide(); scrollBar:SetAlpha(0); scrollUpButton:Hide(); scrollDownButton:Hide(); scrollUpButton:SetAlpha(0); scrollDownButton:SetAlpha(0)
 scrollBar:EnableMouse(false)  -- Disable mouse interaction on the bar itself
 
+
 local contentFrame = CreateFrame("Frame", nil, scrollFrame)
-contentFrame:SetSize(180, 500)  -- Adjust the height based on the number of tracks
+contentFrame:SetSize(160, 500)  -- Adjust the height based on the number of tracks
 scrollFrame:SetScrollChild(contentFrame)
 
 -- Function to play the specified track
@@ -69,7 +76,7 @@ function WORS_U_MusicBook:PlayTrack(track)
         self.currentTrack = track
         self.trackLabel:SetText("" .. track.name)
     else
-		print("|cff00ff00MicroMenu: |r" .. "|cffff0000Error Message Untitled: |r" .. "|cff00ff00Invalid track file path or track is nil.|r")
+		print("|cff00ff00MicroMenu: |r" .. "|cffff0000Error: |r" .. "|cff00ff00Invalid track file path or track is nil.|r")
     end
 end
 
@@ -120,8 +127,10 @@ local function CreateMusicButtons()
 	stopButton:SetScript("OnClick", function()
 		WORS_U_MusicBook:StopTrack()
 	end)
-end
 
+
+end
+--CreateMusicButtons()
 
 -- Update background color based on visibility
 local function UpdateButtonBackground()
@@ -134,10 +143,24 @@ end
 WORS_U_MusicBook.musicPlayer:SetScript("OnShow", UpdateButtonBackground)
 WORS_U_MusicBook.musicPlayer:SetScript("OnHide", UpdateButtonBackground)
 
--- Update background color based on visibility
+-- -- Toggle function 
+-- local function OnMusicClick(self)
+	-- local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
+	-- if pos then
+		-- local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
+		-- WORS_U_MusicBook.musicPlayer:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
+	-- else
+		-- WORS_U_MusicBook.musicPlayer:SetPoint("CENTER")
+	-- end	
+	-- MicroMenu_ToggleFrame(WORS_U_MusicBook.musicPlayer)--:Show()   
+-- end
+
+
+
 local function OnMusicClick(self)	
 	CreateMusicButtons()
 	MicroMenu_ToggleFrame(WORS_U_MusicBook.musicPlayer)--:Show()
+	
 end
 
 MusicMicroButton:SetScript("OnClick", OnMusicClick)

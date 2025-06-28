@@ -1,8 +1,7 @@
--- WORS_U_MagicPrayer.lua
-local LastOpenedSpellORPrayerFrame = nil
-MicroMenu_Frames = {WORS_U_SpellBookFrame, WORS_U_PrayBookFrame, WORS_U_EmoteBookFrame, WORS_U_MusicPlayerFrame, CombatStylePanel} -- MicroMenu frames AND CombatStylePanel
 
--- function to hide all Micromenu, CombatStylePanel and Backpack frames
+-- Store all MicroMenu frames and CombatStylePanel
+MicroMenu_Frames = {WORS_U_SpellBookFrame, WORS_U_PrayBookFrame, WORS_U_EmoteBookFrame, WORS_U_MusicPlayerFrame, CombatStylePanel}
+
 function MicroMenu_HideAll()
     for _, frame in ipairs(MicroMenu_Frames) do
         -- Always set strata/level
@@ -14,7 +13,7 @@ function MicroMenu_HideAll()
             frame:SetFrameLevel(20)
         end
 
-        -- Only hide SpellBook and PrayBook if not combat-locked
+        -- Only hide if not combat-locked
         if not (InCombatLockdown() and (frame == WORS_U_SpellBookFrame or frame == WORS_U_PrayBookFrame)) then
             frame:Hide()
         end
@@ -24,11 +23,13 @@ function MicroMenu_HideAll()
     UpdateSpellMicroButtonBackground()
 end
 
--- function used to toggle between Micromenu, CombatStylePanel and Backpack frames
+
+local LastOpenedBookFrame = nil
+
 function MicroMenu_ToggleFrame(targetFrame)
     if InCombatLockdown() then
         if targetFrame == WORS_U_SpellBookFrame or targetFrame == WORS_U_PrayBookFrame then
-            --print("|cff00ff00MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
+            print("|cff00ff00MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
             return
         end        
     end
@@ -53,37 +54,45 @@ function MicroMenu_ToggleFrame(targetFrame)
         -- Enforce exclusivity between books
         if targetFrame == WORS_U_SpellBookFrame and not InCombatLockdown() then
             WORS_U_PrayBookFrame:Hide()
-            LastOpenedSpellORPrayerFrame = WORS_U_SpellBookFrame
+            LastOpenedBookFrame = WORS_U_SpellBookFrame
         elseif targetFrame == WORS_U_PrayBookFrame and not InCombatLockdown() then
             WORS_U_SpellBookFrame:Hide()
-            LastOpenedSpellORPrayerFrame = WORS_U_PrayBookFrame
+            LastOpenedBookFrame = WORS_U_PrayBookFrame
         end
 
         -- Show the target frame
         targetFrame:Show()
 
-        -- Stealth-load the last used Spell or Prayer book if opening something else
-        if not InCombatLockdown() and targetFrame ~= WORS_U_SpellBookFrame and targetFrame ~= WORS_U_PrayBookFrame and LastOpenedSpellORPrayerFrame and not LastOpenedSpellORPrayerFrame:IsShown() then
-            local otherFrames = (LastOpenedSpellORPrayerFrame == WORS_U_SpellBookFrame) and WORS_U_PrayBookFrame or WORS_U_SpellBookFrame
-            if otherFrames and otherFrames:IsShown() then
-                otherFrames:Hide()
+        -- Stealth-load the last used book if opening something else
+        if not InCombatLockdown()
+            and targetFrame ~= WORS_U_SpellBookFrame
+            and targetFrame ~= WORS_U_PrayBookFrame
+            and LastOpenedBookFrame
+            and not LastOpenedBookFrame:IsShown()
+        then
+            -- Hide the other book first
+            local other = (LastOpenedBookFrame == WORS_U_SpellBookFrame) and WORS_U_PrayBookFrame or WORS_U_SpellBookFrame
+            if other and other:IsShown() then
+                other:Hide()
             end
-            LastOpenedSpellORPrayerFrame:SetFrameStrata("HIGH")
-            LastOpenedSpellORPrayerFrame:SetFrameLevel(10)
-            LastOpenedSpellORPrayerFrame:Show()
+
+            LastOpenedBookFrame:SetFrameStrata("HIGH")
+            LastOpenedBookFrame:SetFrameLevel(10)
+            LastOpenedBookFrame:Show()
         end
-		
+
         if isMicroMenuFrame(targetFrame) then
             AttachMicroButtonsTo(targetFrame)
         end
     end
 
-    -- Update the micromenu button appearance for spell / prayer after toggling
+    -- ✅ Always update the button appearance after toggling
     UpdateSpellMicroButtonBackground()
 	UpdatePrayMicroButtonBackground()
 end
 
--- Hook Backpack and CombatStylePanels functions
+
+-- Hook Blizzard frames to hide micro-menu on show
 local function HookAFrames()
     if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
     if Backpack then
@@ -96,42 +105,38 @@ local function HookAFrames()
         end
 		--Backpack:SetWidth( Backpack:GetWidth() +  12 )
 
-		-- Hock onShow to auto close Micromenu and CombatStylePannel
 		Backpack:HookScript("OnShow", function()
+            AttachMicroButtonsTo(Backpack)
             if WORS_U_MicroMenuSettings.AutoCloseEnabled then
                 if not InCombatLockdown() then
-					if LastOpenedSpellORPrayerFrame then
-						LastOpenedSpellORPrayerFrame:Show()
-					else
-						WORS_U_SpellBook.frame:Show()
-					end				
-				end	
+                    --WORS_U_SpellBook.frame:Show()
+                    --WORS_U_PrayBook.frame:Hide()
+                end
                 WORS_U_EmoteBook.frame:Hide()
                 WORS_U_MusicBook.musicPlayer:Hide()
                 CombatStylePanel:Hide()
             end
-			AttachMicroButtonsTo(Backpack)
 			UpdateSpellMicroButtonBackground()
 			UpdatePrayMicroButtonBackground()
+			
         end)
 		
-		-- Hock OnHide to Restore MicroButtonsFromMicroMenu and update spell and prayer micromenu button
 		Backpack:HookScript("OnHide", function()
 			RestoreMicroButtonsFromMicroMenu()
 			UpdateSpellMicroButtonBackground()
 			UpdatePrayMicroButtonBackground()
         end)
 		
-		-- Hock OnDragStart to hide stelth loaded Spell and Prayer frames when moving backpack
 		hooksecurefunc(Backpack, "OnDragStart", function(self)
 			if InCombatLockdown() then return end
 			WORS_U_SpellBook.frame:Hide()
 			WORS_U_PrayBook.frame:Hide()
 		end)
 		
-		-- Hock StopMovingOrSizing to save new postion to all frames
 		hooksecurefunc(Backpack, "StopMovingOrSizing", function(self)
+			-- only run if AutoClose is on
 			if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
+			--print("|cff00ff00[MicroMenu Debug]|r Backpack drag ended, saving position")
 			SaveFramePosition(self)
 			if InCombatLockdown() then return end
 			WORS_U_SpellBook.frame:Show()
@@ -146,66 +151,78 @@ local function HookAFrames()
             CombatStylePanel:SetUserPlaced(false)
         end		
 		-- 1) Hide combatstylebg 
+
 		for _, r in ipairs({CombatStylePanel:GetRegions()}) do if r:GetObjectType()=="Texture" then r:Hide() end end
 
-
-		CombatStylePanel:SetFrameStrata("HIGH")
-		CombatStylePanel:SetFrameLevel(50)
-		CombatStylePanel:Raise()
-		CombatStylePanel:SetSize(180, 330)
-		
-		
-
-		-- Hock onShow to auto close Micromenu and Backpack
 		CombatStylePanel:HookScript("OnShow", function()
-			CombatStylePanel:SetFrameStrata("HIGH")
-			CombatStylePanel:SetFrameLevel(50)
-			CombatStylePanel:Raise()
-			
-			if WORS_U_MicroMenuSettings.AutoCloseEnabled then
+            AttachMicroButtonsTo(CombatStylePanel)
+            if WORS_U_MicroMenuSettings.AutoCloseEnabled then
                 if not InCombatLockdown() then
-					if LastOpenedSpellORPrayerFrame then
-						LastOpenedSpellORPrayerFrame:Show()
-					else
-						WORS_U_SpellBook.frame:Show()
-					end
+                    --WORS_U_SpellBook.frame:Show()
+                    --WORS_U_PrayBook.frame:Hide()
                 end
                 WORS_U_EmoteBook.frame:Hide()
                 WORS_U_MusicBook.musicPlayer:Hide()
                 CloseBackpack()
             end
-			AttachMicroButtonsTo(CombatStylePanel)
-			UpdateSpellMicroButtonBackground()
-			UpdatePrayMicroButtonBackground()
         end)
-		
-		-- Hock OnHide to Restore MicroButtonsFromMicroMenu and update spell and prayer micromenu button
 		CombatStylePanel:HookScript("OnHide", function()
 			RestoreMicroButtonsFromMicroMenu()
 			UpdateSpellMicroButtonBackground()
 			UpdatePrayMicroButtonBackground()
-        end)
+
+        end)		
+
 		
-		-- Hock OnDragStart to hide stelth loaded Spell and Prayer frames when moving CombatStylePanel
+		
 		CombatStylePanel:HookScript("OnDragStart", function(self)
 			if InCombatLockdown() then return end
 			WORS_U_SpellBookFrame:Hide()
 			WORS_U_PrayBookFrame:Hide()
 		end)
-		
-		-- Hock OnDragStop to save new postion to all frames
+
 		CombatStylePanel:HookScript("OnDragStop", function(self)
 			if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
 			if InCombatLockdown() then return end
 			SaveFramePosition(self)
-			WORS_U_SpellBookFrame:Show()
-			AttachMicroButtonsTo(CombatStylePanel)
-			UpdateSpellMicroButtonBackground()
-			UpdatePrayMicroButtonBackground()			
-		end)		
+			--WORS_U_SpellBookFrame:Show()
+			
+		end)
+		
+		
+		
+		-- hooksecurefunc(CombatStylePanel, "OnDragStart", function(self)
+			-- if InCombatLockdown() then return end
+			-- WORS_U_SpellBook.frame:Hide()
+			-- WORS_U_PrayBook.frame:Hide()
+		-- end)
+		
+		-- hooksecurefunc(CombatStylePanel, "StopMovingOrSizing", function(self)
+			-- -- only run if AutoClose is on
+			-- if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
+			-- --print("|cff00ff00[MicroMenu Debug]|r CombatStylePanel drag ended, saving position")
+			-- SaveFramePosition(self)
+			-- if InCombatLockdown() then return end
+			-- --WORS_U_SpellBook.frame:Show()
+		-- end)	
+		
+		
+		
+		-- Button click handlers
+		CombatStyleMicroButton:SetScript("OnClick", function()
+			if not CombatStylePanel:IsShown() then
+				--print("[CombatStylePanel] CombatStylePanel frame is hidden: Toggling it on")
+				WORS_U_EmoteBook.frame:Hide()
+                WORS_U_MusicBook.musicPlayer:Hide()
+                CloseBackpack()
+				CombatStylePanel:Show()				
+			else
+                --print("[CombatStylePanel] CombatStylePanel frame is already shown: HIDE")
+				CombatStylePanel:Hide()	
+			end			
+		end)	
     end
     
-	-- retrys until both A frames are hooked
 	if not Backpack and not CombatStylePanel then
         C_Timer.After(0.1, HookAFrames)
     end
@@ -219,46 +236,61 @@ local function HookMicroMenuFrames()
         end
         return
     end
+
     for _, frame in ipairs(MicroMenu_Frames) do
-        if frame then -- Skip Spell, Prayer and CombatStylePanel frames these handle this individually
+        if frame then
+
+
+            -- Skip hiding logic for SpellBook and PrayBook themselves
             if frame ~= WORS_U_SpellBookFrame and frame ~= WORS_U_PrayBookFrame and frame ~= CombatStylePanel then
 				
-				-- Hock OnDragStart to hide stelth loaded Spell and Prayer frames when moving another frame
+				----- this and hooks comments not working
 				frame:HookScript("OnDragStart", function(self)
 					if InCombatLockdown() then return end
 					WORS_U_SpellBookFrame:Hide()
 					WORS_U_PrayBookFrame:Hide()
 				end)
-				
+
 				frame:HookScript("OnDragStop", function(self)
 					if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
 					if InCombatLockdown() then return end
-					if LastOpenedSpellORPrayerFrame then
-						LastOpenedSpellORPrayerFrame:Show()
-					else
-						WORS_U_SpellBook.frame:Show()
-					end
-					AttachMicroButtonsTo(frame)	
-				end)
-				
-				-- hock OnShow to stelth load Magic and Prayer frames and attach AttachMicroButtonsTo
-				frame:HookScript("OnShow", function(self)
-					if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
-					if InCombatLockdown() then return end
-					if LastOpenedSpellORPrayerFrame then
-						LastOpenedSpellORPrayerFrame:Show()
-					else
-						WORS_U_SpellBook.frame:Show()
-					end
-					AttachMicroButtonsTo(frame)	
+					WORS_U_SpellBookFrame:Show()
+					
 				end)
             end
-			
-			-- hock OnHide on ALL Micromenu frames to restore micromenu buttons
-			frame:HookScript("OnHide", RestoreMicroButtonsFromMicroMenu) 
         end
     end
 end
+
+
+
+-- Hook hide on micro-menu frames to restore buttons
+local function HookMicroMenuButtonRestores()
+    for _, frame in ipairs(MicroMenu_Frames) do
+        if frame then frame:HookScript("OnHide", RestoreMicroButtonsFromMicroMenu) end
+    end
+	-- Hook the Backpack frame Show/Hide once it exists
+	local hookedBackpack = false
+	C_Timer.NewTicker(0.2, function(ticker)
+		if hookedBackpack then
+			ticker:Cancel()
+			return
+		end
+		local bf = _G["Backpack"]
+		if bf and type(bf.Hide) == "function" then
+			hooksecurefunc(bf, "Hide", function(self)
+				RestoreMicroButtonsFromMicroMenu()
+			end)
+			hooksecurefunc(bf, "Show", function(self)
+				AttachMicroButtonsTo(self)
+			end)
+			hookedBackpack = true
+			ticker:Cancel()
+			--print("|cff00ff00[MicroMenu]|r Backpack.Show/Hide hooked!")
+		end
+	end)	
+end
+
 
 -- Main initialization event
 local f = CreateFrame("Frame")
@@ -268,6 +300,7 @@ f:SetScript("OnEvent", function(self, event)
         C_Timer.After(0.5, function()
             HookAFrames()
             HookMicroMenuFrames()
+            HookMicroMenuButtonRestores()
 			local spellbookTriggered = false
 			C_Timer.NewTicker(0.2, function(ticker)
 				if spellbookTriggered then
@@ -275,14 +308,14 @@ f:SetScript("OnEvent", function(self, event)
 					return
 				end
 				if not InCombatLockdown() then
-					--print("[MagicMicro] Out of combat: Showing spellbook and opening backpack")
-					InventoryMicroButton:Click()
-					SaveFramePosition(Backpack)
+					print("[MagicMicro] Out of combat: Showing spellbook and opening backpack")
 					WORS_U_SpellBookFrame:Show()
+					SaveFramePosition(WORS_U_SpellBookFrame)					
+					InventoryMicroButton:Click()
 					spellbookTriggered = true
 					ticker:Cancel()
 				else
-					--print("[MagicMicro] Still in combat: Waiting...")
+					print("[MagicMicro] Still in combat: Waiting...")
 				end
 			end)		
         end)
@@ -290,8 +323,8 @@ f:SetScript("OnEvent", function(self, event)
     end
 end)
 
-------------------------------------------------------------------------
----------------- Interface Addon Options -------------------------------
+---------------------------------------------------------------------------------------------------
+
 ------------------------------------------------------------------------
 
 local optionsFrame = CreateFrame("Frame", "MicroMenuOptionsFrame", InterfaceOptionsFramePanelContainer)

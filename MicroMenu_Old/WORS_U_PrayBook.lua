@@ -5,7 +5,7 @@ local prayerButtons = {}
 
 -- Create the prayer book frame
 WORS_U_PrayBook.frame = CreateFrame("Frame", "WORS_U_PrayBookFrame", UIParent)
-WORS_U_PrayBook.frame:SetSize(180, 330)
+WORS_U_PrayBook.frame:SetSize(192, 280)
 WORS_U_PrayBook.frame:SetBackdrop({
     bgFile   = "Interface\\WORS\\OldSchoolBackground1",
     edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
@@ -19,12 +19,15 @@ WORS_U_PrayBook.frame:SetMovable(true)
 WORS_U_PrayBook.frame:EnableMouse(true)
 WORS_U_PrayBook.frame:RegisterForDrag("LeftButton")
 WORS_U_PrayBook.frame:SetClampedToScreen(true)
-WORS_U_PrayBook.frame:SetScript("OnDragStart", function(self) 	
+WORS_U_PrayBook.frame:SetScript("OnDragStart", function(self) 
+	
+	
 	self:StartMoving() 
 end)
-WORS_U_PrayBook.frame:SetScript("OnDragStop", function(self) 	
+WORS_U_PrayBook.frame:SetScript("OnDragStop", function(self) 
+
+	
 	self:StopMovingOrSizing() 
-	SaveFramePosition(self)
 end)
 
 -- Close button
@@ -84,9 +87,9 @@ local function OnPrayerClick(self)
 			--print("[PrayerMicro] Normal click detected: Preparing custom spellbook frame")
 			WORS_U_SpellBookFrame:Hide()
 			InitializeMagicPrayerLevels()
-			SetupPrayerButtons(-8, -5, WORS_U_PrayBookFrame, prayerButtons)				
+			SetupPrayerButtons(-10, WORS_U_PrayBookFrame, prayerButtons)				
 			if WORS_U_MicroMenuSettings.showMagicandPrayer then
-				SetupMagicButtons(-8, 160, WORS_U_PrayBookFrame, magicButtons)
+				SetupMagicButtons(155, WORS_U_PrayBookFrame, magicButtons)
 			end
 			
 			if not WORS_U_PrayBook.frame:IsShown() then
@@ -111,11 +114,12 @@ end
 
 local function refreshPrayerFrame()
     InitializeMagicPrayerLevels()
-    SetupPrayerButtons(-8, -5, WORS_U_PrayBook.frame, prayerButtons)
+    SetupPrayerButtons(-10, WORS_U_PrayBook.frame, prayerButtons)
     if WORS_U_MicroMenuSettings.showMagicandPrayer then
-        SetupMagicButtons(-8, 160, WORS_U_PrayBook.frame, magicButtons)
+        SetupMagicButtons(155, WORS_U_PrayBook.frame, magicButtons)
     end
 end
+
 
 local positioned = false
 local needsRefresh = false
@@ -152,21 +156,21 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
         -- if in combat and frame is open (and backpack is closed), defer refresh
         if InCombatLockdown() and  WORS_U_PrayBook.frame:IsShown() and not Backpack:IsShown() then
             needsRefresh = true
-			--print("prayer needsRefresh set true")
+			print("prayer needsRefresh set true")
         -- otherwise, if the book is open and backpack closed, refresh immediately
         elseif WORS_U_PrayBook.frame:IsShown() and not Backpack:IsShown() then
             refreshPrayerFrame()
         elseif WORS_U_PrayBook.frame:IsShown() and Backpack:IsShown() then
 		    needsRefresh = true
-			--print("prayer needsRefresh set true")
+			print("prayer needsRefresh set true")
 		end
 
     elseif event == "PLAYER_REGEN_ENABLED" or event == "BAG_UPDATE_COOLDOWN" then
         -- combat just ended (or cooldown info arrived): do any deferred refresh
         if needsRefresh then            
-			--print("pray needsRefresh set false")
+			print("pray needsRefresh set false")
             if WORS_U_PrayBook.frame:IsShown() and not InCombatLockdown() then
-                --print("refreshprayFrame")
+                print("refreshprayFrame")
 				refreshPrayerFrame()
 				needsRefresh = false
             end			

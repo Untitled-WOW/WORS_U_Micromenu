@@ -4,7 +4,7 @@ local prayerButtons = {}
 
 -- Create the main frame for the custom spell book
 WORS_U_SpellBook.frame = CreateFrame("Frame", "WORS_U_SpellBookFrame", UIParent)
-WORS_U_SpellBook.frame:SetSize(180, 330)
+WORS_U_SpellBook.frame:SetSize(192, 280)
 WORS_U_SpellBook.frame:SetBackdrop({
     bgFile = "Interface\\WORS\\OldSchoolBackground1",
     edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
@@ -29,10 +29,7 @@ WORS_U_SpellBook.frame:RegisterForDrag("LeftButton")
 WORS_U_SpellBook.frame:SetClampedToScreen(true)
 
 WORS_U_SpellBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
-WORS_U_SpellBook.frame:SetScript("OnDragStop", function(self) 
-	self:StopMovingOrSizing() 
-	SaveFramePosition(self)
-end)
+WORS_U_SpellBook.frame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
 local closeButton = CreateFrame("Button", nil, WORS_U_SpellBookFrame)
 closeButton:SetSize(16, 16)
 closeButton:SetPoint("TOPRIGHT", WORS_U_SpellBookFrame, "TOPRIGHT", 4, 4)
@@ -89,10 +86,10 @@ local function OnMagicClick(self)
             --print("[MagicMicro] Normal click detected: Preparing custom spellbook frame")
             WORS_U_PrayBookFrame:Hide()
 			InitializeMagicPrayerLevels()
-            SetupMagicButtons(-8, -5, WORS_U_SpellBookFrame, magicButtons)
+            SetupMagicButtons(-10, WORS_U_SpellBookFrame, magicButtons)
             if WORS_U_MicroMenuSettings.showMagicandPrayer then
                 --print("[MagicMicro] Setting up prayer buttons")
-                SetupPrayerButtons(-8, 160, WORS_U_SpellBookFrame, prayerButtons)
+                SetupPrayerButtons(155, WORS_U_SpellBookFrame, prayerButtons)
             end
 
             if not WORS_U_SpellBook.frame:IsShown() then
@@ -114,20 +111,11 @@ local function OnMagicClick(self)
     end
 end
 
-SpellbookMicroButton:SetScript("OnClick", OnMagicClick)
-SpellbookMicroButton:HookScript("OnEnter", function(self)
-    if GameTooltip:IsOwned(self) then
-        GameTooltip:AddLine("Shift + Click to open WOW Spellbook.", 1, 1, 0, true)
-        GameTooltip:Show()
-    end
-end)
-
-
 local function refreshMagicFrame()
     InitializeMagicPrayerLevels()
-    SetupMagicButtons(-8, -5, WORS_U_SpellBook.frame, magicButtons)
+    SetupMagicButtons(-10, WORS_U_SpellBook.frame, magicButtons)
     if WORS_U_MicroMenuSettings.showMagicandPrayer then
-        SetupPrayerButtons(-8, 160, WORS_U_SpellBook.frame, prayerButtons)
+        SetupPrayerButtons(155, WORS_U_SpellBook.frame, prayerButtons)
     end
 end
 
@@ -166,21 +154,21 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
         -- if in combat and frame is open (and backpack is closed), defer refresh
         if InCombatLockdown() and  WORS_U_SpellBook.frame:IsShown() and not Backpack:IsShown() then
             needsRefresh = true
-			--print("spell needsRefresh set true")
+			print("spell needsRefresh set true")
         -- otherwise, if the book is open and backpack closed, refresh immediately
         elseif WORS_U_SpellBook.frame:IsShown() and not Backpack:IsShown() then
             refreshMagicFrame()
         elseif WORS_U_SpellBook.frame:IsShown() and Backpack:IsShown() then
 		    needsRefresh = true
-			--print("spell needsRefresh set true")
+			print("spell needsRefresh set true")
 		end
 
     elseif event == "PLAYER_REGEN_ENABLED" or event == "BAG_UPDATE_COOLDOWN" then
         -- combat just ended (or cooldown info arrived): do any deferred refresh
         if needsRefresh then
-			--print("spell needsRefresh set false")
+			print("spell needsRefresh set false")
             if WORS_U_SpellBook.frame:IsShown() and not InCombatLockdown() then
-                --print("refreshMagicFrame")
+                print("refreshMagicFrame")
 				refreshMagicFrame()
 				needsRefresh = false
             end
@@ -192,3 +180,10 @@ end)
 
 
 
+SpellbookMicroButton:SetScript("OnClick", OnMagicClick)
+SpellbookMicroButton:HookScript("OnEnter", function(self)
+    if GameTooltip:IsOwned(self) then
+        GameTooltip:AddLine("Shift + Click to open WOW Spellbook.", 1, 1, 0, true)
+        GameTooltip:Show()
+    end
+end)
