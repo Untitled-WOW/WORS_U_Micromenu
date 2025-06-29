@@ -1,5 +1,4 @@
 -- WORS_U_PrayBook.lua
-
 local magicButtons = {}
 local prayerButtons = {}
 
@@ -74,6 +73,15 @@ end
 WORS_U_PrayBook.frame:SetScript("OnShow", UpdatePrayMicroButtonBackground)
 WORS_U_PrayBook.frame:SetScript("OnHide", UpdatePrayMicroButtonBackground)
 
+local function refreshPrayerFrame()
+    InitializeMagicPrayerLevels()
+    SetupPrayerButtons(-8, -5, WORS_U_PrayBook.frame, prayerButtons)
+    if WORS_U_MicroMenuSettings.showMagicandPrayer then
+        SetupMagicButtons(-8, 160, WORS_U_PrayBook.frame, magicButtons)
+    end
+end
+
+
 -- PrayerMicroButton click handler
 local function OnPrayerClick(self)
     if IsShiftKeyDown() then
@@ -84,11 +92,7 @@ local function OnPrayerClick(self)
 	if not InCombatLockdown() then
 		--print("[PrayerMicro] Normal click detected: Preparing custom spellbook frame")
 		WORS_U_SpellBookFrame:Hide()
-		InitializeMagicPrayerLevels()
-		SetupPrayerButtons(-8, -5, WORS_U_PrayBookFrame, prayerButtons)				
-		if WORS_U_MicroMenuSettings.showMagicandPrayer then
-			SetupMagicButtons(-8, 160, WORS_U_PrayBookFrame, magicButtons)
-		end
+		refreshPrayerFrame()
 		
 		if not WORS_U_PrayBook.frame:IsShown() then
 			--print("[PrayerMicro] Spellbook frame is hidden: Toggling it on")
@@ -114,25 +118,17 @@ local function OnPrayerClick(self)
 
 end
 
-local function refreshPrayerFrame()
-    InitializeMagicPrayerLevels()
-    SetupPrayerButtons(-8, -5, WORS_U_PrayBook.frame, prayerButtons)
-    if WORS_U_MicroMenuSettings.showMagicandPrayer then
-        SetupMagicButtons(-8, 160, WORS_U_PrayBook.frame, magicButtons)
-    end
-end
+
 
 local positioned = false
 local needsRefresh = false
 local eventFrame = CreateFrame("Frame")
-
 -- Register the events we'll use
 eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 eventFrame:RegisterEvent("BAG_UPDATE")
 eventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
 eventFrame:RegisterEvent("BAG_UPDATE_COOLDOWN")    -- fires when you leave combat
-
 eventFrame:SetScript("OnEvent", function(self, event, ...)
     if not positioned then
         -- initial placement, only once and only out of combat
@@ -146,8 +142,7 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
             else
                 WORS_U_PrayBook.frame:SetPoint("CENTER")
             end
-            positioned = true
-            self:UnregisterEvent("PLAYER_ENTERING_WORLD")
+            positioned = true            
             refreshPrayerFrame()
         end
         return
@@ -155,25 +150,23 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
 
     if event == "BAG_UPDATE" or event == "PLAYER_EQUIPMENT_CHANGED" then
         -- if in combat and frame is open (and backpack is closed), defer refresh
-        if InCombatLockdown() and  WORS_U_PrayBook.frame:IsShown() and not Backpack:IsShown() then
+        if InCombatLockdown() and  WORS_U_PrayBook.frame:IsShown() then
             needsRefresh = true
-			--print("prayer needsRefresh set true")
+			print("prayer needsRefresh set true. Event: " .. event)
         -- otherwise, if the book is open and backpack closed, refresh immediately
-        elseif WORS_U_PrayBook.frame:IsShown() and not Backpack:IsShown() then
+        elseif not InCombatLockdown() and WORS_U_PrayBook.frame:IsShown() then
             refreshPrayerFrame()
-        elseif WORS_U_PrayBook.frame:IsShown() and Backpack:IsShown() then
-		    needsRefresh = true
-			--print("prayer needsRefresh set true")
+			needsRefresh = false
+			print("prayer needsRefresh set false. Event: " .. event)
 		end
 
-    elseif event == "PLAYER_REGEN_ENABLED" or event == "BAG_UPDATE_COOLDOWN" then
+    elseif event == "PLAYER_REGEN_ENABLED" then
         -- combat just ended (or cooldown info arrived): do any deferred refresh
         if needsRefresh then            
-			--print("pray needsRefresh set false")
             if WORS_U_PrayBook.frame:IsShown() and not InCombatLockdown() then
-                --print("refreshprayFrame")
 				refreshPrayerFrame()
 				needsRefresh = false
+				print("prayer needsRefresh set false. Event: " .. event)
             end			
         end		
     end

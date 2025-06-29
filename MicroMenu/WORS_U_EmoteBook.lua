@@ -175,6 +175,8 @@ WORS_U_EmoteBook.frame:SetScript("OnHide", UpdateButtonBackground)
 
 -- function to replace EmotesMicroButton on click
 local function OnEmoteClick(self)	
+	CastShapeshiftForm(114114)
+	
 	SetupEmoteButtons(-8, -10)
 	if not InCombatLockdown() then
 		MicroMenu_ToggleFrame(WORS_U_EmoteBook.frame)--:Show()

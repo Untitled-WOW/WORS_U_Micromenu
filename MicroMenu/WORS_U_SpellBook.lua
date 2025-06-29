@@ -1,3 +1,4 @@
+-- WORS_U_SpellBook.lua
 local magicButtons = {}
 local prayerButtons = {}
 
@@ -10,15 +11,6 @@ WORS_U_SpellBook.frame:SetBackdrop({
     tile = false, tileSize = 32, edgeSize = 32,
     insets = { left = 5, right = 5, top = 5, bottom = 5 }
 })
-local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
-if pos then
-	local rel = pos.relativeTo and _G[pos.relativeTo] or UIParent
-	WORS_U_SpellBook.frame:SetPoint(
-		pos.point, rel, pos.relativePoint, pos.xOfs, pos.yOfs
-	)
-else
-	WORS_U_SpellBook.frame:SetPoint("CENTER")
-end
 WORS_U_SpellBook.frame:SetFrameStrata("High")
 WORS_U_SpellBook.frame:SetFrameLevel(10)
 WORS_U_SpellBook.frame:Hide()
@@ -42,6 +34,7 @@ closeButton:SetPushedTexture("Interface\\WORS\\OldSchool-CloseButton-Down.blp")
 closeButton:SetScript("OnClick", function()
 	if InCombatLockdown() then
 		print("|cff00ff00MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
+		WORS_U_SpellBook.frame:Hide()
 		return
 	else
 		MicroMenu_ToggleFrame(WORS_U_SpellBookFrame)
@@ -77,6 +70,14 @@ end
 WORS_U_SpellBook.frame:SetScript("OnShow", UpdateSpellMicroButtonBackground)
 WORS_U_SpellBook.frame:SetScript("OnHide", UpdateSpellMicroButtonBackground)
 
+local function refreshMagicFrame()
+    InitializeMagicPrayerLevels()
+    SetupMagicButtons(-8, -5, WORS_U_SpellBook.frame, magicButtons)
+    if WORS_U_MicroMenuSettings.showMagicandPrayer then
+        SetupPrayerButtons(-8, 160, WORS_U_SpellBook.frame, prayerButtons)
+    end
+end
+
 -- Function to handle MagicMicroButton clicks
 local function OnMagicClick(self)
     if IsShiftKeyDown() then -- not used preserving original spell book icon to open WOW spell book ui now using U_SpellBookMicroButtonCopy /
@@ -86,12 +87,7 @@ local function OnMagicClick(self)
 	if not InCombatLockdown() then
 		--print("[MagicMicro] Normal click detected: Preparing custom spellbook frame")
 		WORS_U_PrayBookFrame:Hide()
-		InitializeMagicPrayerLevels()
-		SetupMagicButtons(-8, -5, WORS_U_SpellBookFrame, magicButtons)
-		if WORS_U_MicroMenuSettings.showMagicandPrayer then
-			SetupPrayerButtons(-8, 160, WORS_U_SpellBookFrame, prayerButtons)
-		end
-
+		refreshMagicFrame()
 		if not WORS_U_SpellBook.frame:IsShown() then
 			--print("[MagicMicro] Spellbook frame is hidden: Toggling it on")
 			MicroMenu_ToggleFrame(WORS_U_SpellBook.frame)
@@ -115,22 +111,6 @@ local function OnMagicClick(self)
 	end
 end
 
---SpellbookMicroButton:SetScript("OnClick", OnMagicClick)
-SpellbookMicroButton:HookScript("OnEnter", function(self)
-    if GameTooltip:IsOwned(self) then
-        GameTooltip:AddLine("Shift + Click to open WOW Spellbook.", 1, 1, 0, true)
-        GameTooltip:Show()
-    end
-end)
-
-local function refreshMagicFrame()
-    InitializeMagicPrayerLevels()
-    SetupMagicButtons(-8, -5, WORS_U_SpellBook.frame, magicButtons)
-    if WORS_U_MicroMenuSettings.showMagicandPrayer then
-        SetupPrayerButtons(-8, 160, WORS_U_SpellBook.frame, prayerButtons)
-    end
-end
-
 local positioned = false
 local needsRefresh = false
 local eventFrame = CreateFrame("Frame")
@@ -140,8 +120,6 @@ eventFrame:RegisterEvent("BAG_UPDATE")
 eventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
 eventFrame:RegisterEvent("BAG_UPDATE_COOLDOWN")    -- fires when you leave combat
-
-
 eventFrame:SetScript("OnEvent", function(self, event, ...)
     if not positioned then
         -- initial placement, only once and only out of combat
@@ -156,7 +134,6 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
                 WORS_U_SpellBook.frame:SetPoint("CENTER")
             end
             positioned = true
-            self:UnregisterEvent("PLAYER_ENTERING_WORLD")
             refreshMagicFrame()
         end
         return
@@ -164,25 +141,23 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
 
     if event == "BAG_UPDATE" or event == "PLAYER_EQUIPMENT_CHANGED" then
         -- if in combat and frame is open (and backpack is closed), defer refresh
-        if InCombatLockdown() and  WORS_U_SpellBook.frame:IsShown() and not Backpack:IsShown() then
+        if InCombatLockdown() and WORS_U_SpellBook.frame:IsShown() then
             needsRefresh = true
-			--print("spell needsRefresh set true")
+			print("spell needsRefresh set true. Event: " .. event)
         -- otherwise, if the book is open and backpack closed, refresh immediately
-        elseif WORS_U_SpellBook.frame:IsShown() and not Backpack:IsShown() then
+        elseif not InCombatLockdown() and WORS_U_SpellBook.frame:IsShown() then
             refreshMagicFrame()
-        elseif WORS_U_SpellBook.frame:IsShown() and Backpack:IsShown() then
-		    needsRefresh = true
-			--print("spell needsRefresh set true")
+			needsRefresh = false		    
+			print("spell needsRefresh set false. Event: " .. event)
 		end
 
-    elseif event == "PLAYER_REGEN_ENABLED" or event == "BAG_UPDATE_COOLDOWN" then
+    elseif event == "PLAYER_REGEN_ENABLED" then
         -- combat just ended (or cooldown info arrived): do any deferred refresh
         if needsRefresh then
-			--print("spell needsRefresh set false")
             if WORS_U_SpellBook.frame:IsShown() and not InCombatLockdown() then
-                --print("refreshMagicFrame")
 				refreshMagicFrame()
 				needsRefresh = false
+				print("spell needsRefresh set false. Event: " .. event)
             end
         end		
     end
@@ -191,5 +166,5 @@ end)
 
 
 
--- 5) Attach your own OnClick handler, leaving the original completely intact
+
 U_SpellMicroMenuButton:SetScript("OnClick", OnMagicClick)

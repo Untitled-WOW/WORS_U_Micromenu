@@ -47,6 +47,9 @@ local function safeRestore(btn, data)
         btn:SetParent(data.parent)
         btn:ClearAllPoints()
         btn:SetPoint(data.point, data.rel, data.relPoint, data.x, data.y)
+		
+		btn:SetFrameStrata("HIGH")	-- 3) (Optional) tweak strata/level so it doesn’t sit under something else
+		btn:SetFrameLevel(100)
     end
 end
 
@@ -89,6 +92,7 @@ local function AttachMicroRow(buttons, anchorPoint, xOffset, yOffset)
         -- compute x including the new xOffset
         local x = startX + (i - 1) * spacing + (xOffset or 0)
         btn:SetPoint(anchorPoint, MicroButtonContainer, anchorPoint, x, yOffset or 0)
+
     end
 end
 
@@ -112,7 +116,8 @@ function AttachMicroButtonsTo(parentFrame)
         MicroButtonContainer:SetParent(parentFrame)
         MicroButtonContainer:ClearAllPoints()
         MicroButtonContainer:SetPoint("TOP", parentFrame, "TOP", 0, 40)
-        MicroButtonContainer:Show()
+        
+		MicroButtonContainer:Show()
     end
 	
     -- attach each row of micro buttons
@@ -149,6 +154,8 @@ local function AttachRowToContainer(buttons, container, anchorPoint, xOffset, yO
         btn:ClearAllPoints()
         local x = startX + (i - 1) * spacing + (xOffset or 0)
         btn:SetPoint(anchorPoint, container, anchorPoint, x, yOffset or 0)
+		btn:SetFrameStrata("HIGH")	-- 3) (Optional) tweak strata/level so it doesn’t sit under something else
+		btn:SetFrameLevel(100)
     end
 end
 
@@ -184,6 +191,7 @@ function RestoreMicroButtonsFromMicroMenu()
 
         -- but in your custom order
 		-- remove 16 variation if going back to 7 buttons top and 7 buttons bottom
+		
         AttachRowToContainer(microButtonsRow1TOP,    UIParent, "BOTTOMRIGHT", -134, 35)
         AttachRowToContainer(microButtonsRow2BOTTOM, UIParent, "BOTTOMRIGHT", -150, 0)
     end

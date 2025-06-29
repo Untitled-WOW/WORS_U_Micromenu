@@ -57,9 +57,12 @@ function SetupMagicButtons(XOffset, YOffset, frameName, magicButtons)
                 icon:SetVertexColor(0.25, 0.25, 0.25)
             end
         end
+		local isActive, isCastable = GetShapeshiftFormInfo(i)
 
-        spellButton:SetAttribute("type", "spell")
+		spellButton:SetID(spellID)  
+		spellButton:SetAttribute("type", "spell")
         spellButton:SetAttribute("spell", spellID)
+		
         spellButton:RegisterForDrag("LeftButton")
         spellButton:SetScript("OnDragStart", function(self)
             if spellName then PickupSpell(spellName) end
@@ -74,6 +77,10 @@ function SetupMagicButtons(XOffset, YOffset, frameName, magicButtons)
         table.insert(magicButtons, spellButton)
     end
 end
+
+
+
+
 
 -- Function to set up prayer buttons dynamically, with X and Y offsets
 function SetupPrayerButtons(XOffset, YOffset, frameName, prayerButtons)
