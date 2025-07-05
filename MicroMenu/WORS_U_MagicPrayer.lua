@@ -8,10 +8,29 @@ function InitializeMagicPrayerLevels()
 	prayerLevel = GetLevelFromFactionReputation(prayerID)
 end
 
--- Function to set up magic buttons dynamically, with X and Y offsets
+
+-- Returns true if the player meets all requirements to cast spell works for wors magic spell rune requirment
+function CanCastSpell(spellData)
+    -- 1) level check
+    if magicLevel < spellData.level then
+        return false
+    end
+    -- 2) Blizzard’s “usable?” check (cooldowns, power, known, etc)
+    local name = select(1, GetSpellInfo(spellData.id))
+    local usable = IsUsableSpell(name)
+    if not usable then
+        return false
+    end
+    return true
+end
+
+
+-- One-time creation of magic buttons 
 function SetupMagicButtons(XOffset, YOffset, frameName, magicButtons)
     if InCombatLockdown() then return end
-    -- Clear existing buttons
+    InitializeMagicPrayerLevels()  -- make sure magicLevel is fresh
+
+    -- clear any old buttons
     for _, btn in pairs(magicButtons) do
         btn:Hide()
         btn:SetParent(nil)
@@ -19,125 +38,160 @@ function SetupMagicButtons(XOffset, YOffset, frameName, magicButtons)
     wipe(magicButtons)
 
     local buttonSize, colPadding, rowPadding, margin, columns = 20, 5, 3, 10, 7
-    -- Use the passed-in offsets
-    local buttonXOffset = XOffset
-    local buttonYOffset = YOffset
 
-    for i, spellData in ipairs(WORS_U_SpellBook.spells) do
-        local spellID, requiredLevel = spellData.id, spellData.level
-        local spellName = select(1, GetSpellInfo(spellID))
+    for i, data in ipairs(WORS_U_SpellBook.spells) do
+        local spellID, reqLvl = data.id, data.level
+        local spellName      = select(1, GetSpellInfo(spellID))
+        local row            = floor((i - 1) / columns)
+        local col            = (i - 1) % columns
 
-        local spellButton = CreateFrame("Button", nil, frameName, "SecureActionButtonTemplate")
-        spellButton:SetSize(buttonSize, buttonSize)
-        local row = floor((i - 1) / columns)
-        local col = (i - 1) % columns
-        spellButton:SetPoint(
+        -- create the secure button
+        local btn = CreateFrame("Button", nil, frameName, "SecureActionButtonTemplate")
+        btn:SetSize(buttonSize, buttonSize)
+        btn:SetPoint(
             "TOPLEFT", frameName, "TOPLEFT",
-            buttonXOffset + margin + (buttonSize + colPadding) * col,
-            -buttonYOffset - margin - (buttonSize + rowPadding) * row
+            XOffset + margin + (buttonSize + colPadding) * col,
+            -YOffset   - margin - (buttonSize + rowPadding) * row
         )
 
-        local icon = spellButton:CreateTexture(nil, "ARTWORK")
+        -- stash the data for refresh
+        btn.spellData = data
+
+        -- icon texture (cache for recoloring)
+        local icon = btn:CreateTexture(nil, "ARTWORK")
         icon:SetAllPoints()
-        icon:SetTexture(spellData.icon)
+        icon:SetTexture(data.icon)
+        btn.icon = icon
 
-        if magicLevel < requiredLevel then
-            icon:SetVertexColor(0.1, 0.1, 0.1)
-        else
-            local hasRunes = WORS_U_SpellBook:HasRequiredRunes(spellData.runes)
-            if hasRunes then
-                icon:SetVertexColor(1, 1, 1)
-                if spellData.openInv then
-                    spellButton:SetScript("PostClick", function()
-                        ToggleBackpack()
-                        -- ...
-                    end)
-                end
-            else
-                icon:SetVertexColor(0.25, 0.25, 0.25)
-            end
-        end
-		local isActive, isCastable = GetShapeshiftFormInfo(i)
+		if magicLevel < data.level then
+			icon:SetVertexColor(0.1, 0.1, 0.1)
+		else
+			if CanCastSpell(btn.spellData) then
+				icon:SetVertexColor(1, 1, 1)
+			else
+				icon:SetVertexColor(0.25, 0.25, 0.25)
+			end
+		end
 
-		spellButton:SetID(spellID)  
-		spellButton:SetAttribute("type", "spell")
-        spellButton:SetAttribute("spell", spellID)
-		
-        spellButton:RegisterForDrag("LeftButton")
-        spellButton:SetScript("OnDragStart", function(self)
-            if spellName then PickupSpell(spellName) end
-        end)
-        spellButton:SetScript("OnEnter", function(self)
+        -- secure-cast attributes
+        btn:SetAttribute("type",  "spell")
+        btn:SetAttribute("spell", spellID)
+        btn:RegisterForClicks("AnyUp")
+
+        -- drag to pickup
+        btn:RegisterForDrag("LeftButton")
+        btn:SetScript("OnDragStart", function() PickupSpell(spellName) end)
+
+        -- tooltip
+        btn:SetScript("OnEnter", function(self)
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
             GameTooltip:SetSpellByID(spellID)
             GameTooltip:Show()
         end)
-        spellButton:SetScript("OnLeave", GameTooltip_Hide)
-
-        table.insert(magicButtons, spellButton)
+        btn:SetScript("OnLeave", GameTooltip_Hide)
+		
+		
+		btn:SetScript("OnUpdate", function(self, elapsed)
+		    self._throttle = (self._throttle or 0) + elapsed
+			if self._throttle < 0.25 then return end
+			self._throttle = 0
+			
+			if magicLevel < data.level then
+				icon:SetVertexColor(0.1, 0.1, 0.1)
+			else
+				if CanCastSpell(btn.spellData) then
+					icon:SetVertexColor(1, 1, 1)
+				else
+					icon:SetVertexColor(0.25, 0.25, 0.25)
+				end
+			end
+		end)
+        table.insert(magicButtons, btn)
     end
 end
 
-
-
-
-
--- Function to set up prayer buttons dynamically, with X and Y offsets
+-- One-time creation of prayer buttons
 function SetupPrayerButtons(XOffset, YOffset, frameName, prayerButtons)
     if InCombatLockdown() then return end
-    -- Clear existing buttons
-    for _, btn in pairs(prayerButtons) do
-        btn:Hide()
-        btn:SetParent(nil)
-    end
+    InitializeMagicPrayerLevels()
     wipe(prayerButtons)
 
-    local buttonSize, colPadding, rowPadding, margin, columns = 35, 2, -5, 5, 5
-    local buttonXOffset = XOffset
-    local buttonYOffset = YOffset
+    local size, padX, padY, margin, cols = 35, 2, -5, 5, 5
 
     for i, data in ipairs(WORS_U_PrayBook.prayers) do
         local id, reqLvl = data.id, data.level
-        local prayerName = select(1, GetSpellInfo(id))
+        local name       = select(1, GetSpellInfo(id))
+        local row, col   = floor((i-1)/cols), (i-1)%cols
 
         local btn = CreateFrame("Button", nil, frameName, "SecureActionButtonTemplate")
-        btn:SetSize(buttonSize, buttonSize)
-        local row = floor((i - 1) / columns)
-        local col = (i - 1) % columns
+        btn:SetSize(size, size)
         btn:SetPoint(
-            "TOPLEFT", frameName, "TOPLEFT",
-            buttonXOffset + margin + (buttonSize + colPadding) * col,
-            -buttonYOffset - margin - (buttonSize + rowPadding) * row
+          "TOPLEFT", frameName, "TOPLEFT",
+          XOffset + margin + (size+padX)*col,
+          -YOffset   - margin - (size+padY)*row
         )
 
-        btn:SetNormalTexture(data.icon)
-        local nt = btn:GetNormalTexture()
-        nt:SetVertexColor(prayerLevel < reqLvl and .2 or 1, prayerLevel < reqLvl and .2 or 1, prayerLevel < reqLvl and .2 or 1)
+        -- create & cache our icon texture **and set its initial texture**:
+        local icon = btn:CreateTexture(nil, "ARTWORK")
+        icon:SetAllPoints()
+        icon:SetTexture(data.icon)      -- <<< set the base icon here
+        btn.icon = icon
 
-        btn:SetAttribute("type1", "spell")
-        btn:SetAttribute("spell1", prayerName)
-        btn:SetAttribute("type2", "macro")
-        btn:SetAttribute("macrotext2", "/cancelaura "..prayerName)
+		if prayerLevel < reqLvl then
+			icon:SetTexture(data.icon)
+			icon:SetVertexColor(0.25, 0.25, 0.25)
+		elseif UnitPower("player", 0) < 200 then
+			icon:SetTexture(data.icon)
+			icon:SetVertexColor(0.5, 0.5, 0.5)
+		elseif UnitBuff("player", name) then
+			icon:SetTexture(data.buffIcon)
+			icon:SetVertexColor(1, 1, 1)
+		else
+			icon:SetTexture(data.icon) 
+			icon:SetVertexColor(1, 1, 1)
+		end
 
-        btn:SetScript("OnEnter", function()
-            GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-            GameTooltip:SetSpellByID(id)
-            GameTooltip:Show()
+
+        -- stash the raw data table directly
+        btn.prayerData = data
+
+        -- secure-cast
+        btn:SetAttribute("type",  "spell")
+        btn:SetAttribute("spell", name)
+        btn:RegisterForClicks("AnyUp")
+
+        -- tooltip & drag
+        btn:SetScript("OnEnter", function(self)
+          GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+          GameTooltip:SetSpellByID(id)
+          GameTooltip:Show()
         end)
         btn:SetScript("OnLeave", GameTooltip_Hide)
         btn:RegisterForDrag("LeftButton")
-        btn:SetScript("OnDragStart", function(self)
-            if prayerName then PickupSpell(prayerName) end
-        end)
+        btn:SetScript("OnDragStart", function() PickupSpell(name) end)
 
-        btn:SetScript("OnUpdate", function()
-            if UnitBuff("player", prayerName) then
-                btn:SetNormalTexture(data.buffIcon)
+        -- throttled OnUpdate for level, mana, buff-swap
+        btn:SetScript("OnUpdate", function(self, elapsed)
+            self._throttle = (self._throttle or 0) + elapsed
+            if self._throttle < 0.25 then return end
+            self._throttle = 0
+
+            if prayerLevel < reqLvl then
+                icon:SetTexture(data.icon)
+                icon:SetVertexColor(0.25, 0.25, 0.25)
+            elseif UnitPower("player", 0) < 200 then
+                icon:SetTexture(data.icon)
+                icon:SetVertexColor(0.5, 0.5, 0.5)
+            elseif UnitBuff("player", name) then
+                icon:SetTexture(data.buffIcon)
+                icon:SetVertexColor(1, 1, 1)
             else
-                btn:SetNormalTexture(data.icon)
+                icon:SetTexture(data.icon) 
+                icon:SetVertexColor(1, 1, 1)
             end
         end)
 
         table.insert(prayerButtons, btn)
     end
 end
+

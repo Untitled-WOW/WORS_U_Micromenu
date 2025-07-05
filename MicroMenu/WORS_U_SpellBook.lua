@@ -70,12 +70,19 @@ end
 WORS_U_SpellBook.frame:SetScript("OnShow", UpdateSpellMicroButtonBackground)
 WORS_U_SpellBook.frame:SetScript("OnHide", UpdateSpellMicroButtonBackground)
 
-local function refreshMagicFrame()
+local function setupMagicFrame()
     InitializeMagicPrayerLevels()
     SetupMagicButtons(-8, -5, WORS_U_SpellBook.frame, magicButtons)
     if WORS_U_MicroMenuSettings.showMagicandPrayer then
         SetupPrayerButtons(-8, 160, WORS_U_SpellBook.frame, prayerButtons)
     end
+end
+
+
+
+local function refreshMagicFrame()
+	RefreshPrayerButtons(prayerButtons)
+	RefreshMagicButtons(magicButtons)
 end
 
 -- Function to handle MagicMicroButton clicks
@@ -87,7 +94,7 @@ local function OnMagicClick(self)
 	if not InCombatLockdown() then
 		--print("[MagicMicro] Normal click detected: Preparing custom spellbook frame")
 		WORS_U_PrayBookFrame:Hide()
-		refreshMagicFrame()
+		setupMagicFrame()
 		if not WORS_U_SpellBook.frame:IsShown() then
 			--print("[MagicMicro] Spellbook frame is hidden: Toggling it on")
 			MicroMenu_ToggleFrame(WORS_U_SpellBook.frame)
@@ -134,32 +141,9 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
                 WORS_U_SpellBook.frame:SetPoint("CENTER")
             end
             positioned = true
-            refreshMagicFrame()
+            setupMagicFrame()
         end
         return
-    end
-
-    if event == "BAG_UPDATE" or event == "PLAYER_EQUIPMENT_CHANGED" then
-        -- if in combat and frame is open (and backpack is closed), defer refresh
-        if InCombatLockdown() and WORS_U_SpellBook.frame:IsShown() then
-            needsRefresh = true
-			print("spell needsRefresh set true. Event: " .. event)
-        -- otherwise, if the book is open and backpack closed, refresh immediately
-        elseif not InCombatLockdown() and WORS_U_SpellBook.frame:IsShown() then
-            refreshMagicFrame()
-			needsRefresh = false		    
-			print("spell needsRefresh set false. Event: " .. event)
-		end
-
-    elseif event == "PLAYER_REGEN_ENABLED" then
-        -- combat just ended (or cooldown info arrived): do any deferred refresh
-        if needsRefresh then
-            if WORS_U_SpellBook.frame:IsShown() and not InCombatLockdown() then
-				refreshMagicFrame()
-				needsRefresh = false
-				print("spell needsRefresh set false. Event: " .. event)
-            end
-        end		
     end
 end)
 
@@ -168,3 +152,8 @@ end)
 
 
 U_SpellMicroMenuButton:SetScript("OnClick", OnMagicClick)
+
+
+
+
+

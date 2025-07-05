@@ -73,13 +73,20 @@ end
 WORS_U_PrayBook.frame:SetScript("OnShow", UpdatePrayMicroButtonBackground)
 WORS_U_PrayBook.frame:SetScript("OnHide", UpdatePrayMicroButtonBackground)
 
-local function refreshPrayerFrame()
+local function setupPrayerFrame()
     InitializeMagicPrayerLevels()
     SetupPrayerButtons(-8, -5, WORS_U_PrayBook.frame, prayerButtons)
     if WORS_U_MicroMenuSettings.showMagicandPrayer then
         SetupMagicButtons(-8, 160, WORS_U_PrayBook.frame, magicButtons)
     end
 end
+
+
+local function refreshPrayerFrame()
+	RefreshPrayerButtons(prayerButtons)
+	RefreshMagicButtons(magicButtons)
+end
+
 
 
 -- PrayerMicroButton click handler
@@ -92,7 +99,7 @@ local function OnPrayerClick(self)
 	if not InCombatLockdown() then
 		--print("[PrayerMicro] Normal click detected: Preparing custom spellbook frame")
 		WORS_U_SpellBookFrame:Hide()
-		refreshPrayerFrame()
+		setupPrayerFrame()
 		
 		if not WORS_U_PrayBook.frame:IsShown() then
 			--print("[PrayerMicro] Spellbook frame is hidden: Toggling it on")
@@ -143,32 +150,9 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
                 WORS_U_PrayBook.frame:SetPoint("CENTER")
             end
             positioned = true            
-            refreshPrayerFrame()
+            setupPrayerFrame()
         end
         return
-    end
-
-    if event == "BAG_UPDATE" or event == "PLAYER_EQUIPMENT_CHANGED" then
-        -- if in combat and frame is open (and backpack is closed), defer refresh
-        if InCombatLockdown() and  WORS_U_PrayBook.frame:IsShown() then
-            needsRefresh = true
-			print("prayer needsRefresh set true. Event: " .. event)
-        -- otherwise, if the book is open and backpack closed, refresh immediately
-        elseif not InCombatLockdown() and WORS_U_PrayBook.frame:IsShown() then
-            refreshPrayerFrame()
-			needsRefresh = false
-			print("prayer needsRefresh set false. Event: " .. event)
-		end
-
-    elseif event == "PLAYER_REGEN_ENABLED" then
-        -- combat just ended (or cooldown info arrived): do any deferred refresh
-        if needsRefresh then            
-            if WORS_U_PrayBook.frame:IsShown() and not InCombatLockdown() then
-				refreshPrayerFrame()
-				needsRefresh = false
-				print("prayer needsRefresh set false. Event: " .. event)
-            end			
-        end		
     end
 end)
 
