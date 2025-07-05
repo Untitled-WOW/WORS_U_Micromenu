@@ -82,13 +82,6 @@ local function setupPrayerFrame()
 end
 
 
-local function refreshPrayerFrame()
-	RefreshPrayerButtons(prayerButtons)
-	RefreshMagicButtons(magicButtons)
-end
-
-
-
 -- PrayerMicroButton click handler
 local function OnPrayerClick(self)
     if IsShiftKeyDown() then
@@ -99,8 +92,6 @@ local function OnPrayerClick(self)
 	if not InCombatLockdown() then
 		--print("[PrayerMicro] Normal click detected: Preparing custom spellbook frame")
 		WORS_U_SpellBookFrame:Hide()
-		setupPrayerFrame()
-		
 		if not WORS_U_PrayBook.frame:IsShown() then
 			--print("[PrayerMicro] Spellbook frame is hidden: Toggling it on")
 			MicroMenu_ToggleFrame(WORS_U_PrayBook.frame)
@@ -128,14 +119,10 @@ end
 
 
 local positioned = false
-local needsRefresh = false
 local eventFrame = CreateFrame("Frame")
 -- Register the events we'll use
 eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-eventFrame:RegisterEvent("BAG_UPDATE")
-eventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-eventFrame:RegisterEvent("BAG_UPDATE_COOLDOWN")    -- fires when you leave combat
 eventFrame:SetScript("OnEvent", function(self, event, ...)
     if not positioned then
         -- initial placement, only once and only out of combat

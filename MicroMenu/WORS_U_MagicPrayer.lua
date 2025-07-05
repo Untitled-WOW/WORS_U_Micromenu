@@ -11,11 +11,6 @@ end
 
 -- Returns true if the player meets all requirements to cast spell works for wors magic spell rune requirment
 function CanCastSpell(spellData)
-    -- 1) level check
-    if magicLevel < spellData.level then
-        return false
-    end
-    -- 2) Blizzard’s “usable?” check (cooldowns, power, known, etc)
     local name = select(1, GetSpellInfo(spellData.id))
     local usable = IsUsableSpell(name)
     if not usable then
@@ -25,8 +20,7 @@ function CanCastSpell(spellData)
 end
 
 
--- One-time creation of magic buttons (e.g. on PLAYER_LOGIN)
--- One-time creation of magic buttons (e.g. in your PLAYER_LOGIN handler)
+-- One-time creation of magic buttons 
 function SetupMagicButtons(XOffset, YOffset, frameName, magicButtons)
     if InCombatLockdown() then return end
     -- refresh the current magicLevel
@@ -51,14 +45,7 @@ function SetupMagicButtons(XOffset, YOffset, frameName, magicButtons)
         -- create the secure button
         local btn = CreateFrame("Button", nil, frameName, "SecureActionButtonTemplate")
         btn:SetSize(buttonSize, buttonSize)
-        btn:SetPoint(
-            "TOPLEFT", frameName, "TOPLEFT",
-            XOffset + margin + (buttonSize + colPadding) * col,
-           -YOffset   - margin - (buttonSize + rowPadding) * row
-        )
-
-        -- stash the raw data for possible refresh use
-        btn.spellData = data
+        btn:SetPoint("TOPLEFT", frameName, "TOPLEFT", XOffset + margin + (buttonSize + colPadding) * col, -YOffset   - margin - (buttonSize + rowPadding) * row)
 
         -- create & cache the icon texture
         local icon = btn:CreateTexture(nil, "ARTWORK")
@@ -76,6 +63,9 @@ function SetupMagicButtons(XOffset, YOffset, frameName, magicButtons)
                 icon:SetVertexColor(0.25, 0.25, 0.25)
             end
         end
+
+        -- stash the raw data for possible refresh use
+        btn.spellData = data
 
         -- secure-cast attributes
         btn:SetAttribute("type",  "spell")
@@ -139,6 +129,8 @@ function SetupMagicButtons(XOffset, YOffset, frameName, magicButtons)
     end
 end
 
+
+
 -- One-time creation of prayer buttons
 function SetupPrayerButtons(XOffset, YOffset, frameName, prayerButtons)
     if InCombatLockdown() then return end
@@ -154,11 +146,7 @@ function SetupPrayerButtons(XOffset, YOffset, frameName, prayerButtons)
 
         local btn = CreateFrame("Button", nil, frameName, "SecureActionButtonTemplate")
         btn:SetSize(size, size)
-        btn:SetPoint(
-          "TOPLEFT", frameName, "TOPLEFT",
-          XOffset + margin + (size+padX)*col,
-          -YOffset   - margin - (size+padY)*row
-        )
+        btn:SetPoint("TOPLEFT", frameName, "TOPLEFT", XOffset + margin + (size+padX)*col, -YOffset   - margin - (size+padY)*row)
 
         -- create & cache our icon texture **and set its initial texture**:
         local icon = btn:CreateTexture(nil, "ARTWORK")

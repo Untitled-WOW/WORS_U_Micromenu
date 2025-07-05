@@ -79,12 +79,6 @@ local function setupMagicFrame()
 end
 
 
-
-local function refreshMagicFrame()
-	RefreshPrayerButtons(prayerButtons)
-	RefreshMagicButtons(magicButtons)
-end
-
 -- Function to handle MagicMicroButton clicks
 local function OnMagicClick(self)
     if IsShiftKeyDown() then -- not used preserving original spell book icon to open WOW spell book ui now using U_SpellBookMicroButtonCopy /
@@ -94,7 +88,6 @@ local function OnMagicClick(self)
 	if not InCombatLockdown() then
 		--print("[MagicMicro] Normal click detected: Preparing custom spellbook frame")
 		WORS_U_PrayBookFrame:Hide()
-		setupMagicFrame()
 		if not WORS_U_SpellBook.frame:IsShown() then
 			--print("[MagicMicro] Spellbook frame is hidden: Toggling it on")
 			MicroMenu_ToggleFrame(WORS_U_SpellBook.frame)
@@ -119,14 +112,10 @@ local function OnMagicClick(self)
 end
 
 local positioned = false
-local needsRefresh = false
 local eventFrame = CreateFrame("Frame")
 
 eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-eventFrame:RegisterEvent("BAG_UPDATE")
-eventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-eventFrame:RegisterEvent("BAG_UPDATE_COOLDOWN")    -- fires when you leave combat
 eventFrame:SetScript("OnEvent", function(self, event, ...)
     if not positioned then
         -- initial placement, only once and only out of combat
