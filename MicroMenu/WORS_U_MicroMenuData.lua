@@ -12,113 +12,94 @@ MicroMenu_Frames = {WORS_U_SpellBookFrame, WORS_U_PrayBookFrame, WORS_U_EmoteBoo
 -- WORS_U_SpellBook.lua Data
 WORS_U_SpellBook = {}
 WORS_U_SpellBook.spells = {
-    {level = 0,  name = "Lumbridge Home Teleport",     		id = 99561,  						icon = "Interface\\Icons\\hometele.blp"},
-    {level = 1,  name = "Wind Strike",                 		id = 98952,  runes = {["Air Rune"]=1,["Mind Rune"]=1},                          icon = "Interface\\Icons\\windstrike.blp"},
-    {level = 3,  name = "Confuse",                     		id = 99311,  runes = {["Body Rune"]=1,["Earth Rune"]=2,["Water Rune"]=3},      icon = "Interface\\Icons\\confuseicon.blp"},
- -- {level = 4,  name = "Enchant Crossbow Bolt (Opal)",		id = nil,    runes = {["Cosmic Rune"]=1,["Fire Rune"]=1},                       icon = "Interface\\Icons\\enchantcrossbow.blp"},
-    {level = 5,  name = "Water Strike",                		id = 79535,  runes = {["Water Rune"]=1,["Mind Rune"]=1},                       icon = "Interface\\Icons\\waterstrike.blp"},
-    {level = 7,  name = "Lvl-1 Enchant",               		id = 460022, runes = {["Cosmic Rune"]=1,["Water Rune"]=1},   openInv=true,    icon = "Interface\\Icons\\sapphireenchanting.blp"},
- -- {level = 7,  name = "Enchant Crossbow Bolt (Sapphire)", id = nil,    runes = {["Cosmic Rune"]=1,["Water Rune"]=1},                       icon = "Interface\\Icons\\enchantcrossbow.blp"},
-    {level = 9,  name = "Earth Strike",                		id = 79540,  runes = {["Earth Rune"]=2,["Mind Rune"]=1},                        icon = "Interface\\Icons\\earthstrike.blp"},
-    {level = 11, name = "Weaken",                      		id = 99312,  runes = {["Body Rune"]=1,["Earth Rune"]=3,["Water Rune"]=3},      icon = "Interface\\Icons\\weakenicon.blp"},
-    {level = 13, name = "Fire Strike",                 		id = 79545,  runes = {["Fire Rune"]=3,["Mind Rune"]=1},                        icon = "Interface\\Icons\\firestrike.blp"},
- -- {level = 14, name = "Enchant Crossbow Bolt (Jade)",		id = nil,    runes = {["Cosmic Rune"]=1,["Fire Rune"]=1},                       icon = "Interface\\Icons\\enchantdragonstone.blp"},
-    {level = 15, name = "Bones to Bananas",            		id = 99313,  runes = {["Nature Rune"]=1,["Earth Rune"]=2,["Water Rune"]=2,["Bones"]=1}, openInv=true, icon = "Interface\\Icons\\bonestobananas.blp"},
-    {level = 17, name = "Wind Bolt",                   		id = 79531,  runes = {["Air Rune"]=2,["Chaos Rune"]=1},                         icon = "Interface\\Icons\\windbolt.blp"},
-    {level = 19, name = "Curse",                       		id = 99314,  runes = {["Body Rune"]=2,["Earth Rune"]=3,["Water Rune"]=3},      icon = "Interface\\Icons\\curseicon.blp"},
-    {level = 20, name = "Bind",                        		id = 99316,  runes = {["Nature Rune"]=2,["Earth Rune"]=3,["Water Rune"]=3},    icon = "Interface\\Icons\\bindicon.blp"},
-    {level = 21, name = "Low Level Alchemy",           		id = 114135, runes = {["Nature Rune"]=1,["Fire Rune"]=3},   openInv=true,    icon = "Interface\\Icons\\lowalch.blp"},
-    {level = 23, name = "Water Bolt",                  		id = 79536,  runes = {["Water Rune"]=2,["Chaos Rune"]=1},                         icon = "Interface\\Icons\\waterbolt.blp"},
- -- {level = 24, name = "Enchant Crossbow Bolt (Pearl)",	id = nil,    runes = {["Cosmic Rune"]=1,["Water Rune"]=1},                       icon = "Interface\\Icons\\enchantcrossbow.blp"},
-    {level = 25, name = "Varrock Teleport",            		id = 114193, runes = {["Law Rune"]=1,["Fire Rune"]=1,["Air Rune"]=3},         icon = "Interface\\Icons\\varrocktele.blp"},
-    {level = 27, name = "Lvl-2 Enchant",               		id = 460023, runes = {["Cosmic Rune"]=1,["Earth Rune"]=1}, openInv=true,     icon = "Interface\\Icons\\emeraldenchanting.blp"},
- -- {level = 27, name = "Enchant Crossbow Bolt (Emerald)",  id = nil,    runes = {["Cosmic Rune"]=1,["Earth Rune"]=1},                       icon = "Interface\\Icons\\enchantcrossbow.blp"},
-    {level = 29, name = "Earth Bolt",                  		id = 79541,  runes = {["Earth Rune"]=2,["Chaos Rune"]=1},                         icon = "Interface\\Icons\\earthbolt.blp"},
- -- {level = 29, name = "Enchant Crossbow Bolt (Red Topaz)",id = nil,    runes = {["Cosmic Rune"]=1,["Fire Rune"]=1},                       icon = "Interface\\Icons\\enchantcrossbow.blp"},
-    {level = 31, name = "Lumbridge Teleport",          		id = 114196, runes = {["Law Rune"]=1,["Earth Rune"]=1,["Air Rune"]=3},         icon = "Interface\\Icons\\lumbridgetele.blp"},
-    {level = 33, name = "Telekinetic Grab (Corpse)",   		id = 114134, runes = {["Law Rune"]=1,["Air Rune"]=1},                         icon = "Interface\\Icons\\telegrab.blp"},
-    {level = 33, name = "Telekinetic Grab (Gameobject)",	id = 1812,   runes = {["Law Rune"]=1,["Air Rune"]=1},                         icon = "Interface\\Icons\\telegrab.blp"},
-    {level = 35, name = "Fire Bolt",                   		id = 79546,  runes = {["Fire Rune"]=3,["Chaos Rune"]=1},                         icon = "Interface\\Icons\\firebolt.blp"},
-    {level = 37, name = "Falador Teleport",            		id = 114194, runes = {["Law Rune"]=1,["Water Rune"]=1,["Air Rune"]=3},        icon = "Interface\\Icons\\faladortele.blp"},
-    {level = 39, name = "Crumble Undead",              		id = 99317,  runes = {["Earth Rune"]=2,["Air Rune"]=2,["Chaos Rune"]=1},       icon = "Interface\\Icons\\crumbleundead.blp"},
- -- {level = 40, name = "Teleport to House",           		id = nil,    runes = {["Law Rune"]=1,["Earth Rune"]=1,["Air Rune"]=1},           icon = "Interface\\Icons\\teleporttohouse.blp"},
-    {level = 41, name = "Wind Blast",                  		id = 79532,  runes = {["Air Rune"]=3,["Death Rune"]=1},                          icon = "Interface\\Icons\\windblast.blp"},
-    {level = 43, name = "Superheat Item",              		id = 99318,  runes = {["Fire Rune"]=4,["Nature Rune"]=1},       openInv=true,    icon = "Interface\\Icons\\superheaticon.blp"},
-    {level = 45, name = "Camelot Teleport",            		id = 114197, runes = {["Law Rune"]=1,["Air Rune"]=5},                        icon = "Interface\\Icons\\camelottele.blp"},
-    {level = 47, name = "Water Blast",                 		id = 79537,  runes = {["Water Rune"]=3,["Death Rune"]=1},                       icon = "Interface\\Icons\\waterblast.blp"},
- -- {level = 48, name = "Kourend Castle Teleport",     		id = nil,    runes = {["Law Rune"]=2,["Soul Rune"]=2},                       icon = "Interface\\Icons\\kourendcastletele.blp"},
-    {level = 49, name = "Lvl-3 Enchant",               		id = 460024, runes = {["Cosmic Rune"]=1,["Fire Rune"]=5},   openInv=true,     icon = "Interface\\Icons\\rubyenchanting.blp"},
- -- {level = 49, name = "Enchant Crossbow Bolt (Ruby)", 	id = nil,    runes = {["Cosmic Rune"]=1,["Fire Rune"]=5},                       icon = "Interface\\Icons\\enchantcrossbow.blp"},
- -- {level = 50, name = "Iban Blast",                  		id = nil,    runes = {["Fire Rune"]=5,["Death Rune"]=1},                      icon = "Interface\\Icons\\ibanblast.blp"},
-    {level = 50, name = "Snare",                       		id = 99537,  runes = {["Nature Rune"]=2,["Earth Rune"]=4,["Water Rune"]=4},     icon = "Interface\\Icons\\snareicon.blp"},
- -- {level = 50, name = "Magic Dart",                  		id = nil,    runes = {["Air Rune"]=1,["Death Rune"]=1},                       icon = "Interface\\Icons\\magicdart.blp"},
-    {level = 51, name = "Ardougne Teleport",           		id = 114198, runes = {["Law Rune"]=2,["Water Rune"]=2},                        icon = "Interface\\Icons\\ardytele.blp"},
-    {level = 53, name = "Earth Blast",                 		id = 79542,  runes = {["Earth Rune"]=3,["Death Rune"]=1},                        icon = "Interface\\Icons\\earthblast.blp"},
- -- {level = 54, name = "Civitas illa Fortis Teleport", 	id = nil,    runes = {["Law Rune"]=2,["Fire Rune"]=2},                       icon = "Interface\\Icons\\civitasilafortistele.blp"},
-    {level = 55, name = "High Level Alchemy",          		id = 200090, runes = {["Nature Rune"]=1,["Fire Rune"]=5},       openInv=true,    icon = "Interface\\Icons\\highalch.blp"},
-    {level = 56, name = "Charge Water Orb",            		id = 99233,  runes = {["Water Rune"]=30,["Cosmic Rune"]=3,["Unpowered Orb"]=1}, openInv=true, icon = "Interface\\Icons\\chargewaterorb.blp"},
-    {level = 57, name = "Lvl-4 Enchant",               		id = 460025, runes = {["Cosmic Rune"]=1,["Earth Rune"]=10},    openInv=true,    icon = "Interface\\Icons\\diamondenchanting.blp"},  -- {level = 57, name = "Enchant Crossbow Bolt (Diamond)", id = nil,     runes = {["Cosmic Rune"]=1,["Earth Rune"]=10},                   icon = "Interface\\Icons\\enchantcrossbow.blp"},
-    {level = 58, name = "Watchtower Teleport",         		id = 114200, runes = {["Law Rune"]=2,["Earth Rune"]=2},                        icon = "Interface\\Icons\\watchtowertele.blp"},
-    {level = 59, name = "Fire Blast",                  		id = 79547,  runes = {["Fire Rune"]=4,["Death Rune"]=1},                       icon = "Interface\\Icons\\fireblast.blp"},
-    {level = 60, name = "Charge Earth Orb",            		id = 99234,  runes = {["Earth Rune"]=30,["Cosmic Rune"]=3,["Unpowered Orb"]=1}, openInv=true, icon = "Interface\\Icons\\chargeearthorb.blp"},
- -- {level = 60, name = "Bones to Peaches",            		id = nil,    runes = {["Nature Rune"]=2,["Earth Rune"]=4,["Water Rune"]=4},       icon = "Interface\\Icons\\bonestopeaches.blp"},
- -- {level = 60, name = "Saradomin Strike",            		id = nil,    runes = {["Fire Rune"]=2,["Blood Rune"]=2},                        icon = "Interface\\Icons\\saradominstrike.blp"},
- -- {level = 60, name = "Flames of Zamorak",           		id = nil,    runes = {["Fire Rune"]=2,["Blood Rune"]=2},                        icon = "Interface\\Icons\\flamesofzamorak.blp"},
- -- {level = 60, name = "Claws of Guthix",             		id = nil,    runes = {["Air Rune"]=2,["Blood Rune"]=2},                        icon = "Interface\\Icons\\clawsofguthix.blp"},
-    {level = 61, name = "Trollheim Teleport",          		id = 114199, runes = {["Law Rune"]=2,["Fire Rune"]=2},                        icon = "Interface\\Icons\\trollheimtele.blp"},
-    {level = 62, name = "Wind Wave",                   		id = 79533,  runes = {["Air Rune"]=5,["Blood Rune"]=1},                       icon = "Interface\\Icons\\windwave.blp"},
-    {level = 63, name = "Charge Fire Orb",             		id = 99235,  runes = {["Fire Rune"]=30,["Cosmic Rune"]=3,["Unpowered Orb"]=1}, openInv=true, icon = "Interface\\Icons\\chargefireorb.blp"},
- -- {level = 64, name = "Ape Atoll Teleport",         		id = nil,    runes = {["Law Rune"]=2,["Fire Rune"]=3},                       icon = "Interface\\Icons\\apeatolltele.blp"},
-    {level = 65, name = "Water Wave",                 		id = 79538,  runes = {["Water Rune"]=7,["Blood Rune"]=1,["Air Rune"]=5},      icon = "Interface\\Icons\\waterwave.blp"},
-    {level = 66, name = "Charge Air Orb",              		id = 99236,  runes = {["Air Rune"]=30,["Cosmic Rune"]=3,["Unpowered Orb"]=1}, openInv=true,  icon = "Interface\\Icons\\chargeairorb.blp"},
- -- {level = 66, name = "Vulnerability",              		id = nil,    runes = {["Body Rune"]=1,["Earth Rune"]=5,["Water Rune"]=5},         icon = "Interface\\Icons\\vulnerability.blp"},
-    {level = 68, name = "Lvl-5 Enchant",               		id = 460026, runes = {["Cosmic Rune"]=1,["Earth Rune"]=15},   openInv=true,    icon = "Interface\\Icons\\dragonstoneenchanting.blp"},  -- {level = 68, name = "Enchant Crossbow Bolt (Dragonstone)", id = nil,     runes = {["Cosmic Rune"]=1,["Earth Rune"]=15},                   icon = "Interface\\Icons\\enchantdragonstone.blp"},
-    {level = 70, name = "Earth Wave",                  		id = 79543,  runes = {["Earth Rune"]=7,["Blood Rune"]=1},                         icon = "Interface\\Icons\\earthwave.blp"},
- -- {level = 73, name = "Enfeeble",                   		id = nil,    runes = {["Body Rune"]=1,["Earth Rune"]=8,["Water Rune"]=8},           icon = "Interface\\Icons\\enfeeble.blp"},
- -- {level = 74, name = "Teleother Lumbridge",        		id = nil,    runes = {["Law Rune"]=1,["Soul Rune"]=1,["Earth Rune"]=1},            icon = "Interface\\Icons\\teleotherlumbridge.blp"},
-    {level = 75, name = "Fire Wave",                  		id = 79548,  runes = {["Fire Rune"]=7,["Blood Rune"]=1},                         icon = "Interface\\Icons\\firewave.blp"},
-    {level = 79, name = "Entangle",                    		id = 99315,  runes = {["Nature Rune"]=3,["Earth Rune"]=5,["Water Rune"]=5},      icon = "Interface\\Icons\\entangleicon.blp"},
- -- {level = 80, name = "Stun",                       		id = nil,    runes = {["Body Rune"]=1,["Earth Rune"]=12,["Water Rune"]=12},         icon = "Interface\\Icons\\stunicon.blp"},
-    {level = 80, name = "Charge",                      		id = 707049, runes = {["Blood Rune"]=3,["Fire Rune"]=3,["Air Rune"]=3},       icon = "Interface\\Icons\\chargeicon.blp"},
- -- {level = 81, name = "Wind Surge",                 		id = nil,    runes = {["Air Rune"]=7,["Death Rune"]=1},                          icon = "Interface\\Icons\\windsurge.blp"},
- -- {level = 82, name = "Teleother Falador",          		id = nil,    runes = {["Law Rune"]=1,["Soul Rune"]=1,["Water Rune"]=1},             icon = "Interface\\Icons\\teleotherfalador.blp"},
- -- {level = 85, name = "Water Surge",                		id = nil,    runes = {["Water Rune"]=7,["Death Rune"]=1},                         icon = "Interface\\Icons\\watersurge.blp"},
-    {level = 85, name = "Tele Block",                  		id = 99542,  runes = {["Law Rune"]=1,["Chaos Rune"]=1,["Death Rune"]=1},      icon = "Interface\\Icons\\teleblockicon.blp"},
- -- {level = 85, name = "Teleport to Target",         		id = nil,    runes = {["Law Rune"]=2,["Soul Rune"]=2},                           icon = "Interface\\Icons\\teleporttotarget.blp"},
- -- {level = 87, name = "Lvl-6 Enchant",               		id = nil,    runes = {["Cosmic Rune"]=1,["Soul Rune"]=20},                        icon = "Interface\\Icons\\lvl6enchant.blp"},
- -- {level = 87, name = "Enchant Crossbow Bolt (Onyx)", 	id = nil,    runes = {["Cosmic Rune"]=1,["Soul Rune"]=20},                        icon = "Interface\\Icons\\enchantonyx.blp"},
- -- {level = 90, name = "Teleother Camelot",          		id = nil,    runes = {["Law Rune"]=1,["Soul Rune"]=1,["Fire Rune"]=1},              icon = "Interface\\Icons\\teleothercamelot.blp"},
- -- {level = 90, name = "Earth Surge",                		id = nil,    runes = {["Earth Rune"]=7,["Death Rune"]=1},                         icon = "Interface\\Icons\\earthsurge.blp"},
- -- {level = 93, name = "Lvl-7 Enchant",               		id = nil,    runes = {["Cosmic Rune"]=1,["Soul Rune"]=20},                        icon = "Interface\\Icons\\lvl7enchant.blp"},
- -- {level = 95, name = "Fire Surge",                 		id = nil,    runes = {["Fire Rune"]=10,["Death Rune"]=1},                        icon = "Interface\\Icons\\firesurge.blp"},
- -- {level = 102, name = "Wind Surge",                 		id = 79534,  runes = {["Air Rune"]=7,["Death Rune"]=1},                         icon = "Interface\\Icons\\windsurge.blp"},
- -- {level = 103, name = "Water Surge",                		id = 79539,  runes = {["Water Rune"]=7,["Death Rune"]=1},                        icon = "Interface\\Icons\\watersurge.blp"},
- -- {level = 104, name = "Earth Surge",                		id = 79544,  runes = {["Earth Rune"]=7,["Death Rune"]=1},                       icon = "Interface\\Icons\\earthsurge.blp"},
- -- {level = 105, name = "Fire Surge",                 		id = 79549,  runes = {["Fire Rune"]=10,["Death Rune"]=1},                      icon = "Interface\\Icons\\firesurge.blp"},
-}
+    {level = 0,  name = "Lumbridge Home Teleport",     		id = 99561,		icon = "Interface\\Icons\\hometele.blp"},
+    {level = 1,  name = "Wind Strike",                 		id = 98952,		icon = "Interface\\Icons\\windstrike.blp"},
+    {level = 3,  name = "Confuse",                     		id = 99311,		icon = "Interface\\Icons\\confuseicon.blp"},
+ -- {level = 4,  name = "Enchant Crossbow Bolt (Opal)",		id = nil,		icon = "Interface\\Icons\\enchantcrossbow.blp"},
+    {level = 5,  name = "Water Strike",                		id = 79535,		icon = "Interface\\Icons\\waterstrike.blp"},
+    {level = 7,  name = "Lvl-1 Enchant",               		id = 460022,	icon = "Interface\\Icons\\sapphireenchanting.blp", 		openInv=true,},
+ -- {level = 7,  name = "Enchant Crossbow Bolt (Sapphire)", id = nil,		icon = "Interface\\Icons\\enchantcrossbow.blp"},	
+    {level = 9,  name = "Earth Strike",                		id = 79540,		icon = "Interface\\Icons\\earthstrike.blp"},	
+    {level = 11, name = "Weaken",                      		id = 99312,		icon = "Interface\\Icons\\weakenicon.blp"},	
+    {level = 13, name = "Fire Strike",                 		id = 79545,		icon = "Interface\\Icons\\firestrike.blp"},	
+ -- {level = 14, name = "Enchant Crossbow Bolt (Jade)",		id = nil,		icon = "Interface\\Icons\\enchantdragonstone.blp"},	
+    {level = 15, name = "Bones to Bananas",            		id = 99313,		icon = "Interface\\Icons\\bonestobananas.blp", 			openInv=true,},
+    {level = 17, name = "Wind Bolt",                   		id = 79531,		icon = "Interface\\Icons\\windbolt.blp"},	
+    {level = 19, name = "Curse",                       		id = 99314,  	icon = "Interface\\Icons\\curseicon.blp"},	
+    {level = 20, name = "Bind",                        		id = 99316,  	icon = "Interface\\Icons\\bindicon.blp"},	
+    {level = 21, name = "Low Level Alchemy",           		id = 114135, 	icon = "Interface\\Icons\\lowalch.blp", 				openInv=true,},
+    {level = 23, name = "Water Bolt",                  		id = 79536,  	icon = "Interface\\Icons\\waterbolt.blp"},	
+ -- {level = 24, name = "Enchant Crossbow Bolt (Pearl)",	id = nil,    	icon = "Interface\\Icons\\enchantcrossbow.blp"},	
+    {level = 25, name = "Varrock Teleport",            		id = 114193, 	icon = "Interface\\Icons\\varrocktele.blp"},	
+    {level = 27, name = "Lvl-2 Enchant",               		id = 460023, 	icon = "Interface\\Icons\\emeraldenchanting.blp", 		openInv=true,},
+ -- {level = 27, name = "Enchant Crossbow Bolt (Emerald)",  id = nil,    	icon = "Interface\\Icons\\enchantcrossbow.blp"},
+    {level = 29, name = "Earth Bolt",                  		id = 79541,  	icon = "Interface\\Icons\\earthbolt.blp"},
+ -- {level = 29, name = "Enchant Crossbow Bolt (Red Topaz)",id = nil,    	icon = "Interface\\Icons\\enchantcrossbow.blp"},
+    {level = 31, name = "Lumbridge Teleport",          		id = 114196, 	icon = "Interface\\Icons\\lumbridgetele.blp"},
+    {level = 33, name = "Telekinetic Grab (Corpse)",   		id = 114134, 	icon = "Interface\\Icons\\telegrab.blp"},
+    {level = 33, name = "Telekinetic Grab (Gameobject)",	id = 1812,   	icon = "Interface\\Icons\\telegrab.blp"},
+    {level = 35, name = "Fire Bolt",                   		id = 79546,  	icon = "Interface\\Icons\\firebolt.blp"},
+    {level = 37, name = "Falador Teleport",            		id = 114194, 	icon = "Interface\\Icons\\faladortele.blp"},
+    {level = 39, name = "Crumble Undead",              		id = 99317,  	icon = "Interface\\Icons\\crumbleundead.blp"},
+ -- {level = 40, name = "Teleport to House",           		id = nil,    	icon = "Interface\\Icons\\teleporttohouse.blp"},
+    {level = 41, name = "Wind Blast",                  		id = 79532,  	icon = "Interface\\Icons\\windblast.blp"},
+    {level = 43, name = "Superheat Item",              		id = 99318,  	icon = "Interface\\Icons\\superheaticon.blp", 			openInv=true,},
+    {level = 45, name = "Camelot Teleport",            		id = 114197, 	icon = "Interface\\Icons\\camelottele.blp"},
+    {level = 47, name = "Water Blast",                 		id = 79537,  	icon = "Interface\\Icons\\waterblast.blp"},
+ -- {level = 48, name = "Kourend Castle Teleport",     		id = nil,    	icon = "Interface\\Icons\\kourendcastletele.blp"},
+    {level = 49, name = "Lvl-3 Enchant",               		id = 460024, 	icon = "Interface\\Icons\\rubyenchanting.blp",			openInv=true,},
+ -- {level = 49, name = "Enchant Crossbow Bolt (Ruby)", 	id = nil,    	icon = "Interface\\Icons\\enchantcrossbow.blp"},
+ -- {level = 50, name = "Iban Blast",                  		id = nil,    	icon = "Interface\\Icons\\ibanblast.blp"},
+    {level = 50, name = "Snare",                       		id = 99537,  	icon = "Interface\\Icons\\snareicon.blp"},
+ -- {level = 50, name = "Magic Dart",                  		id = nil,    	icon = "Interface\\Icons\\magicdart.blp"},
+    {level = 51, name = "Ardougne Teleport",           		id = 114198, 	icon = "Interface\\Icons\\ardytele.blp"},
+    {level = 53, name = "Earth Blast",                 		id = 79542,  	icon = "Interface\\Icons\\earthblast.blp"},
+ -- {level = 54, name = "Civitas illa Fortis Teleport", 	id = nil,    	icon = "Interface\\Icons\\civitasilafortistele.blp"},
+    {level = 55, name = "High Level Alchemy",          		id = 200090, 	icon = "Interface\\Icons\\highalch.blp", 				openInv=true,},
+    {level = 56, name = "Charge Water Orb",            		id = 99233,  	icon = "Interface\\Icons\\chargewaterorb.blp", 			openInv=true,},
+    {level = 57, name = "Lvl-4 Enchant",               		id = 460025, 	icon = "Interface\\Icons\\diamondenchanting.blp", 		openInv=true,},  
+ -- {level = 57, name = "Enchant Crossbow Bolt (Diamond)", id = nil,        icon = "Interface\\Icons\\enchantcrossbow.blp"},
+    {level = 58, name = "Watchtower Teleport",         		id = 114200, 	icon = "Interface\\Icons\\watchtowertele.blp"},
+    {level = 59, name = "Fire Blast",                  		id = 79547,  	icon = "Interface\\Icons\\fireblast.blp"},
+    {level = 60, name = "Charge Earth Orb",            		id = 99234,  	icon = "Interface\\Icons\\chargeearthorb.blp", 			openInv=true,},
+ -- {level = 60, name = "Bones to Peaches",            		id = nil,    	icon = "Interface\\Icons\\bonestopeaches.blp"},
+ -- {level = 60, name = "Saradomin Strike",            		id = nil,    	icon = "Interface\\Icons\\saradominstrike.blp"},
+ -- {level = 60, name = "Flames of Zamorak",           		id = nil,    	icon = "Interface\\Icons\\flamesofzamorak.blp"},
+ -- {level = 60, name = "Claws of Guthix",             		id = nil,    	icon = "Interface\\Icons\\clawsofguthix.blp"},
+    {level = 61, name = "Trollheim Teleport",          		id = 114199, 	icon = "Interface\\Icons\\trollheimtele.blp"},
+    {level = 62, name = "Wind Wave",                   		id = 79533,  	icon = "Interface\\Icons\\windwave.blp"},
+    {level = 63, name = "Charge Fire Orb",             		id = 99235,  	icon = "Interface\\Icons\\chargefireorb.blp", 			openInv=true,},
+ -- {level = 64, name = "Ape Atoll Teleport",         		id = nil,    	icon = "Interface\\Icons\\apeatolltele.blp"},
+    {level = 65, name = "Water Wave",                 		id = 79538,  	icon = "Interface\\Icons\\waterwave.blp"},
+    {level = 66, name = "Charge Air Orb",              		id = 99236,  	icon = "Interface\\Icons\\chargeairorb.blp", 			openInv=true,},
+ -- {level = 66, name = "Vulnerability",              		id = nil,    	icon = "Interface\\Icons\\vulnerability.blp"},
+    {level = 68, name = "Lvl-5 Enchant",               		id = 460026, 	icon = "Interface\\Icons\\dragonstoneenchanting.blp", 	openInv=true,}, 
+ -- {level = 68, name = "Enchant Crossbow Bolt (Dragonstone)", id = nil,    icon = "Interface\\Icons\\enchantdragonstone.blp"},
+    {level = 70, name = "Earth Wave",                  		id = 79543,  	icon = "Interface\\Icons\\earthwave.blp"},
+ -- {level = 73, name = "Enfeeble",                   		id = nil,    	icon = "Interface\\Icons\\enfeeble.blp"},
+ -- {level = 74, name = "Teleother Lumbridge",        		id = nil,    	icon = "Interface\\Icons\\teleotherlumbridge.blp"},
+    {level = 75, name = "Fire Wave",                  		id = 79548,  	icon = "Interface\\Icons\\firewave.blp"},
+    {level = 79, name = "Entangle",                    		id = 99315,  	icon = "Interface\\Icons\\entangleicon.blp"},
+ -- {level = 80, name = "Stun",                       		id = nil,    	icon = "Interface\\Icons\\stunicon.blp"},
+    {level = 80, name = "Charge",                      		id = 707049, 	icon = "Interface\\Icons\\chargeicon.blp"},
+ -- {level = 81, name = "Wind Surge",                 		id = nil,    	icon = "Interface\\Icons\\windsurge.blp"},
+ -- {level = 82, name = "Teleother Falador",          		id = nil,    	icon = "Interface\\Icons\\teleotherfalador.blp"},
+ -- {level = 85, name = "Water Surge",                		id = nil,    	icon = "Interface\\Icons\\watersurge.blp"},
+    {level = 85, name = "Tele Block",                  		id = 99542,  	icon = "Interface\\Icons\\teleblockicon.blp"},
+ -- {level = 85, name = "Teleport to Target",         		id = nil,    	icon = "Interface\\Icons\\teleporttotarget.blp"},
+ -- {level = 87, name = "Lvl-6 Enchant",               		id = nil,    	icon = "Interface\\Icons\\lvl6enchant.blp"},
+ -- {level = 87, name = "Enchant Crossbow Bolt (Onyx)", 	id = nil,    	icon = "Interface\\Icons\\enchantonyx.blp"},
+ -- {level = 90, name = "Teleother Camelot",          		id = nil,    	icon = "Interface\\Icons\\teleothercamelot.blp"},
+ -- {level = 90, name = "Earth Surge",                		id = nil,    	icon = "Interface\\Icons\\earthsurge.blp"},
+ -- {level = 93, name = "Lvl-7 Enchant",               		id = nil,    	icon = "Interface\\Icons\\lvl7enchant.blp"},
+ -- {level = 95, name = "Fire Surge",                 		id = nil,    	icon = "Interface\\Icons\\firesurge.blp"},
+ -- {level = 102, name = "Wind Surge",                 		id = 79534,  	icon = "Interface\\Icons\\windsurge.blp"},
+ -- {level = 103, name = "Water Surge",                		id = 79539,  	icon = "Interface\\Icons\\watersurge.blp"},
+ -- {level = 104, name = "Earth Surge",                		id = 79544,  	icon = "Interface\\Icons\\earthsurge.blp"},
+ -- {level = 105, name = "Fire Surge",                 		id = 79549,  	icon = "Interface\\Icons\\firesurge.blp"},
+}                                                                           
 
--- rune and staff ids for spell colours
-WORS_U_SpellBook.runeInfo = {
-    ["Air Rune"]    = { itemID = 90120, staffIDs = {90838, 90404} },
-    ["Water Rune"]  = { itemID = 90107, staffIDs = {90837, 90533} },
-    ["Earth Rune"]  = { itemID = 90067, staffIDs = {90839, 90433, 51348} },
-    ["Fire Rune"]   = { itemID = 90070, staffIDs = {90836, 90439, 51348} },
-    ["Mind Rune"]   = { itemID = 90090, staffIDs = {} },
-    ["Chaos Rune"]  = { itemID = 90052, staffIDs = {} },
-    ["Death Rune"]  = { itemID = 90133, staffIDs = {} },
-    ["Blood Rune"]  = { itemID = 90125, staffIDs = {} },
-	["Body Rune"]   = { itemID = 90038, staffIDs = {} },
-    ["Cosmic Rune"] = { itemID = 90130, staffIDs = {} },
-    ["Nature Rune"] = { itemID = 90091, staffIDs = {} },
-    ["Law Rune"]    = { itemID = 90139, staffIDs = {} },
-    ["Soul Rune"]   = { itemID = 566, staffIDs = {} },
-    ["Astral Rune"] = { itemID = 90123, staffIDs = {} },
-    ["Wrath Rune"]  = { itemID = 90109, staffIDs = {} },
-	["Bones"] = { itemID = 90039, staffIDs = {} },
-	--["Monkey Bones"] = { itemID = 90109, staffIDs = {} },
-	["Big Bones"] = { itemID = 90036, staffIDs = {} },
-	["Unpowered Orb"] = { itemID = 69420, staffIDs = {} },
-}
+
 
 -- check if player has runes required to cast spell 
 function WORS_U_SpellBook:HasRequiredRunes(runeTable)
@@ -156,25 +137,25 @@ end
 -- WORS_U_PrayBook.lua Data
 WORS_U_PrayBook = {}  -- Create the main table for the PrayBook
 WORS_U_PrayBook.prayers = {
-    {level=1,  id=79502,  icon="Interface\\Icons\\thickskin.blp",             buffIcon="Interface\\Icons\\active_thickskin.blp"},           -- Thick Skin
-    {level=4,  id=79506,  icon="Interface\\Icons\\burststrength.blp",         buffIcon="Interface\\Icons\\active_burststrength.blp"},       -- Burst of Strength
-    {level=7,  id=79508,  icon="Interface\\Icons\\claritythought.blp",        buffIcon="Interface\\Icons\\active_claritythought.blp"},      -- Clarity of Thought
-    {level=8,  id=79512,  icon="Interface\\Icons\\sharpeye.blp",              buffIcon="Interface\\Icons\\active_sharpeye.blp"},            -- Sharp Eye
-    {level=9,  id=79514,  icon="Interface\\Icons\\mysticwill.blp",            buffIcon="Interface\\Icons\\active_mysticwill.blp"},          -- Mystic Will
-    {level=10, id=79503,  icon="Interface\\Icons\\rockskin.blp",              buffIcon="Interface\\Icons\\active_rockskin.blp"},            -- Rock Skin
-    {level=13, id=79505,  icon="Interface\\Icons\\superhumanstrength.blp",    buffIcon="Interface\\Icons\\active_superhumanstrength.blp"},  -- Superhuman Strength
-    {level=16, id=79509,  icon="Interface\\Icons\\improvedreflexes.blp",      buffIcon="Interface\\Icons\\active_improvedreflexes.blp"},    -- Improved Reflexes
-    {level=19, id=80019,  icon="Interface\\Icons\\rapidrestore.blp",          buffIcon="Interface\\Icons\\active_rapidrestore.blp"},        -- Rapid Restore
-    {level=22, id=79521,  icon="Interface\\Icons\\rapidheal.blp",             buffIcon="Interface\\Icons\\active_rapidheal.blp"},           -- Rapid Heal
-    {level=25, id=114131, icon="Interface\\Icons\\protectitem.blp",           buffIcon="Interface\\Icons\\active_protectitem.blp"},         -- Protect Item
-    {level=26, id=79511,  icon="Interface\\Icons\\hawkeye.blp",               buffIcon="Interface\\Icons\\active_hawkeye.blp"},             -- Hawk Eye
-    {level=27, id=79516,  icon="Interface\\Icons\\mysticlore.blp",            buffIcon="Interface\\Icons\\active_mysticlore.blp"},          -- Mystic Lore
-    {level=28, id=79504,  icon="Interface\\Icons\\steelskin.blp",             buffIcon="Interface\\Icons\\active_steelskin.blp"},           -- Steel Skin
-    {level=31, id=79507,  icon="Interface\\Icons\\ultimatestrength.blp",      buffIcon="Interface\\Icons\\active_ultimatestrength.blp"},    -- Ultimate Strength
-    {level=34, id=79510,  icon="Interface\\Icons\\incrediblereflexes.blp",    buffIcon="Interface\\Icons\\active_incrediblereflexes.blp"},  -- Incredible Reflexes
-    {level=37, id=79501,  icon="Interface\\Icons\\magicpray.blp",             buffIcon="Interface\\Icons\\active_magicpray.blp"},           -- Protect from Magic
-    {level=40, id=79500,  icon="Interface\\Icons\\rangepray.blp",             buffIcon="Interface\\Icons\\active_rangepray.blp"},           -- Protect from Missiles
-    {level=43, id=465,    icon="Interface\\Icons\\meleepray.blp",             buffIcon="Interface\\Icons\\active_meleepray.blp"},           -- Protect from Melee
+    {level=1,  id=79502,  icon="Interface\\Icons\\thickskin.blp",            buffIcon="Interface\\Icons\\active_thickskin.blp"},           -- Thick Skin
+    {level=4,  id=79506,  icon="Interface\\Icons\\burststrength.blp",        buffIcon="Interface\\Icons\\active_burststrength.blp"},       -- Burst of Strength
+    {level=7,  id=79508,  icon="Interface\\Icons\\claritythought.blp",       buffIcon="Interface\\Icons\\active_claritythought.blp"},      -- Clarity of Thought
+    {level=8,  id=79512,  icon="Interface\\Icons\\sharpeye.blp",             buffIcon="Interface\\Icons\\active_sharpeye.blp"},            -- Sharp Eye
+    {level=9,  id=79514,  icon="Interface\\Icons\\mysticwill.blp",           buffIcon="Interface\\Icons\\active_mysticwill.blp"},          -- Mystic Will
+    {level=10, id=79503,  icon="Interface\\Icons\\rockskin.blp",             buffIcon="Interface\\Icons\\active_rockskin.blp"},            -- Rock Skin
+    {level=13, id=79505,  icon="Interface\\Icons\\superhumanstrength.blp",   buffIcon="Interface\\Icons\\active_superhumanstrength.blp"},  -- Superhuman Strength
+    {level=16, id=79509,  icon="Interface\\Icons\\improvedreflexes.blp",     buffIcon="Interface\\Icons\\active_improvedreflexes.blp"},    -- Improved Reflexes
+    {level=19, id=80019,  icon="Interface\\Icons\\rapidrestore.blp",         buffIcon="Interface\\Icons\\active_rapidrestore.blp"},        -- Rapid Restore
+    {level=22, id=79521,  icon="Interface\\Icons\\rapidheal.blp",            buffIcon="Interface\\Icons\\active_rapidheal.blp"},           -- Rapid Heal
+    {level=25, id=114131, icon="Interface\\Icons\\protectitem.blp",          buffIcon="Interface\\Icons\\active_protectitem.blp"},         -- Protect Item
+    {level=26, id=79511,  icon="Interface\\Icons\\hawkeye.blp",              buffIcon="Interface\\Icons\\active_hawkeye.blp"},             -- Hawk Eye
+    {level=27, id=79516,  icon="Interface\\Icons\\mysticlore.blp",           buffIcon="Interface\\Icons\\active_mysticlore.blp"},          -- Mystic Lore
+    {level=28, id=79504,  icon="Interface\\Icons\\steelskin.blp",            buffIcon="Interface\\Icons\\active_steelskin.blp"},           -- Steel Skin
+    {level=31, id=79507,  icon="Interface\\Icons\\ultimatestrength.blp",     buffIcon="Interface\\Icons\\active_ultimatestrength.blp"},    -- Ultimate Strength
+    {level=34, id=79510,  icon="Interface\\Icons\\incrediblereflexes.blp",   buffIcon="Interface\\Icons\\active_incrediblereflexes.blp"},  -- Incredible Reflexes
+    {level=37, id=79501,  icon="Interface\\Icons\\magicpray.blp",            buffIcon="Interface\\Icons\\active_magicpray.blp"},           -- Protect from Magic
+    {level=40, id=79500,  icon="Interface\\Icons\\rangepray.blp",            buffIcon="Interface\\Icons\\active_rangepray.blp"},           -- Protect from Missiles
+    {level=43, id=465,    icon="Interface\\Icons\\meleepray.blp",            buffIcon="Interface\\Icons\\active_meleepray.blp"},           -- Protect from Melee
     {level=44, id=79513,  icon="Interface\\Icons\\eagleeye.blp",             buffIcon="Interface\\Icons\\active_eagleeye.blp"},           -- Eagle Eye
     {level=45, id=79515,  icon="Interface\\Icons\\mysticmight.blp",          buffIcon="Interface\\Icons\\active_mysticmight.blp"}          -- Mystic Might
 }
