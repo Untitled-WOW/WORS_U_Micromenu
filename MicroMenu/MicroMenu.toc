@@ -6,7 +6,7 @@
 ## SavedVariables: WORS_U_MicroMenuSettings 
 ## DefaultState: disabled
 
-# Main
+
 WORS_U_MicroMenuData.lua
 MicroMenuButtons.lua
 WORS_U_MagicPrayer.lua
