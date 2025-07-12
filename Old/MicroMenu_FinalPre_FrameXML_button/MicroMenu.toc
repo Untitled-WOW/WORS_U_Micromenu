@@ -1,0 +1,17 @@
+## Interface: 30300
+## Title: MicroMenu
+## Notes: Magic, Prayer, Emote and Music Menus for WORS.|nOpen using Micro Menu buttons.|n|nYou cannot |cFFFF0000OPEN|r or |cFFFF0000CLOSE|r Magic and Prayer book while in combat|n|nWhen you open Backback / Combat Style / MicroMenu while out of combat the last opened Magic or Prayer menu will be loaded to enable you to swop to one of them in combat|n|nSend bug reports to |cff00ff00Untitled - Llama69420 green|r on discord.
+## Author: Untitled - Discord@Llama69420
+## Version: 1.0
+## SavedVariables: WORS_U_MicroMenuSettings 
+## DefaultState: disabled
+
+
+WORS_U_MicroMenuData.lua
+MicroMenuButtons.lua
+WORS_U_MagicPrayer.lua
+WORS_U_SpellBook.lua
+WORS_U_EmoteBook.lua
+WORS_U_MusicBook.lua
+WORS_U_PrayBook.lua
+WORS_U_MicroMenu.lua
