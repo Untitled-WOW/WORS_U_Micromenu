@@ -12,6 +12,15 @@ WORS_U_EmoteBook.frame:SetMovable(true)
 WORS_U_EmoteBook.frame:EnableMouse(true)
 WORS_U_EmoteBook.frame:RegisterForDrag("LeftButton")
 WORS_U_EmoteBook.frame:SetClampedToScreen(true)
+local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
+if pos then
+	local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
+	WORS_U_EmoteBook.frame:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
+else
+	WORS_U_EmoteBook.frame:SetPoint("CENTER")
+end	
+
+
 WORS_U_EmoteBook.frame:SetScript("OnDragStart", function(self) 
 	self:StartMoving() 
 end)
@@ -29,7 +38,6 @@ closeButton:SetHighlightTexture("Interface\\WORS\\OldSchool-CloseButton-Highligh
 closeButton:SetPushedTexture("Interface\\WORS\\OldSchool-CloseButton-Down.blp")
 closeButton:SetScript("OnClick", function()
 	WORS_U_EmoteBook.frame:Hide()
-    EmotesMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
 end)
 
 -- Create a scrollable frame for the buttons
@@ -50,58 +58,6 @@ scrollFrame:SetScrollChild(buttonContainer)
 -- Initialize emote buttons
 local emoteButtons = {}
 
--- local function SetupEmoteButtons()
-    -- -- Clear existing buttons before creating new ones
-    -- for _, button in pairs(emoteButtons) do
-        -- button:Hide()
-        -- button:SetParent(nil)
-    -- end
-    -- wipe(emoteButtons)
-
-    -- local buttonWidth = 40
-    -- local buttonHeight = 80
-    -- local padding = 5
-    -- local columns = 4
-    -- local startX = 2
-    -- local buttonStartY = -10
-
-    -- for i, emoteData in ipairs(WORS_U_EmoteBook.emotes) do
-        -- local btn = CreateFrame("Button", nil, buttonContainer, "UIPanelButtonTemplate")
-        -- btn:SetSize(buttonWidth, buttonHeight)
-        -- btn:SetBackdrop({ bgFile = emoteData.icon })
-        -- btn:SetNormalTexture(nil)
-        -- btn:SetPushedTexture(nil)
-        -- btn:SetHighlightTexture(nil)
-
-        -- -- Position
-        -- local row = math.floor((i - 1) / columns)
-        -- local col = (i - 1) % columns
-        -- btn:SetPoint("TOPLEFT", startX + (buttonWidth + padding) * col, buttonStartY - (buttonHeight + padding) * row)
-        -- --btn:SetText(emoteData.name)
-        -- --btn:SetNormalFontObject("GameFontNormalSmall")
-        
-		-- if not emoteData.command or emoteData.command == "" then
-			-- btn:SetBackdropColor(0.247, 0.220, 0.153, 1)
-		-- else
-            -- btn:SetBackdropColor(1, 1, 1, 1)
-			-- btn:SetScript("OnClick", function() 
-				-- if emoteData.command:sub(1,1) == "_" then
-					-- SendChatMessage(emoteData.command, "SAY")
-				-- else
-					-- DoEmote(emoteData.command)
-				-- end
-			-- end)
-		-- end
-		-- btn:SetScript("OnEnter", function(self)
-			-- GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-			-- GameTooltip:ClearLines()
-			-- GameTooltip:SetText(emoteData.name, 1, 1, 1)
-			-- GameTooltip:Show()
-		-- end)
-		-- btn:SetScript("OnLeave", function()	GameTooltip:Hide() end)
-        -- table.insert(emoteButtons, btn)
-    -- end
--- end
 
 local function SetupEmoteButtons(XOffset, YOffset)
     -- Clear existing buttons before creating new ones
@@ -157,8 +113,7 @@ local function SetupEmoteButtons(XOffset, YOffset)
         table.insert(emoteButtons, btn)
     end
 end
-
-
+SetupEmoteButtons(-8, -10)
 
 
 
@@ -174,35 +129,18 @@ WORS_U_EmoteBook.frame:SetScript("OnShow", UpdateButtonBackground)
 WORS_U_EmoteBook.frame:SetScript("OnHide", UpdateButtonBackground)
 
 -- function to replace EmotesMicroButton on click
-local function OnEmoteClick(self)	
-	CastShapeshiftForm(114114)
-	
-	SetupEmoteButtons(-8, -10)
-	if not InCombatLockdown() then
-		MicroMenu_ToggleFrame(WORS_U_EmoteBook.frame)--:Show()
-	elseif not WORS_U_PrayBook.frame:IsShown() then
-		--print("[PrayerMicro] Spellbook frame is hidden: Toggling it on")
-		WORS_U_EmoteBook.frame:Show()
-		AttachMicroButtonsTo(WORS_U_EmoteBook.frame)
-	else
-		WORS_U_EmoteBook.frame:Hide()
-	end
-	if WORS_U_MicroMenuSettings.AutoCloseEnabled then
-	--print("[PrayerMicro] In combat and AutoClose is enabled: Hiding other frames")
-	WORS_U_MusicPlayerFrame:Hide()
-	CombatStylePanel:Hide()
-	CloseBackpack()
-	else
-		--print("[PrayerMicro] In combat and AutoClose is disabled: No action taken")
-	end
+local function OnEmoteClick(self)		
+	MicroMenu_ToggleFrame(WORS_U_EmoteBook.frame)--:Show()
 end
 
 EmotesMicroButton:SetScript("OnClick", OnEmoteClick)
+
 EmotesMicroButton:HookScript("OnEnter", function(self)
     if GameTooltip:IsOwned(self) then
         GameTooltip:Show()
     end
 end)
+
 
 -- Loop through your existing emotes and dynamically register slash commands where commands are _
 for _, emoteData in ipairs(WORS_U_EmoteBook.emotes) do

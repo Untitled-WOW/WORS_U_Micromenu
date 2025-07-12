@@ -35,7 +35,6 @@ closeButton:SetHighlightTexture("Interface\\WORS\\OldSchool-CloseButton-Highligh
 closeButton:SetPushedTexture("Interface\\WORS\\OldSchool-CloseButton-Down.blp")
 closeButton:SetScript("OnClick", function()
 	WORS_U_MusicBook.musicPlayer:Hide()
-    MusicMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
 end)
 
 local trackFrame = CreateFrame("Frame", nil, WORS_U_MusicBook.musicPlayer)
@@ -121,7 +120,7 @@ local function CreateMusicButtons()
 		WORS_U_MusicBook:StopTrack()
 	end)
 end
-
+CreateMusicButtons()
 
 -- Update background color based on visibility
 local function UpdateButtonBackground()
@@ -136,22 +135,7 @@ WORS_U_MusicBook.musicPlayer:SetScript("OnHide", UpdateButtonBackground)
 
 -- Update background color based on visibility
 local function OnMusicClick(self)	
-	CreateMusicButtons()
-	if not InCombatLockdown() then
-		MicroMenu_ToggleFrame(WORS_U_MusicBook.musicPlayer)--:Show()
-	elseif not WORS_U_MusicBook.musicPlayer:IsShown() then
-		WORS_U_MusicBook.musicPlayer:Show()
-		AttachMicroButtonsTo(WORS_U_MusicBook.musicPlayer)
-	else
-		WORS_U_MusicBook.musicPlayer:Hide()
-	end
-	if WORS_U_MicroMenuSettings.AutoCloseEnabled then
-	WORS_U_EmoteBookFrame:Hide()
-	CombatStylePanel:Hide()
-	CloseBackpack()
-	else
-	
-	end
+	MicroMenu_ToggleFrame(WORS_U_MusicBook.musicPlayer)--:Show()
 end
 
 MusicMicroButton:SetScript("OnClick", OnMusicClick)

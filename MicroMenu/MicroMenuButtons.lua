@@ -197,7 +197,6 @@ function RestoreMicroButtonsFromMicroMenu()
     end
 end
 
-
 -- Initialize backups after entering the world
 local f = CreateFrame("Frame")
 f:RegisterEvent("PLAYER_ENTERING_WORLD")

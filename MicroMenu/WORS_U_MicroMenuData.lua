@@ -1,6 +1,5 @@
 -- Initialize MicroMenu saved variables
 WORS_U_MicroMenuSettings = WORS_U_MicroMenuSettings or {}
---WORS_U_MicroMenuSettings.transparency = WORS_U_MicroMenuSettings.transparency or 1
 WORS_U_MicroMenuSettings.AutoCloseEnabled = WORS_U_MicroMenuSettings.AutoCloseEnabled or true
 WORS_U_MicroMenuSettings.showMagicandPrayer = WORS_U_MicroMenuSettings.showMagicandPrayer or true
 WORS_U_MicroMenuSettings.MicroMenuPOS = WORS_U_MicroMenuSettings.MicroMenuPOS or {point = "CENTER", relativeTo = nil, relativePoint = "CENTER", xOfs = 0, yOfs = 0}

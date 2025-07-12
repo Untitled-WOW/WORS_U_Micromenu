@@ -1,0 +1,47 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+    <Button name="WORSSpellTemplate" virtual="true">
+        <Scripts>
+            <OnLoad>
+                self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+            </OnLoad>
+            <OnClick>
+                local spellID = self:GetID()
+                local name = GetSpellInfo(spellID)
+                -- Check buffs for prayer aura cancel if found skip prayer cast
+                for i = 1, 40 do
+                    if UnitBuff("player", i) == name then
+                        CancelUnitBuff("player", i)
+                        return
+                    end
+                end
+                CastSpellByID(spellID)
+            </OnClick>
+            <OnEnter>
+                -- simple tooltip support
+                GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                GameTooltip:SetSpellByID(self:GetID())
+                GameTooltip:Show()
+            </OnEnter>
+            <OnLeave>
+                GameTooltip:Hide()
+            </OnLeave>
+        </Scripts>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture name="$parentIcon" setAllPoints="true"/>
+            </Layer>
+            <Layer level="OVERLAY">
+                <FontString name="$parentCount" inherits="NumberFontNormal" justifyH="RIGHT">
+                    <Anchors>
+                        <Anchor point="BOTTOMRIGHT" x="-2" y="2"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Size>
+            <AbsDimension x="36" y="36"/>
+        </Size>
+    </Button>
+</Ui>
