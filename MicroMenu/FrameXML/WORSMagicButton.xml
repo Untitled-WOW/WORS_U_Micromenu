@@ -43,5 +43,35 @@
         <Size>
             <AbsDimension x="36" y="36"/>
         </Size>
-    </Button>
+    </Button>	
+	<Button name="WORSEqItemTemplate" virtual="true">
+		<Scripts>
+			<OnLoad>
+				-- Register for both left and right clicks
+				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+			</OnLoad>
+			<OnClick>
+				local slotID = self:GetID()
+				if button == "LeftButton" then
+					-- Unequip into your first free backpack slot
+					PickupInventoryItem(slotID)
+					PutItemInBackpack()
+				elseif button == "RightButton" then
+					-- Use the equipped item in that slot
+					UseInventoryItem(slotID)
+				end
+			</OnClick>
+			<OnEnter>
+				GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+				GameTooltip:SetInventoryItem("player", self:GetID())
+				GameTooltip:Show()
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide()
+			</OnLeave>
+		</Scripts>
+		<Size>
+			<AbsDimension x="36" y="36"/>
+		</Size>
+	</Button>	
 </Ui>

@@ -85,40 +85,24 @@ end
 local function CreateMusicButtons()
     -- Buttons created for all WORS_U_MusicBook.tracks
 	for i, track in ipairs(WORS_U_MusicBook.tracks) do
-        local button = CreateFrame("Button", nil, contentFrame, "UIPanelButtonTemplate")
+        local button = CreateFrame("Button", nil, contentFrame, "OldSchoolButtonTemplate")
         button:SetText("Play " .. track.name)
         button:SetSize(150, 25)
         button:SetPoint("TOP", contentFrame, "TOP", 0, -30 * (i - 1))
-        button:SetBackdrop({
-            edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border", -- Border texture
-            edgeSize = 8,  -- Border thickness
-            insets = { left = 2, right = 2, top = 2, bottom = 2 },  -- Insets for border
-        })
-        button:SetNormalTexture(nil) -- Hide the default textures
-        button:SetPushedTexture(nil) -- Hide the default textures
-        button:SetHighlightTexture(nil) -- Hide the default textures
 		button:SetScript("OnClick", function()
             WORS_U_MusicBook:PlayTrack(track)
         end)
 	end
 	
-	-- Stop button positioned at the bottom of the main frame
-	local stopButton = CreateFrame("Button", "WORS_U_MusicBook_StopButton", WORS_U_MusicBook.musicPlayer)
-	stopButton:SetSize(150, 30)
-	stopButton:SetPoint("BOTTOM", WORS_U_MusicBook.musicPlayer, "BOTTOM", 0, 10)
-	stopButton:SetBackdrop({
-		bgFile = "Interface\\WORS\\OldSchoolBackground2",  -- No background texture
-		edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border", -- Border texture
-		edgeSize = 8,  -- Border thickness
-		insets = { left = 2, right = 2, top = 2, bottom = 2 },  -- Insets for border
-	})
-	stopButton:SetBackdropColor(1, 0, 0, 1) -- Red Background for Stop RGBA values (Red, Green, Blue, Alpha)
-	stopButton.text = stopButton:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-	stopButton.text:SetPoint("CENTER")  -- Center the text
-	stopButton.text:SetText("Stop")  -- Set button text to "Stop"
-	stopButton:SetScript("OnClick", function()
-		WORS_U_MusicBook:StopTrack()
-	end)
+-- Stop button positioned at the bottom of the main frame
+local stopButton = CreateFrame("Button", nil, WORS_U_MusicBook.musicPlayer, "OldSchoolButtonTemplate")
+stopButton:SetSize(150, 25)                            -- same size as Play buttons
+stopButton:SetPoint("BOTTOM", WORS_U_MusicBook.musicPlayer, "BOTTOM", 0, 10)
+stopButton:SetText("Stop")                             -- use the template’s built-in text
+stopButton:SetScript("OnClick", function()
+    WORS_U_MusicBook:StopTrack()
+end)
+
 end
 CreateMusicButtons()
 

@@ -12,6 +12,7 @@ WORS_U_EmoteBook.frame:SetMovable(true)
 WORS_U_EmoteBook.frame:EnableMouse(true)
 WORS_U_EmoteBook.frame:RegisterForDrag("LeftButton")
 WORS_U_EmoteBook.frame:SetClampedToScreen(true)
+
 local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
 if pos then
 	local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
@@ -19,7 +20,6 @@ if pos then
 else
 	WORS_U_EmoteBook.frame:SetPoint("CENTER")
 end	
-
 
 WORS_U_EmoteBook.frame:SetScript("OnDragStart", function(self) 
 	self:StartMoving() 

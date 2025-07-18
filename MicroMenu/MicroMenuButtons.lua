@@ -24,7 +24,10 @@ end)
 -- local microButtonsRow2BOTTOM = 	{SocialMicroButton, IgnoreMicroButton, AchievementsMicroButton, GameMenuMicroButton, CompanionsMicroButton, EmotesMicroButton, MusicMicroButton}
 
 local microButtonsRow1TOP = 	{CombatStyleMicroButton, SkillsMicroButton, QuestsMicroButton, InventoryMicroButton, CharacterMicroButton, PrayerMicroButton, U_SpellBookMicroButtonCopy}
-local microButtonsRow2BOTTOM = 	{SpellbookMicroButton, SocialMicroButton, IgnoreMicroButton, AchievementsMicroButton, GameMenuMicroButton, CompanionsMicroButton, EmotesMicroButton, MusicMicroButton}
+--local microButtonsRow2BOTTOM = 	{SpellbookMicroButton, SocialMicroButton, IgnoreMicroButton, AchievementsMicroButton, GameMenuMicroButton, CompanionsMicroButton, EmotesMicroButton, MusicMicroButton}
+local microButtonsRow2BOTTOM = 	{SocialMicroButton, SpellbookMicroButton, AchievementsMicroButton, GameMenuMicroButton, CompanionsMicroButton, EmotesMicroButton, MusicMicroButton}
+
+
 
 -- function to take backup a micromenu button default location
 local function safeBackup(btn)
@@ -122,8 +125,10 @@ function AttachMicroButtonsTo(parentFrame)
 	
     -- attach each row of micro buttons
 	-- remove -16 x offset on row 2 if going back to 7 buttons top and 7 buttons bottom
-    AttachMicroRow(microButtonsRow1TOP, "TOP", 0, 0)
-    AttachMicroRow(microButtonsRow2BOTTOM, "BOTTOM", -16, -8)
+    AttachMicroRow(microButtonsRow1TOP, "TOP", 0, 8)
+    --AttachMicroRow(microButtonsRow2BOTTOM, "BOTTOM", -16, -8)
+	AttachMicroRow(microButtonsRow2BOTTOM, "BOTTOM", 0, -8)
+
 
     -- if we're on the CombatStyle panel, bump its strata/level
     if isCombatStylePannel then
@@ -156,6 +161,7 @@ local function AttachRowToContainer(buttons, container, anchorPoint, xOffset, yO
         btn:SetPoint(anchorPoint, container, anchorPoint, x, yOffset or 0)
 		btn:SetFrameStrata("HIGH")	-- 3) (Optional) tweak strata/level so it doesn’t sit under something else
 		btn:SetFrameLevel(100)
+		btn:SetClampedToScreen(true)
     end
 end
 
@@ -193,7 +199,10 @@ function RestoreMicroButtonsFromMicroMenu()
 		-- remove 16 variation if going back to 7 buttons top and 7 buttons bottom
 		
         AttachRowToContainer(microButtonsRow1TOP,    UIParent, "BOTTOMRIGHT", -134, 35)
-        AttachRowToContainer(microButtonsRow2BOTTOM, UIParent, "BOTTOMRIGHT", -150, 0)
+        --AttachRowToContainer(microButtonsRow2BOTTOM, UIParent, "BOTTOMRIGHT", -150, 0)
+		
+		AttachRowToContainer(microButtonsRow2BOTTOM, UIParent, "BOTTOMRIGHT", -134, 0)
+		
     end
 end
 
