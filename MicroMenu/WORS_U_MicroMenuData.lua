@@ -5,7 +5,7 @@ WORS_U_MicroMenuSettings.showMagicandPrayer = WORS_U_MicroMenuSettings.showMagic
 WORS_U_MicroMenuSettings.MicroMenuPOS = WORS_U_MicroMenuSettings.MicroMenuPOS or {point = "CENTER", relativeTo = nil, relativePoint = "CENTER", xOfs = 0, yOfs = 0}
 
 -- All MicroMenu frames and CombatStylePanel
-MicroMenu_Frames = {WORS_U_SpellBookFrame, WORS_U_PrayBookFrame, WORS_U_EmoteBookFrame, WORS_U_MusicPlayerFrame, CombatStylePanel}
+MicroMenu_Frames = {WORS_U_SpellBookFrame, WORS_U_PrayBookFrame, WORS_U_EmoteBookFrame, WORS_U_MusicPlayerFrame, WORS_U_EquipmentBookFrame, CombatStylePanel}
 
 
 -- WORS_U_SpellBook.lua Data

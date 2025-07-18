@@ -1,5 +1,5 @@
 -- WORS_U_MagicPrayer.lua
-MicroMenu_Frames = {WORS_U_SpellBookFrame, WORS_U_PrayBookFrame, WORS_U_EmoteBookFrame, WORS_U_MusicPlayerFrame, CombatStylePanel} -- MicroMenu frames AND CombatStylePanel
+MicroMenu_Frames = {WORS_U_SpellBookFrame, WORS_U_PrayBookFrame, WORS_U_EmoteBookFrame, WORS_U_MusicPlayerFrame, WORS_U_EquipmentBookFrame, CombatStylePanel} -- MicroMenu frames AND CombatStylePanel
 
 -- function to hide all Micromenu, CombatStylePanel and Backpack frames
 function MicroMenu_HideAll()
@@ -42,6 +42,7 @@ local function HookAFrames()
 				WORS_U_PrayBook.frame:Hide()
 				WORS_U_EmoteBook.frame:Hide()
                 WORS_U_MusicBook.musicPlayer:Hide()
+                WORS_U_EquipmentBook.frame:Hide()
                 CombatStylePanel:Hide()
             end
 			AttachMicroButtonsTo(Backpack)
@@ -85,6 +86,7 @@ local function HookAFrames()
                 WORS_U_SpellBook.frame:Hide()
 				WORS_U_PrayBook.frame:Hide()
 				WORS_U_EmoteBook.frame:Hide()
+				WORS_U_EquipmentBook.frame:Hide()
                 WORS_U_MusicBook.musicPlayer:Hide()
                 CloseBackpack()
             end
@@ -186,63 +188,125 @@ end
 
 
 
--- 1) Grab your toggle‐buttons and assign the binding names:
+-- 1) Define your micro-buttons with a list of binding-names (in priority order):
 local toggles = {
---{ btn = CombatStyleMicroButton,  		binding = "TOGGLECOMBATSTYLE" },
-  { btn = CombatStyleMicroButton,  		binding = "Toggle Combat Style" },
-  { btn = SkillsMicroButton,  			binding = "TOGGLECHARACTER2" 	},
-  { btn = QuestsMicroButton,  			binding = "TOGGLEQUESTLOG" 		},
-  { btn = InventoryMicroButton,  		binding = "TOGGLEBACKPACK" 		},
-  { btn = CharacterMicroButton,  		binding = "TOGGLECHARACTER0" 	},
-  { btn = PrayerMicroButton,    		binding = "Toggle Prayer"    	},
-  { btn = U_SpellBookMicroButtonCopy,   binding = "Toggle Magic"     	},
-
-  { btn = SpellbookMicroButton,   		binding = "TOGGLESPELLBOOK"  	},
-  { btn = SocialMicroButton,   			binding = "TOGGLESOCIAL"     	},
-  { btn = IgnoreMicroButton,   			binding = ""     	},
-  { btn = AchievementsMicroButton,   	binding = "TOGGLEACHIEVEMENT"   },
-  { btn = GameMenuMicroButton,   		binding = "TOGGLEGAMEMENU"     	},
-  { btn = CompanionsMicroButton,   		binding = "TOGGLECHARACTER3"    },
-  { btn = EmotesMicroButton,   			binding = "Toggle Emote"     	},
-  { btn = MusicMicroButton,   			binding = "Toggle Music"     	},
+  { btn = CombatStyleMicroButton,   bindings = { "Toggle Combat Style", "TOGGLECOMBATSTYLE" } },
+  { btn = SkillsMicroButton,        bindings = { "TOGGLECHARACTER2" } },
+  { btn = QuestsMicroButton,        bindings = { "TOGGLEQUESTLOG" } },
+  { btn = InventoryMicroButton,     bindings = { "TOGGLEBACKPACK", "TOGGLEBAG1", "OPENALLBAGS","TOGGLEBAG2", "TOGGLEBAG3", "TOGGLEBAG4"} },
+  { btn = CharacterMicroButton,     bindings = { "TOGGLECHARACTER0" } },
+  { btn = PrayerMicroButton,        bindings = { "Toggle Prayer" } },
+  { btn = U_SpellBookMicroButtonCopy, bindings = { "Toggle Magic" } },
+  { btn = SpellbookMicroButton,     bindings = { "TOGGLESPELLBOOK" } },
+  { btn = SocialMicroButton,        bindings = { "TOGGLESOCIAL", "TOGGLEGUILDTAB" } },
+  { btn = IgnoreMicroButton,        bindings = { } },           -- no binding
+  { btn = AchievementsMicroButton,  bindings = { "TOGGLEACHIEVEMENT" } },
+  { btn = GameMenuMicroButton,      bindings = { "TOGGLEGAMEMENU" } },
+  { btn = CompanionsMicroButton,    bindings = { "TOGGLECHARACTER3" } },
+  { btn = EmotesMicroButton,        bindings = { "Toggle Emote" } },
+  { btn = MusicMicroButton,         bindings = { "Toggle Music" } },
 }
 
+-- 2) Create your hotkey FontString exactly once:
 for _, info in ipairs(toggles) do
-  info.btn.bindingName = info.binding
-
-  -- 2) Create a small HotKey text in the top‐right corner:
-  local hk = info.btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-  hk:SetPoint("TOPRIGHT", info.btn, "TOPRIGHT", -2, 0)
-  info.btn.hotkey = hk
+  local btn = info.btn
+  btn.bindingNames = info.bindings
+  if not btn.hotkey then
+    local hk = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    hk:SetPoint("TOPRIGHT", btn, "TOPRIGHT", -2, 0)
+    btn.hotkey = hk
+  end
 end
 
-
-
+-- 3) Update both the secure-click binding *and* the hotkey text:
 local function UpdateToggleHotkeys()
+  -- clear any old override-bindings on all these buttons
   for _, info in ipairs(toggles) do
-    local key = GetBindingKey(info.btn.bindingName)
+    ClearOverrideBindings(info.btn)
+  end
+
+  for _, info in ipairs(toggles) do
+    local btn = info.btn
+    local key, bindingName
+
+    -- pick the first binding name that actually has a key bound
+    for _, name in ipairs(btn.bindingNames) do
+      local k = GetBindingKey(name)
+      if k then
+        key, bindingName = k, name
+        break
+      end
+    end
+
     if key then
-      local t = GetBindingText(key, "KEY_")
-      -- inline abbreviations, then change “-” to “+”
-      t = t
+      -- 3a) Make the button *clickable* via that key (in a secure environment)
+      SetOverrideBindingClick(
+        btn,                -- owner frame
+        false,              -- local override block
+        key,                -- e.g. "B" or "CTRL-B"
+        btn:GetName()       -- the named frame to “Click”
+      )
+
+      -- 3b) Show the hotkey text
+      local text = GetBindingText(key, "KEY_")
         :gsub("CTRL", "C")
         :gsub("ALT",  "A")
         :gsub("SHIFT","S")
         :gsub("Escape","ESC")
-        
-      info.btn.hotkey:SetText(t)
+      btn.hotkey:SetText(text)
+
     else
-      info.btn.hotkey:SetText("")
+      -- nothing bound → clear both
+      btn.hotkey:SetText("")
     end
   end
 end
 
-
--- 4) Hook into login and binding‐updates:
+-- 4) Wire it up on login & whenever the player rebinds:
 local evt = CreateFrame("Frame")
 evt:RegisterEvent("PLAYER_LOGIN")
 evt:RegisterEvent("UPDATE_BINDINGS")
 evt:SetScript("OnEvent", UpdateToggleHotkeys)
+
+
+
+------------------------------------
+------Spell Key binds 
+
+BINDING_HEADER_WORSMICROMENUMAGIC = "WORS Spellbook"
+
+-- Display names for bindings
+for i = 1, 50 do
+    _G["BINDING_NAME_WORS_MAGIC_" .. i] = "Cast: Spell " .. i
+end
+
+-- Secure buttons
+local secureButtons = {}
+
+function CreateWORSKeybindButtons()
+    for i = 1, 50 do
+        local name = "WORS_KeyBindBtn" .. i
+        local btn = CreateFrame("Button", name, UIParent, "SecureActionButtonTemplate")
+        btn:SetAttribute("type", "spell")
+        btn:Hide()
+        secureButtons[i] = btn
+        _G[name] = btn
+    end
+end
+
+-- Bind keys to secure buttons
+function BindWORSSpellKeys()
+    for i = 1, 50 do
+        local keys = { GetBindingKey("WORS_MAGIC_" .. i) }
+        for _, key in ipairs(keys) do
+            if key then
+                SetBindingClick(key, "WORS_KeyBindBtn" .. i, "LeftButton")
+            end
+        end
+    end
+end
+
+
 
 
 

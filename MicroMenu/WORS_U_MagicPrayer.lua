@@ -37,13 +37,18 @@ function SetupMagicButtons(XOffset, YOffset, parentFrame, magicButtons)
         local spellID, reqLvl = data.id, data.level
         local row, col = floor((i-1)/cols), (i-1)%cols
 
-        local btnName = parentFrame:GetName() .. "SpellBtn" .. i
+        local btnName =  "SpellBtn" .. i
         local btn = CreateFrame("Button", btnName, parentFrame, "WORSSpellTemplate")
         btn:SetSize(btnSize, btnSize)
         btn:SetPoint("TOPLEFT", parentFrame, "TOPLEFT",
                      XOffset + margin + (btnSize + colPad) * col,
                      -YOffset   - margin - (btnSize + rowPad) * row)
         btn:SetID(spellID)
+
+		local secureBtn = _G["WORS_KeyBindBtn" .. i]
+		if secureBtn then
+			secureBtn:SetAttribute("spell", GetSpellInfo(spellID))
+		end
 
         -- 1) hide the XML-template icon so it never draws
         local templateIcon = _G[btnName .. "Icon"]
@@ -163,6 +168,8 @@ function SetupPrayerButtons(XOffset, YOffset, parentFrame, prayerButtons)
                      XOffset + margin + (size + padX) * col,
                      -YOffset   - margin - (size + padY) * row)
         btn:SetID(spellID)
+
+
 
         -- 1) hide the XML template's own Icon region
         local tmplIcon = _G[btnName.."Icon"]
