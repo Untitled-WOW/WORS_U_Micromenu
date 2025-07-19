@@ -159,6 +159,13 @@ WORS_U_PrayBook.prayers = {
     {level=45, id=79515,  icon="Interface\\Icons\\mysticmight.blp",          buffIcon="Interface\\Icons\\active_mysticmight.blp"}          -- Mystic Might
 }
 
+
+
+-- Global table for the Equipment Book
+WORS_U_EquipmentBook = {}
+
+
+
 -- WORS_U_EmoteBook.lua Data
 WORS_U_EmoteBook = {}
 WORS_U_EmoteBook.emotes = {
