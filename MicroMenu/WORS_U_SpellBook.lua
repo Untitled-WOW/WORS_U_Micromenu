@@ -65,8 +65,6 @@ WORS_U_SpellBook.frame:SetScript("OnHide", UpdateSpellMicroButtonBackground)
 
 local function setupMagicFrame()
     SetupMagicButtons(-8, 3, WORS_U_SpellBook.frame, magicButtons)
-	CreateWORSKeybindButtons()
-    BindWORSSpellKeys()
 end
 
 
