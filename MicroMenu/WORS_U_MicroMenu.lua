@@ -221,9 +221,11 @@ end
 -- 3) Update both the secure-click binding *and* the hotkey text:
 local function UpdateToggleHotkeys()
   -- clear any old override-bindings on all these buttons
-  for _, info in ipairs(toggles) do
-    ClearOverrideBindings(info.btn)
-  end
+	for _, info in ipairs(toggles) do
+		if not InCombatLockdown() then
+			ClearOverrideBindings(info.btn)
+		end		
+	end
 
   for _, info in ipairs(toggles) do
     local btn = info.btn
@@ -240,13 +242,14 @@ local function UpdateToggleHotkeys()
 
     if key then
       -- 3a) Make the button *clickable* via that key (in a secure environment)
-      SetOverrideBindingClick(
-        btn,                -- owner frame
-        false,              -- local override block
-        key,                -- e.g. "B" or "CTRL-B"
-        btn:GetName()       -- the named frame to “Click”
-      )
-
+		if not InCombatLockdown() then
+			SetOverrideBindingClick(
+			btn,                -- owner frame
+			false,              -- local override block
+			key,                -- e.g. "B" or "CTRL-B"
+			btn:GetName()       -- the named frame to “Click”
+			)
+		end
       -- 3b) Show the hotkey text
       local text = GetBindingText(key, "KEY_")
         :gsub("CTRL", "C")
@@ -267,49 +270,6 @@ local evt = CreateFrame("Frame")
 evt:RegisterEvent("PLAYER_LOGIN")
 evt:RegisterEvent("UPDATE_BINDINGS")
 evt:SetScript("OnEvent", UpdateToggleHotkeys)
-
-
-
-------------------------------------
-------Spell Key binds 
-
-BINDING_HEADER_WORSMICROMENUMAGIC = "WORS Spellbook"
-
--- Display names for bindings
-for i = 1, 50 do
-    _G["BINDING_NAME_WORS_MAGIC_" .. i] = "Cast: Spell " .. i
-end
-
--- Secure buttons
-local secureButtons = {}
-
-function CreateWORSKeybindButtons()
-    for i = 1, 50 do
-        local name = "WORS_KeyBindBtn" .. i
-        local btn = CreateFrame("Button", name, UIParent, "SecureActionButtonTemplate")
-        btn:SetAttribute("type", "spell")
-        btn:Hide()
-        secureButtons[i] = btn
-        _G[name] = btn
-    end
-end
-
--- Bind keys to secure buttons
-function BindWORSSpellKeys()
-    for i = 1, 50 do
-        local keys = { GetBindingKey("WORS_MAGIC_" .. i) }
-        for _, key in ipairs(keys) do
-            if key then
-                SetBindingClick(key, "WORS_KeyBindBtn" .. i, "LeftButton")
-            end
-        end
-    end
-end
-
-
-
-
-
 
 
 ------------------------------------------------------------------------
