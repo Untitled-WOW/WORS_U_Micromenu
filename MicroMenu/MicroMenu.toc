@@ -2,7 +2,7 @@
 ## Title: MicroMenu
 ## Notes: Magic, Prayer, Emote and Music Menus for WORS.|n|nSet Keybinds to open menus in |cff00ff00ESC|r -> |cff00ff00Keybinds|r -> |cff00ff00WORS MicroMenu|r|n|nOpen using Micro Menu buttons.|n|nSend bug reports to |cff00ff00Untitled - Llama69420 green|r on discord.
 ## Author: Untitled - Discord@Llama69420
-## Version: 1.1.2
+## Version: 1.1.3
 ## SavedVariables: WORS_U_MicroMenuSettings 
 ## DefaultState: disabled
 
@@ -10,7 +10,8 @@
 
 WORS_U_MicroMenuData.lua
 MicroMenuButtons.lua
-WORS_U_Equipment_ValueFrame.lua
+WORS_U_Equipment_ItemsKeptOnDeath.lua
+WORS_U_Equipment_GuidePrices.lua
 WORS_U_Equipment.lua
 WORS_U_MagicPrayer.lua
 WORS_U_SpellBook.lua
