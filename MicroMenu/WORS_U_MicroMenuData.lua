@@ -1,7 +1,5 @@
 -- Initialize MicroMenu saved variables
 WORS_U_MicroMenuSettings = WORS_U_MicroMenuSettings or {}
-WORS_U_MicroMenuSettings.AutoCloseEnabled = WORS_U_MicroMenuSettings.AutoCloseEnabled or true
-WORS_U_MicroMenuSettings.showMagicandPrayer = WORS_U_MicroMenuSettings.showMagicandPrayer or true
 WORS_U_MicroMenuSettings.MicroMenuPOS = WORS_U_MicroMenuSettings.MicroMenuPOS or {point = "CENTER", relativeTo = nil, relativePoint = "CENTER", xOfs = 0, yOfs = 0}
 
 -- All MicroMenu frames and CombatStylePanel
@@ -360,12 +358,6 @@ end
 
 -- function used to save frame postion of all frames when one is moved offsets used to adjust backpack / micro menu and combat style frames
 function SaveFramePosition(self)
-    if not WORS_U_MicroMenuSettings.AutoCloseEnabled then
-        for _, f in ipairs(MicroMenu_Frames) do f:SetUserPlaced(true) end
-        if Backpack then Backpack:SetUserPlaced(true) end
-		if CombatStylePanel then CombatStylePanel:SetUserPlaced(true) end
-        return
-    end
     -- 1) raw anchor
     local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
     local relName = relativeTo and relativeTo:GetName() or "UIParent"

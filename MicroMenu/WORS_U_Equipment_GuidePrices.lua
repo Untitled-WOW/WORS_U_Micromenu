@@ -25,14 +25,14 @@ local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
 title:SetPoint("TOP", 0, -5)
 title:SetText("*WIP* Guide Prices *WIP*")
 
--- Close button
-local close = CreateFrame("Button", nil, frame)
-close:SetSize(16, 16)
-close:SetPoint("TOPRIGHT", 4, 4)
-close:SetNormalTexture("Interface\\WORS\\OldSchool-CloseButton-Up.blp")
-close:SetHighlightTexture("Interface\\WORS\\OldSchool-CloseButton-Highlight.blp", "ADD")
-close:SetPushedTexture("Interface\\WORS\\OldSchool-CloseButton-Down.blp")
-close:SetScript("OnClick", function() frame:Hide() end)
+-- closeBtn button
+local closeBtn = CreateFrame("Button", nil, frame)
+closeBtn:SetSize(16, 16)
+closeBtn:SetPoint("TOPRIGHT", 4, 4)
+closeBtn:SetNormalTexture("Interface\\WORS\\OldSchool-CloseButton-Up.blp")
+closeBtn:SetHighlightTexture("Interface\\WORS\\OldSchool-CloseButton-Highlight.blp", "ADD")
+closeBtn:SetPushedTexture("Interface\\WORS\\OldSchool-CloseButton-Down.blp")
+closeBtn:SetScript("OnClick", function() frame:Hide() end)
 
 -- Layout constants
 local OUTER_PAD = 10

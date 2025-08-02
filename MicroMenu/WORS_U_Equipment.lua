@@ -280,7 +280,7 @@ local function CreateButtons()
 
         -- Background texture (slot border / blank)
         local bg = btn:CreateTexture(nil, "ARTWORK", nil, 0)
-        bg:SetTexture("Interface\\AddOns\\MicroMenu\\Textures\\Blank_slot.blp")
+        bg:SetTexture("Interface\\AddOns\\MicroMenu\\Textures\\EquipmentIcon\\Blank_slot.blp")
         bg:SetAllPoints()
         btn.slotBg = bg
 

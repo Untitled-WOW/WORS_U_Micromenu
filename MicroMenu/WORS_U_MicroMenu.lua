@@ -13,10 +13,8 @@ end
 function MicroMenu_ToggleFrame(targetFrame)
     if targetFrame:IsShown() then
 		targetFrame:Hide()	
-	else
-	    if  WORS_U_MicroMenuSettings.AutoCloseEnabled then 
-			MicroMenu_HideAll()
-		end
+	else	    
+		MicroMenu_HideAll()		
 		targetFrame:Show()		
         AttachMicroButtonsTo(targetFrame)
     end	
@@ -24,7 +22,6 @@ end
 
 -- Hook Backpack and CombatStylePanels functions
 local function HookAFrames()
-    if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
     if Backpack then
         local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
         if pos then
@@ -37,14 +34,12 @@ local function HookAFrames()
 
 		-- Hock onShow to auto close Micromenu and CombatStylePannel
 		Backpack:HookScript("OnShow", function()
-            if WORS_U_MicroMenuSettings.AutoCloseEnabled then
-                WORS_U_SpellBook.frame:Hide()
-				WORS_U_PrayBook.frame:Hide()
-				WORS_U_EmoteBook.frame:Hide()
-                WORS_U_MusicBook.musicPlayer:Hide()
-                WORS_U_EquipmentBook.frame:Hide()
-                CombatStylePanel:Hide()
-            end
+			WORS_U_SpellBook.frame:Hide()
+			WORS_U_PrayBook.frame:Hide()
+			WORS_U_EmoteBook.frame:Hide()
+			WORS_U_MusicBook.musicPlayer:Hide()
+			WORS_U_EquipmentBook.frame:Hide()
+			CombatStylePanel:Hide()
 			AttachMicroButtonsTo(Backpack)
         end)
 		
@@ -58,7 +53,6 @@ local function HookAFrames()
 			if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
 			SaveFramePosition(self)
 		end)
-
 		
     end
     if CombatStylePanel then
@@ -82,14 +76,12 @@ local function HookAFrames()
 			CombatStylePanel:SetFrameStrata("HIGH")
 			CombatStylePanel:SetFrameLevel(50)
 			CombatStylePanel:Raise()			
-			if WORS_U_MicroMenuSettings.AutoCloseEnabled then
-                WORS_U_SpellBook.frame:Hide()
-				WORS_U_PrayBook.frame:Hide()
-				WORS_U_EmoteBook.frame:Hide()
-				WORS_U_EquipmentBook.frame:Hide()
-                WORS_U_MusicBook.musicPlayer:Hide()
-                CloseBackpack()
-            end
+			WORS_U_SpellBook.frame:Hide()
+			WORS_U_PrayBook.frame:Hide()
+			WORS_U_EmoteBook.frame:Hide()
+			WORS_U_EquipmentBook.frame:Hide()
+			WORS_U_MusicBook.musicPlayer:Hide()
+			CloseBackpack()
 			AttachMicroButtonsTo(CombatStylePanel)
         end)
 		
@@ -98,11 +90,8 @@ local function HookAFrames()
 			RestoreMicroButtonsFromMicroMenu()
         end)
 		
-
-		
 		-- Hock OnDragStop to save new postion to all frames
 		CombatStylePanel:HookScript("OnDragStop", function(self)
-			if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
 			SaveFramePosition(self)			
 			AttachMicroButtonsTo(CombatStylePanel)
 		end)		
@@ -116,17 +105,9 @@ end
 
 -- Hook drag-stop on micro-menu frames for saving positions
 local function HookMicroMenuFrames()
-    if not WORS_U_MicroMenuSettings.AutoCloseEnabled then
-        for _, frame in ipairs(MicroMenu_Frames) do
-            if frame then frame:SetUserPlaced(true) end
-        end
-        return
-    end
     for _, frame in ipairs(MicroMenu_Frames) do
-        if frame then -- Skip Spell, Prayer and CombatStylePanel frames these handle this individually
-			
+        if frame then 			
 			frame:HookScript("OnDragStop", function(self)
-				if not WORS_U_MicroMenuSettings.AutoCloseEnabled then return end
 				AttachMicroButtonsTo(frame)	
 				SaveFramePosition(self)
 			end)
@@ -207,7 +188,7 @@ local toggles = {
   { btn = MusicMicroButton,         bindings = { "Toggle Music" } },
 }
 
--- 2) Create your hotkey FontString exactly once:
+-- 2) Create your hotkey FontString once:
 for _, info in ipairs(toggles) do
   local btn = info.btn
   btn.bindingNames = info.bindings
@@ -272,42 +253,3 @@ evt:RegisterEvent("UPDATE_BINDINGS")
 evt:SetScript("OnEvent", UpdateToggleHotkeys)
 
 
-------------------------------------------------------------------------
----------------- Interface Addon Options -------------------------------
-------------------------------------------------------------------------
-
-local optionsFrame = CreateFrame("Frame", "MicroMenuOptionsFrame", InterfaceOptionsFramePanelContainer)
-optionsFrame.name = "MicroMenu"
--- Create a scroll frame
-local scrollFrame = CreateFrame("ScrollFrame", "MicroMenuOptionsScrollFrame", optionsFrame, "UIPanelScrollFrameTemplate")
-scrollFrame:SetSize(550, 540) -- Set the desired size of the scroll frame
-scrollFrame:SetPoint("TOPLEFT", 16, -16)
-local contentFrame = CreateFrame("Frame", "MicroMenuOptionsContentFrame", scrollFrame)
-contentFrame:SetSize(400, 500) -- Set size based on the expected total content height
-scrollFrame:SetScrollChild(contentFrame)
--- Create a title
-local title = contentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-title:SetPoint("TOPLEFT", 0, 0)
-title:SetText("Micro Menu Options")
-
--- Create checkbox for pinToBackpack
-local autoCloseEnabledCheckbox = CreateFrame("CheckButton", "MicroMenuAutoCloseEnabledCheckbox", contentFrame, "InterfaceOptionsCheckButtonTemplate")
-autoCloseEnabledCheckbox:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 10, -10)
-autoCloseEnabledCheckbox.text = autoCloseEnabledCheckbox:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-autoCloseEnabledCheckbox.text:SetPoint("LEFT", autoCloseEnabledCheckbox, "RIGHT", 5, 0)
-autoCloseEnabledCheckbox.text:SetText("Enable Auto Close *Not recommended to change not tested much after recent changes likely to be removed*") -- Set the checkbox label
-autoCloseEnabledCheckbox:SetScript("OnShow", function(self)
-    if WORS_U_MicroMenuSettings.AutoCloseEnabled == true then
-        self:SetChecked(true)
-    else
-        self:SetChecked(false)
-    end
-end)
-autoCloseEnabledCheckbox:SetScript("OnClick", function(self)
-	WORS_U_MicroMenuSettings.AutoCloseEnabled = self:GetChecked() == 1 and true or false
-	HookAFrames()
-	HookMicroMenuFrames()
-end)
-
--- Register the options frame
-InterfaceOptions_AddCategory(optionsFrame)
