@@ -4,12 +4,12 @@ local prayerButtons = {}
 -- Create the prayer book frame
 WORS_U_PrayBook.frame = CreateFrame("Frame", "WORS_U_PrayBookFrame", UIParent)
 WORS_U_PrayBook.frame:SetSize(180, 330)
-WORS_U_PrayBook.frame:SetBackdrop({
-    bgFile   = "Interface\\WORS\\OldSchoolBackground1",
-    edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
-    tile     = false, tileSize = 32, edgeSize = 32,
-    insets   = { left = 5, right = 5, top = 5, bottom = 5 },
-})
+-- WORS_U_PrayBook.frame:SetBackdrop({
+    -- bgFile   = "Interface\\WORS\\OldSchoolBackground1",
+    -- edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
+    -- tile     = false, tileSize = 32, edgeSize = 32,
+    -- insets   = { left = 5, right = 5, top = 5, bottom = 5 },
+-- })
 WORS_U_PrayBook.frame:SetFrameStrata("HIGH")
 WORS_U_PrayBookFrame:SetFrameLevel(10)
 WORS_U_PrayBook.frame:Hide()

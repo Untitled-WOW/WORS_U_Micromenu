@@ -99,6 +99,14 @@ local function AttachMicroRow(buttons, anchorPoint, xOffset, yOffset)
     end
 end
 
+local function UpdateMicroMenuContainerAlpha()
+    if MicroButtonContainer then
+        local alpha = tonumber(C_CVar.GetNumber and C_CVar.GetNumber("transparentInterface")) or 1
+        MicroButtonContainer:SetBackdropColor(1, 1, 1, alpha)
+    end
+end
+
+
 -- function to attach micromenu button rows to a frame
 function AttachMicroButtonsTo(parentFrame)
     if not parentFrame then return end
@@ -141,6 +149,7 @@ function AttachMicroButtonsTo(parentFrame)
         parentFrame:SetFrameLevel(1)
         parentFrame:Raise()
     end
+	UpdateMicroMenuContainerAlpha()
 end
 
 -- helper: lay out a row of buttons on *any* container frame

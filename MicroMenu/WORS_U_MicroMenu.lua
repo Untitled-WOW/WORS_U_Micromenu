@@ -31,7 +31,8 @@ local function HookAFrames()
             Backpack:SetUserPlaced(false)
         end
 		--Backpack:SetWidth( Backpack:GetWidth() +  12 )
-
+		-- Hide backpack textures 
+		for _, r in ipairs({Backpack:GetRegions()}) do if r:GetObjectType()=="Texture" then r:Hide() end end
 		-- Hock onShow to auto close Micromenu and CombatStylePannel
 		Backpack:HookScript("OnShow", function()
 			WORS_U_SpellBook.frame:Hide()
@@ -103,6 +104,9 @@ local function HookAFrames()
     end
 end
 
+
+
+
 -- Hook drag-stop on micro-menu frames for saving positions
 local function HookMicroMenuFrames()
     for _, frame in ipairs(MicroMenu_Frames) do
@@ -115,8 +119,11 @@ local function HookMicroMenuFrames()
 			-- hock OnShow to stelth load Magic and Prayer frames and attach AttachMicroButtonsTo
 			frame:HookScript("OnShow", function(self)
 				AttachMicroButtonsTo(frame)	
+				local alpha = tonumber(C_CVar.GetNumber and C_CVar.GetNumber("transparentInterface")) or 1
+				frame:SetBackdropColor(1, 1, 1, alpha)
 			end)
-            		
+            	
+			
 			-- hock OnHide on ALL Micromenu frames to restore micromenu buttons
 			frame:HookScript("OnHide", RestoreMicroButtonsFromMicroMenu) 
         end

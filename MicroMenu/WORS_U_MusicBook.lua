@@ -1,12 +1,12 @@
 -- Main frame for the music player
 WORS_U_MusicBook.musicPlayer = CreateFrame("Frame", "WORS_U_MusicPlayerFrame", UIParent)
 WORS_U_MusicBook.musicPlayer:SetSize(180, 330)
-WORS_U_MusicBook.musicPlayer:SetBackdrop({
-    bgFile = "Interface\\WORS\\OldSchoolBackground1",
-    edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
-    tile = false, tileSize = 32, edgeSize = 32,
-    insets = { left = 5, right = 5, top = 5, bottom = 5 }
-})
+-- WORS_U_MusicBook.musicPlayer:SetBackdrop({
+    -- bgFile = "Interface\\WORS\\OldSchoolBackground1",
+    -- edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
+    -- tile = false, tileSize = 32, edgeSize = 32,
+    -- insets = { left = 5, right = 5, top = 5, bottom = 5 }
+-- })
 WORS_U_MusicBook.musicPlayer:Hide()
 WORS_U_MusicBook.musicPlayer:SetMovable(true)
 WORS_U_MusicBook.musicPlayer:EnableMouse(true)

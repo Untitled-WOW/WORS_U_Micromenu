@@ -1,12 +1,12 @@
 -- Create the main frame for the custom emote book
 WORS_U_EmoteBook.frame = CreateFrame("Frame", "WORS_U_EmoteBookFrame", UIParent)
 WORS_U_EmoteBook.frame:SetSize(180, 330)
-WORS_U_EmoteBook.frame:SetBackdrop({
-    bgFile = "Interface\\WORS\\OldSchoolBackground1",
-	edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
-    tile = false, tileSize = 32, edgeSize = 32,
-    insets = { left = 5, right = 5, top = 5, bottom = 5 }
-})
+-- WORS_U_EmoteBook.frame:SetBackdrop({
+    -- bgFile = "Interface\\WORS\\OldSchoolBackground1",
+	-- edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
+    -- tile = false, tileSize = 32, edgeSize = 32,
+    -- insets = { left = 5, right = 5, top = 5, bottom = 5 }
+-- })
 WORS_U_EmoteBook.frame:Hide()
 WORS_U_EmoteBook.frame:SetMovable(true)
 WORS_U_EmoteBook.frame:EnableMouse(true)

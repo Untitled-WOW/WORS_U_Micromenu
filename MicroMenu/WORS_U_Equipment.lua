@@ -88,12 +88,12 @@ end
 if not EB.frame then
     EB.frame = CreateFrame("Frame", "WORS_U_EquipmentBookFrame", UIParent)
     EB.frame:SetSize(180, 330)
-    EB.frame:SetBackdrop({
-        bgFile   = "Interface\\WORS\\OldSchoolBackground1",
-        edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
-        tile = false, tileSize = 32, edgeSize = 32,
-        insets = { left=5, right=5, top=5, bottom=5 },
-    })
+    -- EB.frame:SetBackdrop({
+        -- bgFile   = "Interface\\WORS\\OldSchoolBackground1",
+        -- edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
+        -- tile = false, tileSize = 32, edgeSize = 32,
+        -- insets = { left=5, right=5, top=5, bottom=5 },
+    -- })
     EB.frame:Hide()
     EB.frame:SetMovable(true)
     EB.frame:EnableMouse(true)

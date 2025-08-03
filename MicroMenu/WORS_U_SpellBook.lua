@@ -4,12 +4,12 @@ local magicButtons = {}
 -- Create the main frame for the custom spell book
 WORS_U_SpellBook.frame = CreateFrame("Frame", "WORS_U_SpellBookFrame", UIParent)
 WORS_U_SpellBook.frame:SetSize(180, 330)
-WORS_U_SpellBook.frame:SetBackdrop({
-    bgFile = "Interface\\WORS\\OldSchoolBackground1",
-    edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
-    tile = false, tileSize = 32, edgeSize = 32,
-    insets = { left = 5, right = 5, top = 5, bottom = 5 }
-})
+-- WORS_U_SpellBook.frame:SetBackdrop({
+    -- bgFile = "Interface\\WORS\\OldSchoolBackground1",
+    -- edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
+    -- tile = false, tileSize = 32, edgeSize = 32,
+    -- insets = { left = 5, right = 5, top = 5, bottom = 5 }
+-- })
 WORS_U_SpellBook.frame:SetFrameStrata("High")
 WORS_U_SpellBook.frame:SetFrameLevel(10)
 WORS_U_SpellBook.frame:Hide()
