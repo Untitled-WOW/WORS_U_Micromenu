@@ -203,14 +203,14 @@ function RestoreMicroButtonsFromMicroMenu()
         -- (we backed that up at login)
         local backup = microBackup[tostring(microButtonsRow1TOP[1])]
         local origParent = backup and backup.parent or UIParent
-
-        -- but in your custom order
-		-- remove 16 variation if going back to 7 buttons top and 7 buttons bottom
 		
-        AttachRowToContainer(microButtonsRow1TOP,    UIParent, "BOTTOMRIGHT", -134, 35)
-        --AttachRowToContainer(microButtonsRow2BOTTOM, UIParent, "BOTTOMRIGHT", -150, 0)
-		
-		AttachRowToContainer(microButtonsRow2BOTTOM, UIParent, "BOTTOMRIGHT", -134, 0)
+		if MyViewportFrame then
+			AttachRowToContainer(microButtonsRow1TOP,    MyViewportFrame, "BOTTOMRIGHT", -134, 35)
+			AttachRowToContainer(microButtonsRow2BOTTOM, MyViewportFrame, "BOTTOMRIGHT", -134, 0)
+		else
+			AttachRowToContainer(microButtonsRow1TOP,    UIParent, "BOTTOMRIGHT", -134, 35)
+			AttachRowToContainer(microButtonsRow2BOTTOM, UIParent, "BOTTOMRIGHT", -134, 0)
+		end
 		
     end
 end

@@ -111,6 +111,10 @@ end
 local function HookMicroMenuFrames()
     for _, frame in ipairs(MicroMenu_Frames) do
         if frame then 			
+			frame:SetFrameStrata("HIGH")
+			frame:SetFrameLevel(50)
+			frame:Raise()
+			
 			frame:HookScript("OnDragStop", function(self)
 				AttachMicroButtonsTo(frame)	
 				SaveFramePosition(self)
@@ -122,7 +126,7 @@ local function HookMicroMenuFrames()
 				local alpha = tonumber(C_CVar.GetNumber and C_CVar.GetNumber("transparentInterface")) or 1
 				frame:SetBackdropColor(1, 1, 1, alpha)
 			end)
-            	
+			
 			
 			-- hock OnHide on ALL Micromenu frames to restore micromenu buttons
 			frame:HookScript("OnHide", RestoreMicroButtonsFromMicroMenu) 
