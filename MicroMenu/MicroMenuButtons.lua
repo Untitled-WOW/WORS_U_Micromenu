@@ -20,14 +20,8 @@ U_SpellMicroMenuButton:HookScript("OnEnter", function(self)
     GameTooltip:Show()
 end)
 
--- local microButtonsRow1TOP = 	{CombatStyleMicroButton, SkillsMicroButton, QuestsMicroButton, InventoryMicroButton, CharacterMicroButton, PrayerMicroButton, SpellbookMicroButton}
--- local microButtonsRow2BOTTOM = 	{SocialMicroButton, IgnoreMicroButton, AchievementsMicroButton, GameMenuMicroButton, CompanionsMicroButton, EmotesMicroButton, MusicMicroButton}
-
 local microButtonsRow1TOP = 	{CombatStyleMicroButton, SkillsMicroButton, QuestsMicroButton, InventoryMicroButton, CharacterMicroButton, PrayerMicroButton, U_SpellBookMicroButtonCopy}
---local microButtonsRow2BOTTOM = 	{SpellbookMicroButton, SocialMicroButton, IgnoreMicroButton, AchievementsMicroButton, GameMenuMicroButton, CompanionsMicroButton, EmotesMicroButton, MusicMicroButton}
 local microButtonsRow2BOTTOM = 	{SocialMicroButton, SpellbookMicroButton, AchievementsMicroButton, GameMenuMicroButton, CompanionsMicroButton, EmotesMicroButton, MusicMicroButton}
-
-
 
 -- function to take backup a micromenu button default location
 local function safeBackup(btn)
@@ -176,11 +170,7 @@ end
 
 
 function RestoreMicroButtonsFromMicroMenu()
-    local candidateFrames = {
-      WORS_U_SpellBookFrame, WORS_U_PrayBookFrame,
-      WORS_U_EmoteBookFrame, WORS_U_MusicPlayerFrame,
-      CombatStylePanel, Backpack
-    }
+    local candidateFrames = {WORS_U_SpellBookFrame, WORS_U_PrayBookFrame, WORS_U_EmoteBookFrame, CombatStylePanel, Backpack}
     local target = nil
     for _, f in ipairs(candidateFrames) do
         if f and f:IsShown() then

@@ -1,5 +1,5 @@
 -- WORS_U_MagicPrayer.lua
-MicroMenu_Frames = {WORS_U_SpellBookFrame, WORS_U_PrayBookFrame, WORS_U_EmoteBookFrame, WORS_U_MusicPlayerFrame, WORS_U_EquipmentBookFrame, CombatStylePanel} -- MicroMenu frames AND CombatStylePanel
+MicroMenu_Frames = {WORS_U_SpellBookFrame, WORS_U_PrayBookFrame, WORS_U_EmoteBookFrame, WORS_U_EquipmentBookFrame, CombatStylePanel} 
 
 -- function to hide all Micromenu, CombatStylePanel and Backpack frames
 function MicroMenu_HideAll()
@@ -38,7 +38,6 @@ local function HookAFrames()
 			WORS_U_SpellBook.frame:Hide()
 			WORS_U_PrayBook.frame:Hide()
 			WORS_U_EmoteBook.frame:Hide()
-			WORS_U_MusicBook.musicPlayer:Hide()
 			WORS_U_EquipmentBook.frame:Hide()
 			CombatStylePanel:Hide()
 			AttachMicroButtonsTo(Backpack)
@@ -81,7 +80,6 @@ local function HookAFrames()
 			WORS_U_PrayBook.frame:Hide()
 			WORS_U_EmoteBook.frame:Hide()
 			WORS_U_EquipmentBook.frame:Hide()
-			WORS_U_MusicBook.musicPlayer:Hide()
 			CloseBackpack()
 			AttachMicroButtonsTo(CombatStylePanel)
         end)
@@ -174,9 +172,7 @@ function WORS_U_TOGGLE_COMBATSTYLE()
   MicroMenu_ToggleFrame(CombatStylePanel)
 end
 
-function WORS_U_TOGGLE_MUSIC()
-  MicroMenu_ToggleFrame(WORS_U_MusicBook.musicPlayer)
-end
+
 
 
 
@@ -196,7 +192,6 @@ local toggles = {
   { btn = GameMenuMicroButton,      bindings = { "TOGGLEGAMEMENU" } },
   { btn = CompanionsMicroButton,    bindings = { "TOGGLECHARACTER3" } },
   { btn = EmotesMicroButton,        bindings = { "Toggle Emote" } },
-  { btn = MusicMicroButton,         bindings = { "Toggle Music" } },
 }
 
 -- 2) Create your hotkey FontString once:

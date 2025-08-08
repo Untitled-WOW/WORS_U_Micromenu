@@ -3,7 +3,7 @@ WORS_U_MicroMenuSettings = WORS_U_MicroMenuSettings or {}
 WORS_U_MicroMenuSettings.MicroMenuPOS = WORS_U_MicroMenuSettings.MicroMenuPOS or {point = "CENTER", relativeTo = nil, relativePoint = "CENTER", xOfs = 0, yOfs = 0}
 
 -- All MicroMenu frames and CombatStylePanel
-MicroMenu_Frames = {WORS_U_SpellBookFrame, WORS_U_PrayBookFrame, WORS_U_EmoteBookFrame, WORS_U_MusicPlayerFrame, WORS_U_EquipmentBookFrame, CombatStylePanel}
+MicroMenu_Frames = {WORS_U_SpellBookFrame, WORS_U_PrayBookFrame, WORS_U_EmoteBookFrame, WORS_U_EquipmentBookFrame, CombatStylePanel}
 
 
 -- WORS_U_SpellBook.lua Data
@@ -224,18 +224,6 @@ WORS_U_EmoteBook.emotes = {
     { name = "Sit Down",  			--[[using wow]]	command = "sit", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\55_Sit_down_emote_icon.tga" },
 }
 
--- WORS_U_MusicBook.lua Data
-WORS_U_MusicBook = {}
-WORS_U_MusicBook.currentTrack = nil
-WORS_U_MusicBook.tracks = {
-    { name = "Sea Shanty", 		file = "Sound\\RuneScape\\Sea_Shanty_2.ogg" },
-    { name = "Harmony", 		file = "Sound\\RuneScape\\Harmony.ogg" },
-	{ name = "Harmony 2", 		file = "Sound\\RuneScape\\Harmony_2.ogg" },
-	{ name = "Runescape Main", 	file = "Sound\\RuneScape\\Scape_Main.ogg" },
-	{ name = "Runescape Theme", file = "Sound\\RuneScape\\Runescape_Theme.ogg" },
-	{ name = "Wilderness", 		file = "Sound\\RuneScape\\Wilderness.ogg" },
-	{ name = "Wilderness 2", 	file = "Sound\\RuneScape\\Wilderness_2.ogg" },
-}
 
 -- Experience Table used to calculate skills level from Reputaion
 experienceTable = {
