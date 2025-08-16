@@ -66,10 +66,6 @@ local function HookAFrames()
 		-- 1) Hide combatstylebg one line for loop
 		for _, r in ipairs({CombatStylePanel:GetRegions()}) do if r:GetObjectType()=="Texture" then r:Hide() end end
 
-		CombatStylePanel:SetFrameStrata("HIGH")
-		CombatStylePanel:SetFrameLevel(50)
-		CombatStylePanel:Raise()
-		CombatStylePanel:SetSize(180, 330)		
 
 		-- Hock onShow to auto close Micromenu and Backpack
 		CombatStylePanel:HookScript("OnShow", function()

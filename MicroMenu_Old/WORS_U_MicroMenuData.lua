@@ -3,7 +3,7 @@ WORS_U_MicroMenuSettings = WORS_U_MicroMenuSettings or {}
 WORS_U_MicroMenuSettings.MicroMenuPOS = WORS_U_MicroMenuSettings.MicroMenuPOS or {point = "CENTER", relativeTo = nil, relativePoint = "CENTER", xOfs = 0, yOfs = 0}
 
 -- All MicroMenu frames and CombatStylePanel
-MicroMenu_Frames = {WORS_U_SpellBookFrame, WORS_U_PrayBookFrame, WORS_U_EmoteBookFrame, WORS_U_EquipmentBookFrame, CombatStylePanel}
+MicroMenu_Frames = {WORS_U_SpellBookFrame, WORS_U_PrayBookFrame, WORS_U_EmoteBookFrame, CombatStylePanel}
 
 
 -- WORS_U_SpellBook.lua Data
@@ -353,18 +353,6 @@ function SaveFramePosition(self)
 	-- 2) persist
     WORS_U_MicroMenuSettings.MicroMenuPOS = {point = point, relativeTo = relName, relativePoint = relativePoint, xOfs = xOfs, yOfs = yOfs}
     local reference = _G[relName] or UIParent
-
-    -- 3) two offset tables
-    -- local bpOffsets = { -- bp ofsets for when Micromenu frames or combatstylepannel is moved to apply to backpack
-        -- RIGHT       = { -6, -25 }, TOPRIGHT     = { -6, 0 }, BOTTOMRIGHT = { -6, -50 },
-        -- LEFT        = {  6, -25 }, TOPLEFT      = {  6, 0 }, BOTTOMLEFT  = {  6, -50 },
-        -- CENTER      = {  0, -25 }, TOP          = {  0, 0 }, BOTTOM      = {  0, -50 },
-    -- }
-    -- local mmOffsets = { -- mm ofsets for when backpack is moved to apply to Micromenu frames
-        -- RIGHT       = {  6, 25 },   TOPRIGHT    = {  6, 0 }, BOTTOMRIGHT = {  6, 50 },
-        -- LEFT        = { -6, 25 },   TOPLEFT     = { -6, 0 }, BOTTOMLEFT  = { -6, 50 },
-        -- CENTER      = {  0, 25 },   TOP         = {  0, 0 }, BOTTOM      = {  0, 50 },
-    -- }
 	
 	-- 3) two offset tables
     local bpOffsets = { -- bp ofsets for when Micromenu frames or combatstylepannel is moved to apply to backpack

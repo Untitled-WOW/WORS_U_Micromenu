@@ -1,27 +1,29 @@
 -- Function to initialize Prayer level from rep
-local factionID = 1170
 local prayerLevel = 1
 local function InitializePrayerLevel()
-    prayerLevel = GetLevelFromFactionReputation(factionID)
+	_, _, prayerLevel, _, _, _ = WORSSkillsUtil.GetSkillInfo(Enum.WORSSkills.Prayer)
 end
 
-local prayerButtons = {}  
+local prayerButtons = {}
+
 -- Function to set up magic buttons dynamically
 local function SetupPrayerButtons()
-	if InCombatLockdown() then
-		return
-	end
-	-- Clear existing buttons before creating new ones
-	for _, button in pairs(prayerButtons) do
+    if InCombatLockdown() then
+        -- can't create/modify secure children in combat
+        return
+    end
+
+    -- Clear existing buttons before creating new ones
+    for _, button in pairs(prayerButtons) do
         button:Hide()
         button:SetParent(nil)
     end
     wipe(prayerButtons)
+
     local buttonSize = 35
-    local padding 	 = 2	 -- space between buttons
-	local margin   	 = 5 	 -- space from frame edge
-    local columns 	 = 5
-    
+    local padding    = 2          -- space between buttons
+    local margin     = 5         -- space from frame edge
+    local columns    = 5
 	for i, prayerData in ipairs(WORS_U_PrayBook.prayers) do
         local prayerID = prayerData.id
         local requiredLevel = prayerData.level
@@ -41,16 +43,13 @@ local function SetupPrayerButtons()
         else
 			icon:SetVertexColor(1, 1, 1) -- Normal icon
         end
-		-- pre click used to cast prayer or remove aura
-        prayerButton:SetScript("PreClick", function(self)
-            if UnitBuff("player", prayerName) then
-                self:SetAttribute("type", "macro")
-                self:SetAttribute("macrotext", "/cancelaura " .. prayerName)
-            else
-                self:SetAttribute("type", "spell")
-                self:SetAttribute("spell", prayerID)
-            end
-        end)
+	
+		-- one-time setup 
+		prayerButton:RegisterForClicks("AnyUp")
+		prayerButton:SetAttribute("type", "spell")                        -- Left click = cast
+		prayerButton:SetAttribute("spell", prayerName)
+        prayerButton:SetAttribute("checkselfcast", true)     -- honor self-cast logic safely
+
         prayerButton:SetScript("OnEnter", function()
             GameTooltip:SetOwner(prayerButton, "ANCHOR_RIGHT")
             GameTooltip:SetSpellByID(prayerID)
@@ -67,103 +66,162 @@ local function SetupPrayerButtons()
             end
         end)
         table.insert(prayerButtons, prayerButton)
-    end	
-	LoadTransparency()
+	end
 end
 
--- Create the prayer book frame
-WORS_U_PrayBook.frame = CreateFrame("Frame", "WORS_U_PrayBookFrame", UIParent)
-WORS_U_PrayBook.frame:SetSize(192, 280)
+-- ===========================
+-- SECURE WRAPPER + VISIBILITY
+-- ===========================
+
+-- Create the main frame as a secure handler so it can Show/Hide in combat
+--WORS_U_PrayBook.frame = CreateFrame("Frame", "WORS_U_PrayBookFrame", UIParent, "SecureHandlerStateTemplate,OldSchoolFrameTemplate")
+
+WORS_U_PrayBook.frame:SetSize(192, 304)
 WORS_U_PrayBook.frame:SetBackdrop({
     bgFile = "Interface\\WORS\\OldSchoolBackground1",
     edgeFile = "Interface\\WORS\\OldSchool-Dialog-Border",
     tile = false, tileSize = 32, edgeSize = 32,
     insets = { left = 5, right = 5, top = 5, bottom = 5 }
 })
-WORS_U_PrayBook.frame:SetFrameStrata("High")
-WORS_U_PrayBookFrame:SetFrameLevel(10)
+local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
+if pos then
+	local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
+	WORS_U_PrayBook.frame:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
+else
+	WORS_U_PrayBook.frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -20, 90)
+end	
+WORS_U_PrayBook.frame:SetFrameStrata("LOW")
+WORS_U_PrayBook.frame:SetFrameLevel(10)
 WORS_U_PrayBook.frame:Hide()
 WORS_U_PrayBook.frame:SetMovable(true)
 WORS_U_PrayBook.frame:EnableMouse(true)
 WORS_U_PrayBook.frame:RegisterForDrag("LeftButton")
 WORS_U_PrayBook.frame:SetClampedToScreen(true)
---tinsert(UISpecialFrames, "WORS_U_PrayBookFrame")
+--WORS_U_PrayBook.frame:SetUserPlaced(false)
+-- tinsert(UISpecialFrames, "WORS_U_SpellBookFrame")
 WORS_U_PrayBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
-WORS_U_PrayBook.frame:SetScript("OnDragStop", function(self)
-    self:StopMovingOrSizing()
-end)
-local closeButton = CreateFrame("Button", nil, WORS_U_PrayBookFrame)
-closeButton:SetSize(16, 16)
-closeButton:SetPoint("TOPRIGHT", WORS_U_PrayBookFrame, "TOPRIGHT", 4, 4)
-WORS_U_PrayBook.closeButton = closeButton
-closeButton:SetNormalTexture("Interface\\WORS\\OldSchool-CloseButton-Up.blp")
-closeButton:SetHighlightTexture("Interface\\WORS\\OldSchool-CloseButton-Highlight.blp", "ADD")
-closeButton:SetPushedTexture("Interface\\WORS\\OldSchool-CloseButton-Down.blp")
-closeButton:SetScript("OnClick", function()
-	if InCombatLockdown() then
-		print("|cff00ff00MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
-		return
-	else	
-		WORS_U_PrayBook.frame:Hide()
-		PrayerMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
-	end
+WORS_U_PrayBook.frame:SetScript("OnDragStop", function(self) 
+	self:StopMovingOrSizing() 
+	SaveFramePosition(self)
 end)
 
--- Function to update the button's background color
+-- Keep a secure "desired visibility" attribute (no drivers; we allow in-combat show)
+WORS_U_PrayBook.frame:SetAttribute("userToggle", nil) -- hidden by default
+
+if WORS_U_PrayBookFrame.CloseButton then WORS_U_PrayBookFrame.CloseButton:ClearAllPoints() end
+
+
+-- Build content when the frame becomes visible and we're not in combat
+WORS_U_PrayBook.frame:SetScript("OnShow", function()
+	CloseBackpack()
+    if not InCombatLockdown() then
+        InitializePrayerLevel()
+        SetupPrayerButtons()
+    end
+end)
+
+-- Update micro button tint on show/hide
 local function UpdateButtonBackground()
     if WORS_U_PrayBook.frame:IsShown() then
-		PrayerMicroButton:GetNormalTexture():SetVertexColor(1, 0, 0) -- Set the color to red	
-	else
-		PrayerMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Default	
-	end
+        PrayerMicroButton:GetNormalTexture():SetVertexColor(1, 0, 0) -- red when open
+    else
+        PrayerMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- default
+    end
 end
 WORS_U_PrayBook.frame:SetScript("OnShow", UpdateButtonBackground)
 WORS_U_PrayBook.frame:SetScript("OnHide", UpdateButtonBackground)
 
--- Function to handle PrayerMicroButton clicks
-local function OnPrayerClick(self)
-	local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
-	if not InCombatLockdown() then
+-- =========================================
+-- EVENTS: keep icons up-to-date 
+-- =========================================
+local eventFrame = CreateFrame("Frame")
+eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED") 
+eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+--eventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+eventFrame:SetScript("OnEvent", function(self, event)
+	if event == "PLAYER_ENTERING_WORLD" then
+		if InCombatLockdown() then return end
+		local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
 		if pos then
 			local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
 			WORS_U_PrayBook.frame:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
 		else
-			WORS_U_PrayBook.frame:SetPoint("CENTER")
-		end
-	else
-		print("|cff00ff00MicroMenu: You cannot open or close Spell / Prayer Book in combat.|r")
+			WORS_U_PrayBook.frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -20, 90)
+			SaveFramePosition(WORS_U_PrayBook.frame)
+		end	
+		InitializePrayerLevel()
+		SetupPrayerButtons()	
+	elseif event == "PLAYER_REGEN_ENABLED" then
+		InitializePrayerLevel()
+		SetupPrayerButtons()
 	end
-
-	if IsAltKeyDown() and not InCombatLockdown() then
-        WORS_U_PrayBook.frame:Show()
-		currentTransparencyIndex = currentTransparencyIndex % #transparencyLevels + 1
-        WORS_U_PrayBook.frame:SetAlpha(transparencyLevels[currentTransparencyIndex])
-        SaveTransparency()  -- Save transparency after change
-	elseif IsShiftKeyDown() then        
-        --AscensionSpellbookFrame:Show()
-		ToggleSpellBook(BOOKTYPE_SPELL)
-    else
-		if not InCombatLockdown() then	
-			if WORS_U_PrayBook.frame:IsShown() then
-				WORS_U_PrayBook.frame:Hide()
-			else
-				InitializePrayerLevel()
-				SetupPrayerButtons()
-				MicroMenu_ToggleFrame(WORS_U_PrayBook.frame)--:Show()
-			end
-		elseif WORS_U_MicroMenuSettings.AutoCloseEnabled then	
-			WORS_U_EmoteBookFrame:Hide()
-			WORS_U_MusicPlayerFrame:Hide()
-			CombatStylePanel:Hide()
-			CloseBackpack()
-		end
-    end
-end
-PrayerMicroButton:SetScript("OnClick", OnPrayerClick)
-PrayerMicroButton:HookScript("OnEnter", function(self)
-    if GameTooltip:IsOwned(self) then
-        GameTooltip:AddLine("Shift + Click to open WOW Spellbook.", 1, 1, 0, true)
-        GameTooltip:AddLine("ALT + Click to change transparency.", 1, 1, 0, true)
-        GameTooltip:Show()
-    end
 end)
+
+-- =========================
+-- SECURE TOGGLE + CLOSE UI
+-- =========================
+
+-- Secure TOGGLE overlay on the SpellbookMicroButton
+local Toggle = CreateFrame("Button", "WORS_UPrayBook_Toggle", UIParent, "SecureHandlerClickTemplate")
+Toggle:SetAllPoints(PrayerMicroButton)
+Toggle:RegisterForClicks("AnyUp")
+Toggle:SetFrameStrata("HIGH")
+Toggle:SetFrameLevel(PrayerMicroButton:GetFrameLevel() + 1)
+
+-- before: after you create CombatStylePanel and WORS_U_SpellBook.frame
+-- Pass references into secure environment
+Toggle:SetFrameRef("uSpellBook", WORS_U_SpellBook.frame)
+Toggle:SetFrameRef("uPrayerBook", WORS_U_PrayBook.frame)
+Toggle:SetFrameRef("aCombatStyle", CombatStylePanel)  
+
+-- Secure click snippet
+Toggle:SetAttribute("_onclick", [=[
+  local uSpellBook = self:GetFrameRef("uSpellBook")
+  local uPrayerBook = self:GetFrameRef("uPrayerBook")
+  local aCombatStyle = self:GetFrameRef("aCombatStyle")
+  local isShown = uPrayerBook:GetAttribute("userToggle")
+  if isShown then
+    uPrayerBook:SetAttribute("userToggle", nil)
+    uPrayerBook:Hide()
+  else
+	if uSpellBook and uSpellBook:IsShown() then 
+		uSpellBook:Hide()
+		uSpellBook:SetAttribute("userToggle", nil)
+	end
+	if aCombatStyle and aCombatStyle:IsShown() then aCombatStyle:Hide() end
+	
+	uPrayerBook:SetAttribute("userToggle", true)
+    uPrayerBook:Show()
+  end
+]=])
+
+-- Shift+Click to reset position 
+Toggle:SetScript("OnMouseUp", function(self)
+	CloseBackpack()
+	WORS_U_EmoteBookFrame:Hide()
+	if IsShiftKeyDown() and not InCombatLockdown() then
+		WORS_U_PrayBook.frame:ClearAllPoints()
+		WORS_U_PrayBook.frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -20, 90)
+		SaveFramePosition(WORS_U_PrayBook.frame)
+		print("|cff00ff00[MicroMenu]|r position reset.")
+	end
+end)
+
+
+-- Secure CLOSE button inside the frame (works in combat)
+local closeButton = CreateFrame("Button", nil, WORS_U_PrayBook.frame, "SecureHandlerClickTemplate")
+closeButton:SetSize(16, 16)
+closeButton:SetPoint("TOPRIGHT", WORS_U_PrayBook.frame, "TOPRIGHT", 4, 4)
+WORS_U_PrayBook.closeButton = closeButton
+closeButton:SetNormalTexture("Interface\\WORS\\OldSchool-CloseButton-Up.blp")
+closeButton:SetHighlightTexture("Interface\\WORS\\OldSchool-CloseButton-Highlight.blp", "ADD")
+closeButton:SetPushedTexture("Interface\\WORS\\OldSchool-CloseButton-Down.blp")
+
+closeButton:SetFrameRef("uPrayerBook", WORS_U_PrayBook.frame)
+closeButton:SetAttribute("_onclick", [=[
+  local uPrayerBook = self:GetFrameRef("uPrayerBook")
+  uPrayerBook:SetAttribute("userToggle", nil)
+  uPrayerBook:Hide()
+]=])
+
+

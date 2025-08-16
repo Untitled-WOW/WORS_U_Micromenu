@@ -5,7 +5,14 @@ WORS_U_MicroMenuSettings = WORS_U_MicroMenuSettings or {
 	MicroMenuPOS = { point = "CENTER", relativeTo = nil, relativePoint = "CENTER", xOfs = 0, yOfs = 0 }
 }
 
+local function GetMicroMenuFrames()
+    return { _G["WORS_U_SpellBookFrame"], _G["WORS_U_PrayBookFrame"], _G["WORS_U_EmoteBookFrame"], _G["CombatStylePanel"] }
+end
+
+
 WORS_U_SpellBook = {}
+WORS_U_SpellBook.frame = CreateFrame("Frame", "WORS_U_SpellBookFrame", UIParent, "SecureHandlerStateTemplate,OldSchoolFrameTemplate")
+
 WORS_U_SpellBook.spells = {
     {level = 0, name = "Lumbridge Home Teleport", id = 99561},
     {level = 1, name = "Wind Strike", id = 98952, runes = {["Air Rune"] = 1, ["Mind Rune"] = 1}},
@@ -88,10 +95,10 @@ WORS_U_SpellBook.spells = {
  -- {level = 90, name = "Earth Surge", id = 79544, runes = {["Earth Rune"] = 7, ["Death Rune"] = 1}},
  -- {level = 93, name = "Lvl-7 Enchant", id = nil, runes = {["Cosmic Rune"] = 1, ["Soul Rune"] = 20}},
  -- {level = 95, name = "Fire Surge", id = 79549, runes = {["Fire Rune"] = 10, ["Death Rune"] = 1}},
-    {level = 102, name = "Wind Surge", id = 79534, runes = {["Air Rune"] = 7, ["Death Rune"] = 1}},
-    {level = 103, name = "Water Surge", id = 79539, runes = {["Water Rune"] = 7, ["Death Rune"] = 1}},
-	{level = 104, name = "Earth Surge", id = 79544, runes = {["Earth Rune"] = 7, ["Death Rune"] = 1}},
-	{level = 105, name = "Fire Surge", id = 79549, runes = {["Fire Rune"] = 10, ["Death Rune"] = 1}},
+ -- {level = 102, name = "Wind Surge", id = 79534, runes = {["Air Rune"] = 7, ["Death Rune"] = 1}},
+ -- {level = 103, name = "Water Surge", id = 79539, runes = {["Water Rune"] = 7, ["Death Rune"] = 1}},
+ -- {level = 104, name = "Earth Surge", id = 79544, runes = {["Earth Rune"] = 7, ["Death Rune"] = 1}},
+ -- {level = 105, name = "Fire Surge", id = 79549, runes = {["Fire Rune"] = 10, ["Death Rune"] = 1}},
 }
 WORS_U_SpellBook.runeInfo = {
     ["Air Rune"]    = { itemID = 90120, staffIDs = {90838, 90404} },
@@ -157,6 +164,8 @@ end
 
 -- WORS_U_PrayBook Data
 WORS_U_PrayBook = {}  -- Create the main table for the PrayBook
+WORS_U_PrayBook.frame = CreateFrame("Frame", "WORS_U_PrayBookFrame", UIParent, "SecureHandlerStateTemplate,OldSchoolFrameTemplate")
+
 WORS_U_PrayBook.prayers = {
     {level = 1, id = 79502, buffIcon = "Interface\\Icons\\active_thickskin.blp"},  -- Thick Skin
     {level = 4, id = 79506, buffIcon = "Interface\\Icons\\active_burststrength.blp"},  -- Burst of Strength
@@ -192,185 +201,122 @@ WORS_U_PrayBook.prayers = {
 }
 
 
--- WORS_U_EmoteBook Data
+-- WORS_U_EmoteBook.lua Data
 WORS_U_EmoteBook = {}
+WORS_U_EmoteBook.frame = CreateFrame("Frame", "WORS_U_EmoteBookFrame", UIParent, "OldSchoolFrameTemplate")
 WORS_U_EmoteBook.emotes = {
-    { name = "Yes", command = "nod" },			
-    { name = "No", command = "no" },
-	{ name = "Bow", command = "Bow" },
-    { name = "Angry", command = "angry" }, --OSRS correct
-    { name = "Think", command = "think" },
-    { name = "Wave", command = "wave" },
-	{ name = "Shrug", command = "shrug" },
-    { name = "Cheer", command = "cheer" },--OsRS correcthey
-    { name = "Beckon", command = "beckon" },	
-    { name = "Laugh", command = "laugh" },
-    { name = "Joy", command = "Bounce" },
-	{ name = "Yawn", command = "Yawn" },--OSRS correct
-    { name = "Dance", command = "dance" },
-    { name = "Shake", command = "shake" },
-	{ name = "Tease", command = "tease" },
-	{ name = "Bonk", command = "Bonk" },--OSRS correct
-    { name = "Cry", command = "cry" },
-	{ name = "Blow", command = "kiss" },
-	{ name = "Panic", command = "panic" },
-	{ name = "Fart", command = "fart" },
-	{ name = "Clap", command = "clap" },
-	{ name = "Salute", command = "salute" },
+    { name = "Yes",   		    	--[[using wow]]	command = "nod",   				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\1_Yes_emote_icon.tga" },
+    { name = "No",    		    	--[[using wow]]	command = "no",    				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\2_No_emote_icon.tga" },
+    { name = "Bow",   		    	--[[using wow]]	command = "Bow",   				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\3_Bow_emote_icon.tga" },
+    { name = "Angry", 		    	--[[using wow]]	command = "angry", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\4_Angry_emote_icon.tga" },
+    { name = "Think",		    	--[[using wow]]	command = "think", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\5_Think_emote_icon.tga" },
+    { name = "Wave",		    	--[[using wow]]	command = "wave",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\6_Wave_emote_icon.tga" },
+    { name = "Shrug",		    	--[[using wow]]	command = "shrug", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\7_Shrug_emote_icon.tga" },
+    { name = "Cheer",		    	--[[using wow]]	command = "cheer", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\8_Cheer_emote_icon.tga" },
+    { name = "Beckon",		    	--[[using wow]]	command = "beckon",				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\9_Beckon_emote_icon.tga" },
+    { name = "Laugh", 		    	--[[using wow]]	command = "laugh", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\10_Laugh_emote_icon.tga" },
+    { name = "Joy",        			--[[*_custom*]]	command = "_joy",				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\11_Jump_for_Joy_emote_icon.tga" },
+    { name = "Yawn", 		    	--[[using wow]]	command = "Yawn",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\12_Yawn_emote_icon.tga" },
+    { name = "Dance", 		    	--[[using wow]]	command = "dance", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\13_Dance_emote_icon.tga" },
+    { name = "Shake", 		    	--[[using wow]]	command = "shake", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\14_Jig_emote_icon.tga" },
+    { name = "Tease", 		    	--[[using wow]]	command = "tease", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\15_Spin_emote_icon.tga" },
+    { name = "Bonk",  		    	--[[using wow]]	command = "Bonk",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\16_Headbang_emote_icon.tga" },
+    { name = "Cry",   		    	--[[using wow]]	command = "cry",   				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\17_Cry_emote_icon.tga" },
+    { name = "Blow",  		    	--[[using wow]]	command = "kiss",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\18_Blow_Kiss_emote_icon.tga" },
+    { name = "Panic", 		    	--[[using wow]]	command = "panic", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\19_Panic_emote_icon.tga" },
+    { name = "Fart",  		    	--[[using wow]]	command = "fart", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\20_Raspberry_emote_icon.tga" },
+    { name = "Clap",  		    	--[[using wow]]	command = "clap",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\21_Clap_emote_icon.tga" },
+    { name = "Salute",		    	--[[using wow]]	command = "salute",				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\22_Salute_emote_icon.tga" },
+	{ name = "Goblin Bow", 			--[[*_custom*]]	command = "_goblinbow", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\23_Goblin_Bow_emote_icon.tga" },
+    { name = "Goblin Salute",		--[[*_custom*]]	command = "_goblinsalute", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\24_Goblin_Salute_emote_icon.tga" },
+	{ name = "Glass Box",  			--[[*_custom*]]	command = "_glassbox", 			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\25_Glass_Box_emote_icon.tga" },
+    { name = "Climb Rope",							command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\26_Climb_Rope_emote_icon.tga" },
+    { name = "Lean",	   			--[[*_custom*]]	command = "_lean", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\27_Lean_emote_icon.tga" },
+    { name = "Glass Wall",							command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\28_Glass_Wall_emote_icon.tga" },
+	{ name = "Idea",								command = "",					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\29_Idea_emote_icon.tga" },
+    { name = "Stamp",								command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\30_Stamp_emote_icon.tga" },
+    { name = "Flap",	    		--[[*_custom*]]	command = "_flap", 			 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\31_Flap_emote_icon.tga" },
+    { name = "Slap Head",    		--[[*_custom*]]	command = "_slaphead",			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\32_Slap_Head_emote_icon.tga" },
+	{ name = "Zombie Walk",  		--[[*_custom*]]	command = "_zombiewalk", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\33_Zombie_Walk_emote_icon.tga" },
+    { name = "Zombie Dance",		--[[*_custom*]]	command = "_zombiedance", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\34_Zombie_Dance_emote_icon.tga" },
+    { name = "Scared",				--[[using wow]]	command = "scared",				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\35_Scared_emote_icon.tga" },
+    { name = "Rabbit Hop", 			--[[*_custom]] 	command = "_rabbithop",			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\36_Rabbit_Hop_emote_icon.tga" },
+    { name = "Sit Up",								command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\37_Sit_up_emote_icon.tga" },
+    { name = "Push Up",				--[[*_custom*]]	command = "_pushup", 			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\38_Push_up_emote_icon.tga" },
+    { name = "Star Jump",			--[[*_custom*]]	command = "_starjump", 			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\39_Star_jump_emote_icon.tga" },
+    { name = "Jog",									command = "",					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\40_Jog_emote_icon.tga" },
+    { name = "Flex",            	--[[using wow]] command = "flex", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\41_Flex_emote_icon.tga" },
+    { name = "Zombie Hand",			--[[*_custom*]]	command = "_zombiehand", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\42_Zombie_Hand_emote_icon.tga" },
+    { name = "Hypermobile Drinker",	--[[*_custom*]]	command = "_hypermobiledrinker",icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\43_Hypermobile_Drinker_emote_icon.tga" },
+    { name = "Skill Cape",  						command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\44_Skill_Cape_emote_icon.tga" },
+    { name = "Air Guitar",  		--[[*_custom*]]	command = "_airguitar", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\45_Air_Guitar_emote_icon.tga" },
+    { name = "Uri Transform",     					command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\46_Uri_transform_emote_icon.tga" },
+    { name = "Smooth Dance", 		--[[*_custom*]]	command = "_smoothdance",		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\47_Smooth_dance_emote_icon.tga" },
+    { name = "Crazy Dance",  		--[[*_custom*]]	command = "_crazydance",		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\48_Crazy_dance_emote_icon.tga" },
+    { name = "Premier Shield", 		--[[*_custom*]]	command = "_premiershield", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\49_Premier_Shield_emote_icon.tga" },
+    { name = "Explore",         	  				command = "",					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\50_Explore_emote_icon.tga" },
+    { name = "Relic Unlock",    	  				command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\51_Relic_unlock_emote_icon.tga" },
+    { name = "Party",           	  				command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\52_Party_emote_icon.tga" },
+    { name = "Trick",           	  				command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\53_Trick_emote_icon.tga" },
+    { name = "Fortis Salute",		--[[*_custom*]]	command = "_fortissalute", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\54_Fortis_Salute_emote_icon.tga" },
+    { name = "Sit Down",  			--[[using wow]]	command = "sit", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\55_Sit_down_emote_icon.tga" },
 }
 
--- WORS_U_MusicBook Data
-WORS_U_MusicBook = {}
-WORS_U_MusicBook.currentTrack = nil
-WORS_U_MusicBook.tracks = {
-    { name = "Sea Shanty", file = "Sound\\RuneScape\\Sea_Shanty_2.ogg" },
-    { name = "Harmony", file = "Sound\\RuneScape\\Harmony.ogg" },
-	{ name = "Harmony 2", file = "Sound\\RuneScape\\Harmony_2.ogg" },
-	{ name = "Runescape Main", file = "Sound\\RuneScape\\Scape_Main.ogg" },
-	{ name = "Runescape Theme", file = "Sound\\RuneScape\\Runescape_Theme.ogg" },
-	{ name = "Wilderness", file = "Sound\\RuneScape\\Wilderness.ogg" },
-	{ name = "Wilderness 2", file = "Sound\\RuneScape\\Wilderness_2.ogg" },
 
-}
+local reanchorPending = false
 
--- Experience Table used to calculate skills level from Reputaion
-experienceTable = {
-    [1] = 0,
-    [2] = 83,
-    [3] = 174,
-    [4] = 276,
-    [5] = 388,
-    [6] = 512,
-    [7] = 650,
-    [8] = 801,
-    [9] = 969,
-    [10] = 1154,
-    [11] = 1358,
-    [12] = 1584,
-    [13] = 1833,
-    [14] = 2107,
-    [15] = 2411,
-    [16] = 2746,
-    [17] = 3115,
-    [18] = 3523,
-    [19] = 3973,
-    [20] = 4470,
-    [21] = 5018,
-    [22] = 5624,
-    [23] = 6291,
-    [24] = 7028,
-    [25] = 7842,
-    [26] = 8740,
-    [27] = 9730,
-    [28] = 10824,
-    [29] = 12031,
-    [30] = 13363,
-    [31] = 14833,
-    [32] = 16456,
-    [33] = 18247,
-    [34] = 20224,
-    [35] = 22406,
-    [36] = 24815,
-    [37] = 27473,
-    [38] = 30408,
-    [39] = 33648,
-    [40] = 37224,
-    [41] = 41171,
-    [42] = 45529,
-    [43] = 50339,
-    [44] = 55649,
-    [45] = 61512,
-    [46] = 67983,
-    [47] = 75127,
-    [48] = 83014,
-    [49] = 91721,
-    [50] = 101333,
-    [51] = 111945,
-    [52] = 123660,
-    [53] = 136594,
-    [54] = 150872,
-    [55] = 166636,
-    [56] = 184040,
-    [57] = 203254,
-    [58] = 224466,
-    [59] = 247886,
-    [60] = 273742,
-    [61] = 302288,
-    [62] = 333804,
-    [63] = 368599,
-    [64] = 407015,
-    [65] = 449428,
-    [66] = 496254,
-    [67] = 547953,
-    [68] = 605032,
-    [69] = 668051,
-    [70] = 737627,
-    [71] = 814445,
-    [72] = 899257,
-    [73] = 992895,
-    [74] = 1096278,
-    [75] = 1210421,
-    [76] = 1336443,
-    [77] = 1475581,
-    [78] = 1629200,
-    [79] = 1798808,
-    [80] = 1986068,
-    [81] = 2192818,
-    [82] = 2421087,
-    [83] = 2673114,
-    [84] = 2951373,
-    [85] = 3258594,
-    [86] = 3597792,
-    [87] = 3972294,
-    [88] = 4385776,
-    [89] = 4842295,
-    [90] = 5346332,
-    [91] = 5902831,
-    [92] = 6517253,
-    [93] = 7195629,
-    [94] = 7944614,
-    [95] = 8771558,
-    [96] = 9684577,
-    [97] = 10692629,
-    [98] = 11805606,
-    [99] = 13034431,
-}
--- Function to GetLevelFromFactionReputation
-function GetLevelFromFactionReputation(factionID)
-    local _, _, _, _, _, repValue = GetFactionInfoByID(factionID)
-    if not repValue then
-        print("|cff00ff00MicroMenu: |r" .. "|cffff0000Error: |r" .. "|cff00ff00Faction ID", factionID, "not found.|r")
-        return 1
+local function ApplySavedPosition()
+    local pos = WORS_U_MicroMenuSettings and WORS_U_MicroMenuSettings.MicroMenuPOS
+    if not pos then return end
+    if InCombatLockdown() then
+        reanchorPending = true
+        return
     end
 
-    local adjustedXP = repValue - 43000
-    for level = #experienceTable, 1, -1 do
-        if adjustedXP >= experienceTable[level] then
-            return level
-        end
-    end
-    return 1
-end
+    local reference = (_G[pos.relativeTo] or UIParent)
+    local bpOffsets = {
+        RIGHT={0,0}, TOPRIGHT={0,0}, BOTTOMRIGHT={0,0},
+        LEFT={0,0},  TOPLEFT={0,0},  BOTTOMLEFT={0,0},
+        CENTER={0,0}, TOP={0,0}, BOTTOM={0,0},
+    }
 
--- Used to cycle thru transparancy levels on Alt clicking MicroMenuButtons
-transparencyLevels = {1, 0.75, 0.5, 0.25}
-currentTransparencyIndex = 1
-
--- Function to save transparency to saved variables
-function SaveTransparency()
-    WORS_U_MicroMenuSettings.transparency = transparencyLevels[currentTransparencyIndex]
-	print("|cff00ff00MicroMenu: Transparency saved:", WORS_U_MicroMenuSettings.transparency * 100 .. "%|r")
-	print("|cff00ff00MicroMenu: |r" .. "|cffff0000Error: |r" .. "|cff00ff00Transparency saved:", WORS_U_MicroMenuSettings.transparency * 100 .. "%|r")
-
-end
-
--- Function to load transparency from saved variables
-function LoadTransparency()
-    local savedAlpha = WORS_U_MicroMenuSettings.transparency or 1  -- Default to 1 (100%) if not saved
-    -- Apply transparency to each frame in the list
-	for _, frame in ipairs(MicroMenu_Frames) do
+    for _, frame in ipairs(GetMicroMenuFrames()) do
         if frame then
-            frame:SetAlpha(savedAlpha)  -- Set transparency for the frame
+            frame:ClearAllPoints()
+            frame:SetPoint(pos.point, reference, pos.relativePoint, pos.xOfs, pos.yOfs)
+            --frame:SetUserPlaced(false)
         end
     end
+
+    if Backpack then
+        local bpX, bpY = unpack(bpOffsets[pos.relativePoint] or {0,0})
+        Backpack:ClearAllPoints()
+        Backpack:SetPoint(pos.point, reference, pos.relativePoint, pos.xOfs + bpX, pos.yOfs + bpY)
+        --Backpack:SetUserPlaced(false)
+    end
 end
+
+function SaveFramePosition(self)
+    local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
+    local relName = (relativeTo and relativeTo:GetName()) or "UIParent"
+
+    WORS_U_MicroMenuSettings.MicroMenuPOS = {
+        point = point, relativeTo = relName, relativePoint = relativePoint, xOfs = xOfs, yOfs = yOfs
+    }
+
+    if InCombatLockdown() then
+        reanchorPending = true
+        return
+    end
+
+    ApplySavedPosition()
+end
+
+local reanchorWatcher = CreateFrame("Frame")
+reanchorWatcher:RegisterEvent("PLAYER_REGEN_ENABLED")
+reanchorWatcher:SetScript("OnEvent", function()
+    if reanchorPending then
+        reanchorPending = false
+        ApplySavedPosition()
+    end
+end)

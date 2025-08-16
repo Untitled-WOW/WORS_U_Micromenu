@@ -1,0 +1,60 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+	<Frame name="WORS_U_EmoteBookFrame" parent="UIParent" inherits="OldSchoolFrameTemplate" enableMouse="true" movable="true" clampedToScreen="true" hidden="true">
+		<Size x="192" y="304"/>
+		<Anchors>
+			<Anchor point="BOTTOMRIGHT">
+				<Offset x="-20" y="90"/>
+			</Anchor>
+		</Anchors>
+
+		<Frames>
+			<ScrollFrame parentKey="ScrollFrame" inherits="UIPanelScrollFrameTemplate">
+				<Size x="180" y="290"/>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="12" y="-5"/>
+					</Anchor>
+				</Anchors>
+				<ScrollChild>
+				<Frame parentKey="ButtonContainer">
+					<Size x="180" y="330"/>
+				</Frame>
+				</ScrollChild>
+			</ScrollFrame>
+		</Frames>
+
+		<Scripts>
+			<OnDragStart> self:StartMoving(); </OnDragStart>
+			<OnDragStop>
+				self:StopMovingOrSizing();
+				if SaveFramePosition then SaveFramePosition(self); end
+			</OnDragStop>
+			<OnLoad>
+				local closeBtn = self.CloseButton
+				if closeBtn then
+					closeBtn:ClearAllPoints()
+					closeBtn:SetPoint("TOPRIGHT", self, "TOPRIGHT", 4, 4)
+				end
+
+				-- hide scrollbar visuals (keep wheel/scrollChild functional)
+				local sb = self.ScrollFrame.ScrollBar
+				if sb then
+					local up = _G[sb:GetName().."ScrollUpButton"]
+					local down = _G[sb:GetName().."ScrollDownButton"]
+					sb:Hide(); sb:SetAlpha(0); sb:EnableMouse(false)
+					if up then up:Hide(); up:SetAlpha(0) end
+					if down then down:Hide(); down:SetAlpha(0) end
+				end
+
+
+				self:SetFrameLevel(5);
+				self:RegisterForDrag("LeftButton");
+			</OnLoad>
+
+
+		</Scripts>
+	</Frame>
+
+	<!-- Load behavior after frame exists -->
+	<Script file="MicroMenu_Emote.lua"/>
+</Ui>
