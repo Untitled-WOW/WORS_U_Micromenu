@@ -1,6 +1,0 @@
-<Bindings>
-	<Binding name="Toggle Combat Style" header="WORSMICROMENU">MicroMenu_ToggleFrame(CombatStylePanel)</Binding>	
-	<Binding name="Toggle Magic">MicroMenu_ToggleFrame(WORS_U_SpellBook.frame)</Binding>
-	<Binding name="Toggle Prayer">MicroMenu_ToggleFrame(WORS_U_PrayBook.frame)</Binding>
-	<Binding name="Toggle Emote">MicroMenu_ToggleFrame(WORS_U_EmoteBook.frame)</Binding>
-</Bindings>
