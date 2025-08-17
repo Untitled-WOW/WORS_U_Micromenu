@@ -1,0 +1,20 @@
+## Interface: 30300
+## Title: MicroMenu
+## Notes: Upgraded Spell, Prayer, Emote and Music menu for for WORS.                                                                            Open by clicking the Micro Menu button.                                                               Toggle transparancy by Alt clicking Micro Menu buttons.                                                                           Open WOW Spellbook by Shift clicking button.                                                                           Send bug reports to Untitled - Llama69420 on discord.
+## Author: Untitled - Discord@Llama69420
+## Version: 2.666
+## Dependencies: WORS_Backpack
+## SavedVariables: WORS_U_MicroMenuSettings
+## DefaultState: disabled
+
+# Main
+WORS_U_MicroMenuData.lua
+MicroMenuButtons.lua
+WORS_U_SpellBook.lua
+WORS_U_PrayBook.lua
+WORS_U_Equipment.lua
+WORS_U_Equipment_GuidePrices.lua
+WORS_U_Equipment_ItemsKeptOnDeath.lua
+WORS_U_Equipment_ValueFrame.lua
+WORS_U_EmoteBook.lua
+WORS_U_MicroMenu.lua
