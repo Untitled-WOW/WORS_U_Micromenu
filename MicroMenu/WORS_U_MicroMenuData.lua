@@ -5,7 +5,7 @@ WORS_U_MicroMenuSettings = WORS_U_MicroMenuSettings or {
 }
 
 local function GetMicroMenuFrames()
-    return { _G["WORS_U_SpellBookFrame"], _G["WORS_U_PrayBookFrame"], _G["WORS_U_EmoteBookFrame"], _G["WORS_U_EquipmentBookFrame"], _G["CombatStylePanel"] }
+    return { _G["WORS_U_SpellBookFrame"], _G["WORS_U_PrayBookFrame"], _G["WORS_U_EquipmentBookFrame"], _G["WORS_U_EmoteBookFrame"], _G["WORS_U_SkillsBookFrame"], _G["CombatStylePanel"] }
 end
 
 
@@ -199,72 +199,74 @@ WORS_U_PrayBook.prayers = {
 	
 }
 
+WORS_U_EquipmentBook = {}
+WORS_U_EquipmentBook.frame = CreateFrame("Frame", "WORS_U_EquipmentBookFrame", UIParent, "SecureHandlerStateTemplate,OldSchoolFrameTemplate")
+
 
 -- WORS_U_EmoteBook.lua Data
 WORS_U_EmoteBook = {}
 WORS_U_EmoteBook.frame = CreateFrame("Frame", "WORS_U_EmoteBookFrame", UIParent, "OldSchoolFrameTemplate")
 WORS_U_EmoteBook.emotes = {
-    { name = "Yes",   		    	--[[using wow]]	command = "nod",   				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\1_Yes_emote_icon.tga" },
-    { name = "No",    		    	--[[using wow]]	command = "no",    				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\2_No_emote_icon.tga" },
-    { name = "Bow",   		    	--[[using wow]]	command = "Bow",   				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\3_Bow_emote_icon.tga" },
-    { name = "Angry", 		    	--[[using wow]]	command = "angry", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\4_Angry_emote_icon.tga" },
-    { name = "Think",		    	--[[using wow]]	command = "think", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\5_Think_emote_icon.tga" },
-    { name = "Wave",		    	--[[using wow]]	command = "wave",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\6_Wave_emote_icon.tga" },
-    { name = "Shrug",		    	--[[using wow]]	command = "shrug", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\7_Shrug_emote_icon.tga" },
-    { name = "Cheer",		    	--[[using wow]]	command = "cheer", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\8_Cheer_emote_icon.tga" },
-    { name = "Beckon",		    	--[[using wow]]	command = "beckon",				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\9_Beckon_emote_icon.tga" },
-    { name = "Laugh", 		    	--[[using wow]]	command = "laugh", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\10_Laugh_emote_icon.tga" },
-    { name = "Joy",        			--[[*_custom*]]	command = "_joy",				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\11_Jump_for_Joy_emote_icon.tga" },
-    { name = "Yawn", 		    	--[[using wow]]	command = "Yawn",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\12_Yawn_emote_icon.tga" },
-    { name = "Dance", 		    	--[[using wow]]	command = "dance", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\13_Dance_emote_icon.tga" },
-    { name = "Shake", 		    	--[[using wow]]	command = "shake", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\14_Jig_emote_icon.tga" },
-    { name = "Tease", 		    	--[[using wow]]	command = "tease", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\15_Spin_emote_icon.tga" },
-    { name = "Bonk",  		    	--[[using wow]]	command = "Bonk",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\16_Headbang_emote_icon.tga" },
-    { name = "Cry",   		    	--[[using wow]]	command = "cry",   				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\17_Cry_emote_icon.tga" },
-    { name = "Blow",  		    	--[[using wow]]	command = "kiss",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\18_Blow_Kiss_emote_icon.tga" },
-    { name = "Panic", 		    	--[[using wow]]	command = "panic", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\19_Panic_emote_icon.tga" },
-    { name = "Fart",  		    	--[[using wow]]	command = "fart", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\20_Raspberry_emote_icon.tga" },
-    { name = "Clap",  		    	--[[using wow]]	command = "clap",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\21_Clap_emote_icon.tga" },
-    { name = "Salute",		    	--[[using wow]]	command = "salute",				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\22_Salute_emote_icon.tga" },
-	{ name = "Goblin Bow", 			--[[*_custom*]]	command = "_goblinbow", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\23_Goblin_Bow_emote_icon.tga" },
-    { name = "Goblin Salute",		--[[*_custom*]]	command = "_goblinsalute", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\24_Goblin_Salute_emote_icon.tga" },
-	{ name = "Glass Box",  			--[[*_custom*]]	command = "_glassbox", 			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\25_Glass_Box_emote_icon.tga" },
-    { name = "Climb Rope",							command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\26_Climb_Rope_emote_icon.tga" },
-    { name = "Lean",	   			--[[*_custom*]]	command = "_lean", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\27_Lean_emote_icon.tga" },
-    { name = "Glass Wall",							command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\28_Glass_Wall_emote_icon.tga" },
-	{ name = "Idea",								command = "",					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\29_Idea_emote_icon.tga" },
-    { name = "Stamp",								command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\30_Stamp_emote_icon.tga" },
-    { name = "Flap",	    		--[[*_custom*]]	command = "_flap", 			 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\31_Flap_emote_icon.tga" },
-    { name = "Slap Head",    		--[[*_custom*]]	command = "_slaphead",			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\32_Slap_Head_emote_icon.tga" },
-	{ name = "Zombie Walk",  		--[[*_custom*]]	command = "_zombiewalk", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\33_Zombie_Walk_emote_icon.tga" },
-    { name = "Zombie Dance",		--[[*_custom*]]	command = "_zombiedance", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\34_Zombie_Dance_emote_icon.tga" },
-    { name = "Scared",				--[[using wow]]	command = "scared",				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\35_Scared_emote_icon.tga" },
-    { name = "Rabbit Hop", 			--[[*_custom]] 	command = "_rabbithop",			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\36_Rabbit_Hop_emote_icon.tga" },
-    { name = "Sit Up",								command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\37_Sit_up_emote_icon.tga" },
-    { name = "Push Up",				--[[*_custom*]]	command = "_pushup", 			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\38_Push_up_emote_icon.tga" },
-    { name = "Star Jump",			--[[*_custom*]]	command = "_starjump", 			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\39_Star_jump_emote_icon.tga" },
-    { name = "Jog",									command = "",					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\40_Jog_emote_icon.tga" },
-    { name = "Flex",            	--[[using wow]] command = "flex", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\41_Flex_emote_icon.tga" },
-    { name = "Zombie Hand",			--[[*_custom*]]	command = "_zombiehand", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\42_Zombie_Hand_emote_icon.tga" },
-    { name = "Hypermobile Drinker",	--[[*_custom*]]	command = "_hypermobiledrinker",icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\43_Hypermobile_Drinker_emote_icon.tga" },
-    { name = "Skill Cape",  						command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\44_Skill_Cape_emote_icon.tga" },
-    { name = "Air Guitar",  		--[[*_custom*]]	command = "_airguitar", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\45_Air_Guitar_emote_icon.tga" },
-    { name = "Uri Transform",     					command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\46_Uri_transform_emote_icon.tga" },
-    { name = "Smooth Dance", 		--[[*_custom*]]	command = "_smoothdance",		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\47_Smooth_dance_emote_icon.tga" },
-    { name = "Crazy Dance",  		--[[*_custom*]]	command = "_crazydance",		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\48_Crazy_dance_emote_icon.tga" },
-    { name = "Premier Shield", 		--[[*_custom*]]	command = "_premiershield", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\49_Premier_Shield_emote_icon.tga" },
-    { name = "Explore",         	  				command = "",					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\50_Explore_emote_icon.tga" },
-    { name = "Relic Unlock",    	  				command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\51_Relic_unlock_emote_icon.tga" },
-    { name = "Party",           	  				command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\52_Party_emote_icon.tga" },
-    { name = "Trick",           	  				command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\53_Trick_emote_icon.tga" },
-    { name = "Fortis Salute",		--[[*_custom*]]	command = "_fortissalute", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\54_Fortis_Salute_emote_icon.tga" },
-    { name = "Sit Down",  			--[[using wow]]	command = "sit", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\55_Sit_down_emote_icon.tga" },
+    { name = "Yes",   		    	--[[using wow]]	command = "nod",   				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\1_Yes_emote_icon" },
+    { name = "No",    		    	--[[using wow]]	command = "no",    				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\2_No_emote_icon" },
+    { name = "Bow",   		    	--[[using wow]]	command = "Bow",   				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\3_Bow_emote_icon" },
+    { name = "Angry", 		    	--[[using wow]]	command = "angry", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\4_Angry_emote_icon" },
+    { name = "Think",		    	--[[using wow]]	command = "think", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\5_Think_emote_icon" },
+    { name = "Wave",		    	--[[using wow]]	command = "wave",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\6_Wave_emote_icon" },
+    { name = "Shrug",		    	--[[using wow]]	command = "shrug", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\7_Shrug_emote_icon" },
+    { name = "Cheer",		    	--[[using wow]]	command = "cheer", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\8_Cheer_emote_icon" },
+    { name = "Beckon",		    	--[[using wow]]	command = "beckon",				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\9_Beckon_emote_icon" },
+    { name = "Laugh", 		    	--[[using wow]]	command = "laugh", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\10_Laugh_emote_icon" },
+    { name = "Joy",        			--[[*_custom*]]	command = "_joy",				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\11_Jump_for_Joy_emote_icon" },
+    { name = "Yawn", 		    	--[[using wow]]	command = "Yawn",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\12_Yawn_emote_icon" },
+    { name = "Dance", 		    	--[[using wow]]	command = "dance", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\13_Dance_emote_icon" },
+    { name = "Shake", 		    	--[[using wow]]	command = "shake", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\14_Jig_emote_icon" },
+    { name = "Tease", 		    	--[[using wow]]	command = "tease", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\15_Spin_emote_icon" },
+    { name = "Bonk",  		    	--[[using wow]]	command = "Bonk",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\16_Headbang_emote_icon" },
+    { name = "Cry",   		    	--[[using wow]]	command = "cry",   				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\17_Cry_emote_icon" },
+    { name = "Blow",  		    	--[[using wow]]	command = "kiss",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\18_Blow_Kiss_emote_icon" },
+    { name = "Panic", 		    	--[[using wow]]	command = "panic", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\19_Panic_emote_icon" },
+    { name = "Fart",  		    	--[[using wow]]	command = "fart", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\20_Raspberry_emote_icon" },
+    { name = "Clap",  		    	--[[using wow]]	command = "clap",  				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\21_Clap_emote_icon" },
+    { name = "Salute",		    	--[[using wow]]	command = "salute",				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\22_Salute_emote_icon" },
+	{ name = "Goblin Bow", 			--[[*_custom*]]	command = "_goblinbow", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\23_Goblin_Bow_emote_icon" },
+    { name = "Goblin Salute",		--[[*_custom*]]	command = "_goblinsalute", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\24_Goblin_Salute_emote_icon" },
+	{ name = "Glass Box",  			--[[*_custom*]]	command = "_glassbox", 			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\25_Glass_Box_emote_icon" },
+    { name = "Climb Rope",							command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\26_Climb_Rope_emote_icon" },
+    { name = "Lean",	   			--[[*_custom*]]	command = "_lean", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\27_Lean_emote_icon" },
+    { name = "Glass Wall",							command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\28_Glass_Wall_emote_icon" },
+	{ name = "Idea",								command = "",					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\29_Idea_emote_icon" },
+    { name = "Stamp",								command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\30_Stamp_emote_icon" },
+    { name = "Flap",	    		--[[*_custom*]]	command = "_flap", 			 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\31_Flap_emote_icon" },
+    { name = "Slap Head",    		--[[*_custom*]]	command = "_slaphead",			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\32_Slap_Head_emote_icon" },
+	{ name = "Zombie Walk",  		--[[*_custom*]]	command = "_zombiewalk", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\33_Zombie_Walk_emote_icon" },
+    { name = "Zombie Dance",		--[[*_custom*]]	command = "_zombiedance", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\34_Zombie_Dance_emote_icon" },
+    { name = "Scared",				--[[using wow]]	command = "scared",				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\35_Scared_emote_icon" },
+    { name = "Rabbit Hop", 			--[[*_custom]] 	command = "_rabbithop",			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\36_Rabbit_Hop_emote_icon" },
+    { name = "Sit Up",								command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\37_Sit_up_emote_icon" },
+    { name = "Push Up",				--[[*_custom*]]	command = "_pushup", 			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\38_Push_up_emote_icon" },
+    { name = "Star Jump",			--[[*_custom*]]	command = "_starjump", 			icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\39_Star_jump_emote_icon" },
+    { name = "Jog",									command = "",					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\40_Jog_emote_icon" },
+    { name = "Flex",            	--[[using wow]] command = "flex", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\41_Flex_emote_icon" },
+    { name = "Zombie Hand",			--[[*_custom*]]	command = "_zombiehand", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\42_Zombie_Hand_emote_icon" },
+    { name = "Hypermobile Drinker",	--[[*_custom*]]	command = "_hypermobiledrinker",icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\43_Hypermobile_Drinker_emote_icon" },
+    { name = "Skill Cape",  						command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\44_Skill_Cape_emote_icon" },
+    { name = "Air Guitar",  		--[[*_custom*]]	command = "_airguitar", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\45_Air_Guitar_emote_icon" },
+    { name = "Uri Transform",     					command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\46_Uri_transform_emote_icon" },
+    { name = "Smooth Dance", 		--[[*_custom*]]	command = "_smoothdance",		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\47_Smooth_dance_emote_icon" },
+    { name = "Crazy Dance",  		--[[*_custom*]]	command = "_crazydance",		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\48_Crazy_dance_emote_icon" },
+    { name = "Premier Shield", 		--[[*_custom*]]	command = "_premiershield", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\49_Premier_Shield_emote_icon" },
+    { name = "Explore",         	  				command = "",					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\50_Explore_emote_icon" },
+    { name = "Relic Unlock",    	  				command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\51_Relic_unlock_emote_icon" },
+    { name = "Party",           	  				command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\52_Party_emote_icon" },
+    { name = "Trick",           	  				command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\53_Trick_emote_icon" },
+    { name = "Fortis Salute",		--[[*_custom*]]	command = "_fortissalute", 		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\54_Fortis_Salute_emote_icon" },
+    { name = "Sit Down",  			--[[using wow]]	command = "sit", 				icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\55_Sit_down_emote_icon" },
 }
 
-WORS_U_EquipmentBook = {}
 
-WORS_U_EquipmentBook.frame = CreateFrame("Frame", "WORS_U_EquipmentBookFrame", UIParent, "SecureHandlerStateTemplate,OldSchoolFrameTemplate")
-
+WORS_U_SkillsBook = {}
+WORS_U_SkillsBook.frame = CreateFrame("Frame", "WORS_U_SkillsBookFrame", UIParent, "OldSchoolFrameTemplate")
 
 
 function ResetMicroMenuPOSByAspect(frame)

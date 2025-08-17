@@ -206,7 +206,7 @@ Toggle:SetAttribute("_onclick", [=[
 -- Shift+Click to reset position 
 Toggle:SetScript("OnMouseUp", function(self)
 	Backpack:Hide()
-
+	WORS_U_SkillsBook.frame:Hide()
 	WORS_U_EmoteBookFrame:Hide()
 	if IsShiftKeyDown() and not InCombatLockdown() then
 		ResetMicroMenuPOSByAspect(WORS_U_PrayBook.frame)

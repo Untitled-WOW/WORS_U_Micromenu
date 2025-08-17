@@ -175,6 +175,8 @@ Toggle:RegisterForClicks("AnyUp")
 Toggle:SetFrameRef("uSpellBook", WORS_U_SpellBook.frame)
 Toggle:SetFrameRef("uPrayerBook", WORS_U_PrayBook.frame)
 Toggle:SetFrameRef("uEquipmentBook", WORS_U_EquipmentBook.frame)
+
+
 Toggle:SetFrameRef("aCombatStyle", CombatStylePanel)  
 
 -- Secure click snippet
@@ -207,7 +209,7 @@ Toggle:SetAttribute("_onclick", [=[
 -- Shift+Click to reset position 
 Toggle:SetScript("OnMouseUp", function(self)
     Backpack:Hide()
-
+	WORS_U_SkillsBook.frame:Hide()
 	WORS_U_EmoteBookFrame:Hide()
 	if IsShiftKeyDown() and not InCombatLockdown() then
 		ResetMicroMenuPOSByAspect(WORS_U_SpellBook.frame)

@@ -1,0 +1,430 @@
+-- === Configure order and icons here (IDs or Names) ==================
+local WORS_SkillOrder = {
+	"Attack","Hitpoints","Mining",
+	"Strength","Agility","Smithing",
+	"Defence","Herblore","Fishing",
+	"Ranged","Thieving","Cooking",
+	"Prayer","Crafting","Firemaking",
+	"Magic","Fletching","Woodcutting",
+	"Runecrafting","Slayer","Farming",
+	"Construction","Hunter","Dungeoneering"
+}
+-- skills with crafting ui reference to its spell id
+local WORS_SkillCraftUI = {
+	Cooking   = 2550,
+	Crafting  = 2018,
+	Fletching = 2259,
+	Herblore  = 2108,
+	Smithing  = 3273,
+}
+
+
+-- Explicit icon paths per skill
+local WORS_SkillIcons = {
+    -- ["Attack"]        = "Interface\\Icons\\attack",
+    -- ["Hitpoints"]     = "Interface\\Icons\\hitpoints",
+    -- ["Mining"]        = "Interface\\Icons\\mining",
+    -- ["Strength"]      = "Interface\\Icons\\strength",
+    -- ["Agility"]       = "Interface\\Icons\\agilityicon",
+    -- ["Smithing"]      = "Interface\\Icons\\smithing",
+    -- ["Defence"]       = "Interface\\Icons\\defence",
+    -- ["Herblore"]      = "Interface\\Icons\\herblore",
+    -- ["Fishing"]       = "Interface\\Icons\\fishing",
+    -- ["Ranged"]        = "Interface\\Icons\\ranged",
+    -- ["Thieving"]      = "Interface\\Icons\\thieving",
+    -- ["Cooking"]       = "Interface\\Icons\\cooking",
+    -- ["Prayer"]        = "Interface\\Icons\\prayer",
+    -- ["Crafting"]      = "Interface\\Icons\\crafting",
+    -- ["Firemaking"]    = "Interface\\Icons\\firemaking",
+    -- ["Magic"]         = "Interface\\Icons\\magicicon",
+    -- ["Fletching"]     = "Interface\\Icons\\fletching",
+    -- ["Woodcutting"]   = "Interface\\Icons\\woodcuttingicon",
+    -- ["Runecrafting"]  = "Interface\\Icons\\runecrafting",
+    -- ["Slayer"]        = "Interface\\Icons\\slayer",
+    -- ["Farming"]       = "Interface\\Icons\\farming",
+    -- ["Construction"]  = "Interface\\Icons\\construction",
+    -- ["Hunter"]        = "Interface\\Icons\\huntericon",
+    ["Dungeoneering"] = "Interface\\Icons\\dungeoneering",
+}
+-- ===================================================================
+
+-- WORS_U_SkillsBook = WORS_U_SkillsBook or {}
+-- WORS_U_SkillsBook.frame = CreateFrame("Frame", "WORS_U_SkillsBookFrame", UIParent, "OldSchoolFrameTemplate")
+WORS_U_SkillsBook.frame:SetSize(192, 304)
+WORS_U_SkillsBook.frame:SetFrameStrata("LOW")
+WORS_U_SkillsBook.frame:SetFrameLevel(5)
+
+local bg = WORS_U_SkillsBook.frame:CreateTexture(nil, "LOW")
+WORS_U_SkillsBook.frame.Background = bg
+bg:SetTexture("Interface\\WORS\\OldSchoolBackground1")
+bg:SetAllPoints(WORS_U_SkillsBook.frame)
+bg:SetHorizTile(true)
+bg:SetVertTile(true)
+
+WORS_U_SkillsBook.frame:Hide()
+WORS_U_SkillsBook.frame:SetMovable(true)
+WORS_U_SkillsBook.frame:EnableMouse(true)
+WORS_U_SkillsBook.frame:RegisterForDrag("LeftButton")
+WORS_U_SkillsBook.frame:SetClampedToScreen(true)
+
+WORS_U_SkillsBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
+WORS_U_SkillsBook.frame:SetScript("OnDragStop", function(self)
+	self:StopMovingOrSizing()
+	SaveFramePosition(self) 
+end)
+
+WORS_U_SkillsBook.frame.CloseButton:ClearAllPoints()
+WORS_U_SkillsBook.frame.CloseButton:SetPoint("TOPRIGHT", WORS_U_SkillsBook.frame, "TOPRIGHT", 4, 4)
+
+-- ---------- Layout constants ----------
+local CAP      = 99
+local BUTTON_W = 59
+local BUTTON_H = 30
+local PADDING  = 0
+local COLS     = 3
+local START_X  = 7
+local START_Y  = -10
+-- --------------------------------------
+
+-- Resolve a skill ID if given a name
+local function ResolveSkillID(v)
+	if type(v) == "number" then return v end
+	if type(v) == "string" and WORSSkillsUtil and WORSSkillsUtil.GetSkillIDFromName then
+		return WORSSkillsUtil.GetSkillIDFromName(v)
+	end
+end
+
+-- Build display order: use WORS_SkillOrder if provided, else Enum.WORSSkills (sorted)
+local function BuildResolvedOrder()
+	local order = {}
+	if WORS_SkillOrder and #WORS_SkillOrder > 0 then
+		for _, v in ipairs(WORS_SkillOrder) do
+			local id = ResolveSkillID(v)
+			if id then table.insert(order, id) end
+		end
+	else
+		local tmp = {}
+		for _, id in pairs(Enum.WORSSkills) do table.insert(tmp, id) end
+		table.sort(tmp)
+		order = tmp
+	end
+	return order
+end
+
+-- Pick icon: override table first (by id or name), else embedded icon in faction name, else question mark
+local function GetIconForSkill(factionID)
+	-- direct id override
+	if WORS_SkillIcons and WORS_SkillIcons[factionID] then
+		return WORS_SkillIcons[factionID]
+	end
+	-- name override
+	if type(WORS_SkillIcons) == "table" then
+		for key, path in pairs(WORS_SkillIcons) do
+			if type(key) == "string" then
+				local id = ResolveSkillID(key)
+				if id and id == factionID then return path end
+			end
+		end
+	end
+	-- embedded icon in faction name (|T...|t Name)
+	local name = GetFactionInfoByID(factionID)
+	if name then
+		local embedded = name:match("|T([^:|]+):")
+		if embedded then return embedded end
+	end
+	return "Interface\\Icons\\INV_Misc_QuestionMark"
+end
+
+local function OpenSkillGuideSafe(factionID)
+    if not IsAddOnLoaded("WORS_SkillGuide") then
+        local ok = LoadAddOn("WORS_SkillGuide")
+        if not ok then
+            UIErrorsFrame:AddMessage("Cannot load WORS_SkillGuide", 1, 0, 0, 1)
+            return
+        end
+    end
+
+    local guide = _G.SkillGuideFrame or _G.WORS_SkillGuideFrame
+    if not (guide and guide.OpenSkill) then
+        UIErrorsFrame:AddMessage("SkillGuide frame not found", 1, 0, 0, 1)
+        return
+    end
+
+    -- helper
+    local function hasCats(id)
+        local cats = DBCSkillGuide and DBCSkillGuide.GetCategoriesForSkill and DBCSkillGuide.GetCategoriesForSkill(id)
+        return type(cats) == "table" and #cats > 0
+    end
+
+    -- candidates: factionID, then mapped skillLineID
+    local candidates = { factionID }
+    local map = Enum and Enum.WORSSkillToSkillLine and Enum.WORSSkillToSkillLine[factionID]
+    if map then table.insert(candidates, map) end
+
+    for _, id in ipairs(candidates) do
+        if hasCats(id) then
+            -- toggle logic: if guide is already showing this skill, hide it
+            if guide:IsShown() and guide.skillID == id then
+                guide:Hide()
+            else
+                guide:OpenSkill(id)
+            end
+            return
+        end
+    end
+
+    UIErrorsFrame:AddMessage("No SkillGuide data available for this skill.", 1, 0, 0, 1)
+end
+
+
+-- Create/rebuild buttons in chosen order (+ inject TOTAL box after skipping 2 slots)
+function WORS_U_SkillsBook:RefreshConfig()
+	-- wipe old
+	if self._skillButtons then
+		for _, e in ipairs(self._skillButtons) do e.btn:Hide(); e.btn:SetParent(nil) end
+	end
+	self._skillButtons = {}
+	self.totalBox = nil
+
+	local ids = BuildResolvedOrder()
+
+	-- Inject: skip 2 slots, then place TOTAL box
+	table.insert(ids, "__SKIP__")
+	table.insert(ids, "__SKIP__")
+	table.insert(ids, "__TOTAL__")
+
+	local row, col = 0, 0
+
+	for _, entry in ipairs(ids) do
+		if entry == "__SKIP__" then
+			-- advance grid position without creating a button
+			col = col + 1
+			if col >= COLS then col = 0; row = row + 1 end
+		elseif entry == "__TOTAL__" then
+			local btn = CreateFrame("Button", nil, self.frame, "OldSchoolButtonTemplate")
+			btn:SetSize(BUTTON_W, BUTTON_H)
+
+			local x = START_X + (BUTTON_W + PADDING) * col
+			local y = START_Y - (BUTTON_H + PADDING) * row
+			btn:SetPoint("TOPLEFT", self.frame, "TOPLEFT", x, y)
+
+			-- 1) Kill template textures so nothing sits above our fill
+			btn:SetNormalTexture(nil)
+			btn:SetPushedTexture(nil)
+			btn:SetHighlightTexture(nil)
+			do
+				local r = { btn:GetRegions() }
+				for i = 1, #r do
+					local obj = r[i]
+					if obj and obj.GetObjectType and obj:GetObjectType() == "Texture" then
+						obj:SetTexture(nil)
+					end
+				end
+			end
+
+			-- 2) Solid black fill on a higher layer so it always shows
+			local fill = btn:CreateTexture(nil, "BORDER")  -- BORDER > BACKGROUND
+			fill:SetAllPoints()
+			fill:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
+			fill:SetVertexColor(0, 0, 0, 0.95)
+			btn._fill = fill
+
+			-- 3) Yellow label (set immediately to avoid first-open 0)
+			local fs = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+			fs:SetPoint("CENTER", 0, 0)
+			fs:SetTextColor(1, 1, 0)
+			local tl = 0
+			local ok, lvl = pcall(function() local L,_ = WORSSkillsUtil.GetTotalLevel(); return L end)
+			if ok and lvl then tl = lvl end
+			fs:SetText(("Total level:\n %d"):format(tl or 0))
+			btn.Label = fs
+
+			-- Tooltip: Total level + Total XP (formatted, white numbers)
+			btn:SetScript("OnEnter", function(selfBtn)
+				GameTooltip:SetOwner(selfBtn, "ANCHOR_RIGHT")
+				local totalLevel, totalXP = WORSSkillsUtil.GetTotalLevel()
+				GameTooltip:SetText("Total level", 1, 1, 1)
+				GameTooltip:SetText(("Total Level: |cFFFFFFFF%s|r"):format(BreakUpLargeNumbers(totalLevel or 0)), 1, 1, 1)
+				GameTooltip:AddLine(("Total XP: |cFFFFFFFF%s|r"):format(BreakUpLargeNumbers(totalXP or 0)),	NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+				GameTooltip:Show()
+			end)
+			btn:SetScript("OnLeave", GameTooltip_Hide)
+
+			self.totalBox = btn
+			table.insert(self._skillButtons, { btn = btn, id = "__TOTAL__" })
+
+			-- advance grid
+			col = col + 1
+			if col >= COLS then col = 0; row = row + 1 end
+
+		else
+			-- normal skill buttons
+			local factionID = entry
+			local btn = CreateFrame("Button", nil, self.frame, "OldSchoolButtonTemplate")
+			btn:SetSize(BUTTON_W, BUTTON_H)
+
+			local x = START_X + (BUTTON_W + PADDING) * col
+			local y = START_Y - (BUTTON_H + PADDING) * row
+			btn:SetPoint("TOPLEFT", self.frame, "TOPLEFT", x, y)
+
+			-- Icon (left)
+			local icon = btn:CreateTexture(nil, "ARTWORK")
+			icon:SetSize(20, 20)
+			icon:SetPoint("LEFT", 5, 0)
+			icon:SetTexture(GetIconForSkill(factionID))
+			btn.Icon = icon
+
+			-- Current level (top-right)
+			local curFS = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+			curFS:SetPoint("TOPRIGHT", -20, -3)
+			curFS:SetTextColor(1, 1, 0)
+			btn.CurFS = curFS
+
+			-- Cap (bottom-right)
+			local capFS = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+			capFS:SetPoint("BOTTOMRIGHT", -4, 3)
+			capFS:SetTextColor(1, 1, 0)
+			capFS:SetText(tostring(CAP))
+			btn.CapFS = capFS
+
+			-- Slash texture between current and cap
+			local slashTex = btn:CreateTexture(nil, "OVERLAY")
+			slashTex:SetSize(25, 25)
+			slashTex:SetPoint("CENTER", btn, "RIGHT", -18, 0)
+			slashTex:SetTexture("Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\skill_slash")
+			btn.SlashTex = slashTex
+
+			btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+			btn:SetScript("OnClick", function(self, button)
+				local skillName = (GetFactionInfoByID(factionID) or ""):match("([^|]+)$"):match("(%S+)$")
+				-- strip icons and keep last word
+				if button == "LeftButton" then
+					local spellID = WORS_SkillCraftUI[skillName]
+					if spellID then
+						CastSpellByID(spellID)
+					else
+						-- no UI mapped → fallback to skill guide
+						OpenSkillGuideSafe(factionID)
+					end
+				elseif button == "RightButton" then
+					OpenSkillGuideSafe(factionID)
+				end
+			end)
+
+			btn:SetScript("OnEnter", function(selfBtn)
+				GameTooltip:SetOwner(selfBtn, "ANCHOR_RIGHT")
+
+				-- Pull clean stats (keeps working at 99)
+				local name, _, currentLevel, _, totalXP, nextLevelAtXP = WORSSkillsUtil.GetSkillInfo(factionID)
+				name     = name or "Skill"
+				currentLevel = currentLevel or 0
+				totalXP  = totalXP or 0
+
+				-- Title: "<SkillName> currentLevel / 99"
+				GameTooltip:SetText(("%s %d/%d"):format(name, currentLevel, CAP), 1, 1, 1)
+
+				-- "<SkillName> XP: <Total skill xp>"
+				GameTooltip:AddLine(("%s XP: |cFFFFFFFF%s|r"):format(name, BreakUpLargeNumbers(totalXP)), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+
+				-- Only show these when NOT maxed
+				if currentLevel < CAP and nextLevelAtXP then
+					local remaining = nextLevelAtXP - totalXP
+					if remaining < 0 then remaining = 0 end  -- safety
+
+					-- "Next level at: <total xp for next level>"
+					GameTooltip:AddLine(("Next level at: |cFFFFFFFF%s|r"):format(BreakUpLargeNumbers(nextLevelAtXP)), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+
+					-- "Remaining XP: <xp needed to level>"
+					GameTooltip:AddLine(("Remaining XP: |cFFFFFFFF%s|r"):format(BreakUpLargeNumbers(remaining)), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+				end
+
+				GameTooltip:Show()
+			end)
+			btn:SetScript("OnLeave", GameTooltip_Hide)
+
+			-- Initial level text
+			local _, _, lvl2 = WORSSkillsUtil.GetSkillInfo(factionID)
+			btn.CurFS:SetText(lvl2 or 0)
+
+			table.insert(self._skillButtons, { btn = btn, id = factionID })
+
+			-- advance grid
+			col = col + 1
+			if col >= COLS then col = 0; row = row + 1 end
+		end
+	end
+end
+
+-- Update levels/icons quickly (called when frame opens)
+function WORS_U_SkillsBook:RefreshValues()
+	if not self._skillButtons then return end
+
+	for _, e in ipairs(self._skillButtons) do
+		if e.id == "__TOTAL__" then
+			if self.totalBox and self.totalBox.Label then
+				local totalLevel = 0
+				local totalXP = 0
+				local ok, lvl, xp = pcall(WORSSkillsUtil.GetTotalLevel)
+				if ok and lvl then totalLevel = lvl end
+				if ok and xp  then totalXP   = xp  end
+				self.totalBox.Label:SetText(("Total level:\n %d"):format(totalLevel or 0))
+			end
+		else
+			local _, _, lvl = WORSSkillsUtil.GetSkillInfo(e.id)
+			if e.btn.CurFS then e.btn.CurFS:SetText(lvl or 0) end
+			if e.btn.Icon  then e.btn.Icon:SetTexture(GetIconForSkill(e.id)) end
+		end
+	end
+end
+
+-- Build on first open; then refresh values on every open
+WORS_U_SkillsBook.frame:HookScript("OnShow", function()
+	if not WORS_U_SkillsBook._skillButtons or #WORS_U_SkillsBook._skillButtons == 0 then
+		WORS_U_SkillsBook:RefreshConfig()
+	end
+	-- ensure totals (and icons/levels) are populated on the very first open
+	WORS_U_SkillsBook:RefreshValues()
+end)
+
+
+-- keep micro state in sync (same as your other frames)
+local function UpdateSkillsMicroVisual()
+	if WORS_U_SkillsBook.frame:IsShown() then
+		SkillsMicroButton:SetButtonState("PUSHED", true)
+	else
+		SkillsMicroButton:SetButtonState("NORMAL")
+	end
+end
+WORS_U_SkillsBook.frame:HookScript("OnShow", UpdateSkillsMicroVisual)
+WORS_U_SkillsBook.frame:HookScript("OnHide", UpdateSkillsMicroVisual)
+
+
+hooksecurefunc("UpdateMicroButtons", function()
+	UpdateSkillsMicroVisual()
+end)
+
+
+-- === Live updates when reputation changes (drives skills) ===
+local function RefreshSkillsAndTooltip()
+	-- Update numbers/icons
+	if WORS_U_SkillsBook and WORS_U_SkillsBook.RefreshValues then
+		WORS_U_SkillsBook:RefreshValues()
+	end
+
+	-- If user is hovering a skill/total button, rebuild that tooltip live
+	local owner = GameTooltip and GameTooltip:GetOwner()
+	if owner then
+		-- Try to re-fire the button's OnEnter if it has one
+		local onEnter = owner:GetScript("OnEnter")
+		if type(onEnter) == "function" then
+			onEnter(owner)
+		end
+	end
+end
+
+local skillsEvt = CreateFrame("Frame")
+skillsEvt:RegisterEvent("PLAYER_ENTERING_WORLD")           -- prime once
+skillsEvt:RegisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")  -- combat rep spam
+skillsEvt:SetScript("OnEvent", function()
+	RefreshSkillsAndTooltip()
+end)

@@ -1,7 +1,7 @@
 local aBackpackHooked, aCombatStyleHooked
 
 local function HookABackpack()
-	ToggleBackpack()
+	--ToggleBackpack()
     if aBackpackHooked or not Backpack then return end
 
     local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
@@ -13,6 +13,7 @@ local function HookABackpack()
 
     Backpack:HookScript("OnShow", function()
         WORS_U_EmoteBook.frame:Hide()
+		WORS_U_SkillsBook.frame:Hide()
         if InCombatLockdown() then return end
         CombatStylePanel:Hide()
         WORS_U_SpellBook.frame:Hide();     WORS_U_SpellBook.frame:SetAttribute("userToggle", nil)
@@ -38,12 +39,13 @@ local function HookACombatStylePanel()
 
     CombatStylePanel:HookScript("OnShow", function()
         WORS_U_EmoteBook.frame:Hide()
+		WORS_U_SkillsBook.frame:Hide()
         Backpack:Hide()
         if InCombatLockdown() then return end
         WORS_U_SpellBook.frame:Hide();     WORS_U_SpellBook.frame:SetAttribute("userToggle", nil)
         WORS_U_PrayBook.frame:Hide();      WORS_U_PrayBook.frame:SetAttribute("userToggle", nil)
         WORS_U_EquipmentBook.frame:Hide(); WORS_U_EquipmentBook.frame:SetAttribute("userToggle", nil)
-    end)
+    end)	
 
     CombatStylePanel:HookScript("OnDragStop", SaveFramePosition)
     aCombatStyleHooked = true
@@ -72,3 +74,7 @@ f:SetScript("OnEvent", function(self, event)
 		end			
 	end	
 end)
+
+
+
+

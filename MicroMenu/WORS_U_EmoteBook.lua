@@ -31,9 +31,7 @@ end)
 
 WORS_U_EmoteBook.frame.CloseButton:ClearAllPoints()
 WORS_U_EmoteBook.frame.CloseButton:SetPoint("TOPRIGHT", WORS_U_EmoteBook.frame, "TOPRIGHT", 4, 4)	
-WORS_U_EmoteBook.frame.CloseButton:SetScript("PostClick", function(self)
-	RestoreMicroButtonsFromMicroMenu()	
-end)	
+
 
 
 
@@ -54,7 +52,6 @@ scrollFrame:SetScrollChild(buttonContainer)
 
 -- Initialize emote buttons
 local emoteButtons = {}
-
 
 local function SetupEmoteButtons(XOffset, YOffset)
     -- Clear existing buttons before creating new ones
@@ -112,55 +109,20 @@ local function SetupEmoteButtons(XOffset, YOffset)
 end
 SetupEmoteButtons(-8, -10)
 
-
-
--- function to replace EmotesMicroButton on click
-local function OnEmoteClick(self)
-	if IsShiftKeyDown() then 
-		ResetMicroMenuPOSByAspect(WORS_U_EmoteBook.frame)
-		print("|cff00ff00[MicroMenu]|r position reset.")
-	end	
-	local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
-	if pos then
-		local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
-		WORS_U_EmoteBook.frame:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
-	else
-		ResetMicroMenuPOSByAspect(WORS_U_EmoteBook.frame)
-	end	
-	if WORS_U_EmoteBook.frame:IsShown() then
-		WORS_U_EmoteBook.frame:Hide()		
-	else
-		WORS_U_EmoteBook.frame:Show()
-		Backpack:Hide()
-		if not InCombatLockdown() then
-			WORS_U_SpellBook.frame:Hide()
-			WORS_U_SpellBook.frame:SetAttribute("userToggle", nil)
-			WORS_U_PrayBook.frame:Hide()	
-			WORS_U_PrayBook.frame:SetAttribute("userToggle", nil)	
-			WORS_U_EquipmentBook.frame:Hide()	
-			WORS_U_EquipmentBook.frame:SetAttribute("userToggle", nil)				
-			CombatStylePanel:Hide()		
-		end
-	end
-end
-
-U_EmoteMicroMenuButton:HookScript("OnClick", OnEmoteClick)
-
 --Function to update the button's background color
 local function UpdateButtonBackground()
     if WORS_U_EmoteBook.frame:IsShown() then
-        --U_EmoteMicroMenuButton:GetNormalTexture():SetVertexColor(1, 0, 0) -- Set the color to red
-		U_EmoteMicroMenuButton:SetButtonState("PUSHED", true)
+		EmotesMicroButton:SetButtonState("PUSHED", true)
     else
-		U_EmoteMicroMenuButton:SetButtonState("NORMAL")
-
-        --U_EmoteMicroMenuButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- Set the color default
+		EmotesMicroButton:SetButtonState("NORMAL")
     end
 end
 WORS_U_EmoteBook.frame:HookScript("OnShow", UpdateButtonBackground)
 WORS_U_EmoteBook.frame:HookScript("OnHide", UpdateButtonBackground)
 
-
+hooksecurefunc("UpdateMicroButtons", function()
+	UpdateButtonBackground()
+end)
 
 -- Loop through your existing emotes and dynamically register slash commands where commands are _
 for _, emoteData in ipairs(WORS_U_EmoteBook.emotes) do
