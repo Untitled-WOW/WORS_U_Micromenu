@@ -2,7 +2,7 @@
 ## Title: MicroMenu
 ## Notes: Magic, Prayer, Emote Menus for WORS.|n|nSet Keybinds to open menus in |cff00ff00ESC|r -> |cff00ff00Keybinds|r -> |cff00ff00WORS MicroMenu|r|n|nOpen using Micro Menu buttons.|n|nSend bug reports to |cff00ff00Untitled - Llama69420 green|r on discord.
 ## Author: Untitled - Discord@Llama69420
-## Version: 1.1.6
+## Version: 1.2.0
 ## SavedVariables: WORS_U_MicroMenuSettings 
 ## DefaultState: disabled
 

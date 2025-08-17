@@ -21,30 +21,31 @@ local WORS_SkillCraftUI = {
 
 -- Explicit icon paths per skill
 local WORS_SkillIcons = {
-    -- ["Attack"]        = "Interface\\Icons\\attack",
-    -- ["Hitpoints"]     = "Interface\\Icons\\hitpoints",
-    -- ["Mining"]        = "Interface\\Icons\\mining",
-    -- ["Strength"]      = "Interface\\Icons\\strength",
-    -- ["Agility"]       = "Interface\\Icons\\agilityicon",
-    -- ["Smithing"]      = "Interface\\Icons\\smithing",
-    -- ["Defence"]       = "Interface\\Icons\\defence",
-    -- ["Herblore"]      = "Interface\\Icons\\herblore",
-    -- ["Fishing"]       = "Interface\\Icons\\fishing",
-    -- ["Ranged"]        = "Interface\\Icons\\ranged",
-    -- ["Thieving"]      = "Interface\\Icons\\thieving",
-    -- ["Cooking"]       = "Interface\\Icons\\cooking",
-    -- ["Prayer"]        = "Interface\\Icons\\prayer",
-    -- ["Crafting"]      = "Interface\\Icons\\crafting",
-    -- ["Firemaking"]    = "Interface\\Icons\\firemaking",
-    -- ["Magic"]         = "Interface\\Icons\\magicicon",
-    -- ["Fletching"]     = "Interface\\Icons\\fletching",
-    -- ["Woodcutting"]   = "Interface\\Icons\\woodcuttingicon",
-    -- ["Runecrafting"]  = "Interface\\Icons\\runecrafting",
-    -- ["Slayer"]        = "Interface\\Icons\\slayer",
-    -- ["Farming"]       = "Interface\\Icons\\farming",
-    -- ["Construction"]  = "Interface\\Icons\\construction",
-    -- ["Hunter"]        = "Interface\\Icons\\huntericon",
-    ["Dungeoneering"] = "Interface\\Icons\\dungeoneering",
+    ["Attack"]        = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\attack",
+    ["Hitpoints"]     = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\hitpoints",
+    ["Mining"]        = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\mining",
+    ["Strength"]      = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\strength",
+    ["Agility"]       = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\agility",
+    ["Smithing"]      = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\smithing",
+    ["Defence"]       = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\defence",
+    ["Herblore"]      = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\herblore",
+    ["Fishing"]       = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\fishing",
+    ["Ranged"]        = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\ranged",
+    ["Thieving"]      = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\thieving",
+    ["Cooking"]       = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\cooking",
+    ["Prayer"]        = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\prayer",
+    ["Crafting"]      = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\crafting",
+    ["Firemaking"]    = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\firemaking",
+    ["Magic"]         = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\magic",
+    ["Fletching"]     = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\fletching",
+    ["Woodcutting"]   = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\woodcutting",
+    ["Runecrafting"]  = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\runecraft",
+    ["Slayer"]        = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\slayer",
+    ["Farming"]       = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\farming",
+    ["Construction"]  = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\construction",
+    ["Hunter"]        = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\hunter",
+   -- ["Dungeoneering"] = "Interface\\Icons\\dungeoneering",
+    ["Dungeoneering"] = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\dungeoneering",
 }
 -- ===================================================================
 
@@ -269,8 +270,8 @@ function WORS_U_SkillsBook:RefreshConfig()
 
 			-- Icon (left)
 			local icon = btn:CreateTexture(nil, "ARTWORK")
-			icon:SetSize(20, 20)
-			icon:SetPoint("LEFT", 5, 0)
+			icon:SetSize(28, 28)
+			icon:SetPoint("LEFT", 1, 0)
 			icon:SetTexture(GetIconForSkill(factionID))
 			btn.Icon = icon
 

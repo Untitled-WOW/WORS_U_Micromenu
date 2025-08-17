@@ -1,0 +1,6 @@
+<Bindings>
+	<Binding name="Toggle Combat Style" header="WORSMICROMENU"></Binding>	
+	<Binding name="Toggle Magic"></Binding>
+	<Binding name="Toggle Prayer"></Binding>
+	<Binding name="Toggle Emote"></Binding>
+</Bindings>

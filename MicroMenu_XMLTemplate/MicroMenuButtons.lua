@@ -195,11 +195,11 @@ function RestoreMicroButtonsFromMicroMenu()
         local origParent = backup and backup.parent or UIParent
 		
 		if MyViewportFrame then
-			AttachRowToContainer(microButtonsRow1TOP,    MyViewportFrame, "BOTTOMRIGHT", -134, 35)
-			AttachRowToContainer(microButtonsRow2BOTTOM, MyViewportFrame, "BOTTOMRIGHT", -134, 0)
+			AttachRowToContainer(microButtonsRow1TOP,    MyViewportFrame, "BOTTOMRIGHT", -90, 45)
+			AttachRowToContainer(microButtonsRow2BOTTOM, MyViewportFrame, "BOTTOMRIGHT", -90, 10)
 		else
-			AttachRowToContainer(microButtonsRow1TOP,    UIParent, "BOTTOMRIGHT", -134, 35)
-			AttachRowToContainer(microButtonsRow2BOTTOM, UIParent, "BOTTOMRIGHT", -134, 0)
+			AttachRowToContainer(microButtonsRow1TOP,    UIParent, "BOTTOMRIGHT", -100, 45)
+			AttachRowToContainer(microButtonsRow2BOTTOM, UIParent, "BOTTOMRIGHT", -100, 10)
 		end
 		
     end

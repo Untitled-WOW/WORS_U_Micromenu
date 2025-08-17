@@ -218,20 +218,30 @@ function UpdateEquipmentButtons()
     for id, btn in pairs(WORS_U_EquipmentBook.buttons) do
         local tex = GetInventoryItemTexture("player", id)
         if tex then
+            -- Show actual item icon
             btn._singleSlot.icon:SetTexture(tex)
-            ResetTex(btn._singleSlot.icon)           -- real item icon: no crop
+            ResetTex(btn._singleSlot.icon)
+
+            -- Hide the slot art background since item is equipped
+            btn.bgIcon:Hide()
         else
+            -- No item: show slot art
             local key = texById[id]
             if key then
-                btn._singleSlot.icon:SetTexture(BASE_TEX_PATH .. key .. ".blp")
-                CropSlotTex(btn._singleSlot.icon)    -- fallback art: crop
+                btn._singleSlot.icon:SetTexture(nil) -- clear item icon
+                btn.bgIcon:SetTexture(BASE_TEX_PATH .. key .. ".blp")
+                CropSlotTex(btn.bgIcon)
+                btn.bgIcon:Show()
             end
+
             if btn.countText then btn.countText:SetText("") end
         end
     end
 
     UpdateButtonCounts()
 end
+
+
 
 -- ===========================
 -- SECURE WRAPPER + VISIBILITY
