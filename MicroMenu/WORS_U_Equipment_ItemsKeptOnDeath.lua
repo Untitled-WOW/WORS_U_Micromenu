@@ -51,12 +51,14 @@ WORS_U_EquipmentBook.itemsKeptOnDeathFrame:SetBackdrop({
     tile     = true, tileSize = 32, edgeSize = 32,
     insets   = { left=5, right=5, top=5, bottom=5 },
 })
-WORS_U_EquipmentBook.itemsKeptOnDeathFrame:SetPoint("CENTER", UIParent, "CENTER", 4, 4)
+WORS_U_EquipmentBook.itemsKeptOnDeathFrame:SetPoint("CENTER")
 WORS_U_EquipmentBook.itemsKeptOnDeathFrame:EnableMouse(true)
 WORS_U_EquipmentBook.itemsKeptOnDeathFrame:SetMovable(true)
 WORS_U_EquipmentBook.itemsKeptOnDeathFrame:RegisterForDrag("LeftButton")
 WORS_U_EquipmentBook.itemsKeptOnDeathFrame:SetClampedToScreen(true)
 WORS_U_EquipmentBook.itemsKeptOnDeathFrame:Hide()
+tinsert(UISpecialFrames, "WORS_U_EquipmentBookitemsKeptOnDeathFrame")
+
 
 local closeButton = CreateFrame("Button", nil, WORS_U_EquipmentBook.itemsKeptOnDeathFrame)
 closeButton:SetSize(16,16)

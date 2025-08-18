@@ -1,7 +1,7 @@
 <Bindings>
-	<Binding name="Toggle Magic" header="WORSMICROMENU"></Binding>
-	<Binding name="Toggle Prayer"></Binding>
-	<Binding name="Toggle Equipment"></Binding>
-	<Binding name="Toggle Skills"></Binding>
-	<Binding name="Toggle Emote"></Binding>
+	<Binding name="TOGGLEMAGIC"     header="WORSMICROMENU" />
+	<Binding name="TOGGLEPRAYER"    header="WORSMICROMENU" />
+	<Binding name="TOGGLEEQUIPMENT" header="WORSMICROMENU" />
+	<Binding name="TOGGLESKILLS"    header="WORSMICROMENU" />
+	<Binding name="TOGGLEEMOTE"     header="WORSMICROMENU" />
 </Bindings>

@@ -272,7 +272,6 @@ WORS_U_EquipmentBook.frame:SetScript("OnDragStop", function(self)
     SaveFramePosition(self)
 end)
 
-WORS_U_EquipmentBook.frame:SetAttribute("userToggle", nil) -- hidden by default
 
 if WORS_U_EquipmentBookFrame and WORS_U_EquipmentBookFrame.CloseButton then
     WORS_U_EquipmentBookFrame.CloseButton:ClearAllPoints()
@@ -316,11 +315,8 @@ local function CreateIconButton(parent, texture, textureDown, tooltipText, onCli
     return b
 end
 
--- 1: Equipment Stats
-local btn1 = CreateIconButton(buttonRow,
-    "Interface\\AddOns\\MicroMenu\\Textures\\Btn\\Equipment_Stats.blp",
-    "Interface\\AddOns\\MicroMenu\\Textures\\Btn\\Equipment_Stats_Down.blp",
-    "View Equipment Stats",
+-- 1: EquipmentStats
+local btn1_EquipmentStats = CreateIconButton(buttonRow, "Interface\\AddOns\\MicroMenu\\Textures\\Btn\\Equipment_Stats.blp", "Interface\\AddOns\\MicroMenu\\Textures\\Btn\\Equipment_Stats_Down.blp", "View Equipment Stats",
     function()
         if AscensionCharacterFrame:IsShown() then
             AscensionCharacterFrame:Hide()
@@ -329,11 +325,8 @@ local btn1 = CreateIconButton(buttonRow,
         end
     end)
 
--- 2: Guide Prices
-local btn2 = CreateIconButton(buttonRow,
-    "Interface\\AddOns\\MicroMenu\\Textures\\Btn\\Guide_prices.blp",
-    "Interface\\AddOns\\MicroMenu\\Textures\\Btn\\Guide_prices_Down.blp",
-    "View Guide Prices",
+-- 2: GuidePrices
+local btn2_GuidePrices = CreateIconButton(buttonRow, "Interface\\AddOns\\MicroMenu\\Textures\\Btn\\Guide_prices.blp", "Interface\\AddOns\\MicroMenu\\Textures\\Btn\\Guide_prices_Down.blp", "View Guide Prices",
     function()
         if WORS_U_EquipmentBook.guidePricesFrame then
             if WORS_U_EquipmentBook.guidePricesFrame:IsShown() then
@@ -341,15 +334,13 @@ local btn2 = CreateIconButton(buttonRow,
             else
                 if WORS_U_EquipmentBook.UpdateGuidePricesFrame then WORS_U_EquipmentBook:UpdateGuidePricesFrame() end
                 WORS_U_EquipmentBook.guidePricesFrame:Show()
+				WORS_U_EquipmentBook.itemsKeptOnDeathFrame:Hide()
             end
         end
     end)
 
--- 3: Items Kept on Death
-local btn3 = CreateIconButton(buttonRow,
-    "Interface\\AddOns\\MicroMenu\\Textures\\Btn\\Items_kept_on_death.blp",
-    "Interface\\AddOns\\MicroMenu\\Textures\\Btn\\Items_kept_on_death_Down.blp",
-    "View Items Kept on Death",
+-- 3: ItemsKeptOnDeath
+local btn3_ItemsKeptOnDeath = CreateIconButton(buttonRow, "Interface\\AddOns\\MicroMenu\\Textures\\Btn\\Items_kept_on_death.blp", "Interface\\AddOns\\MicroMenu\\Textures\\Btn\\Items_kept_on_death_Down.blp", "View Items Kept on Death",
     function()
         if WORS_U_EquipmentBook.itemsKeptOnDeathFrame then
             if WORS_U_EquipmentBook.itemsKeptOnDeathFrame:IsShown() then
@@ -357,24 +348,23 @@ local btn3 = CreateIconButton(buttonRow,
             else
                 if WORS_U_EquipmentBook.UpdateitemsKeptOnDeathFrame then WORS_U_EquipmentBook:UpdateitemsKeptOnDeathFrame() end
                 WORS_U_EquipmentBook.itemsKeptOnDeathFrame:Show()
+				WORS_U_EquipmentBook.guidePricesFrame:Hide()
+
             end
         end
     end)
 
--- 4: Call Follower
-local btn4 = CreateIconButton(buttonRow,
-    "Interface\\AddOns\\MicroMenu\\Textures\\Btn\\Call_follower.blp",
-    "Interface\\AddOns\\MicroMenu\\Textures\\Btn\\Call_follower_Down.blp",
-    "Call Follower",
+-- 4: CallFollower
+local btn4_CallFollower = CreateIconButton(buttonRow, "Interface\\AddOns\\MicroMenu\\Textures\\Btn\\Call_follower.blp", "Interface\\AddOns\\MicroMenu\\Textures\\Btn\\Call_follower_Down.blp", "Call Follower",
     function()
         print("|cffffcc00[MicroMenu]|r You do not have a follower. (This doesn't do anything)")
     end)
 
 -- Layout the buttons horizontally inside the container
-btn1:SetPoint("LEFT", buttonRow, "LEFT", 0, 0)
-btn2:SetPoint("LEFT", btn1, "RIGHT", buttonPadding, 0)
-btn3:SetPoint("LEFT", btn2, "RIGHT", buttonPadding, 0)
-btn4:SetPoint("LEFT", btn3, "RIGHT", buttonPadding, 0)
+btn1_EquipmentStats:SetPoint("LEFT", buttonRow, "LEFT", 0, 0)
+btn2_GuidePrices:SetPoint("LEFT", btn1_EquipmentStats, "RIGHT", buttonPadding, 0)
+btn3_ItemsKeptOnDeath:SetPoint("LEFT", btn2_GuidePrices, "RIGHT", buttonPadding, 0)
+btn4_CallFollower:SetPoint("LEFT", btn3_ItemsKeptOnDeath, "RIGHT", buttonPadding, 0)
 
 -- =========================================
 -- EVENTS (defined after functions exist)
@@ -415,63 +405,6 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1)
     end
 end)
 
--- =========================
--- SECURE TOGGLE + CLOSE UI
--- =========================
-local Toggle = CreateFrame("Button", "WORS_UPEquipmentBook_Toggle", UIParent, "SecureHandlerClickTemplate")
-Toggle:SetAllPoints(U_EquipmentMicroMenuButton)
-Toggle:SetFrameStrata("HIGH")
-Toggle:SetFrameLevel(U_EquipmentMicroMenuButton:GetFrameLevel() + 1)
-Toggle:RegisterForClicks("AnyUp")
-
-Toggle:SetFrameRef("uSpellBook", WORS_U_SpellBook.frame)
-Toggle:SetFrameRef("uPrayerBook", WORS_U_PrayBook.frame)
-Toggle:SetFrameRef("uEquipmentBook", WORS_U_EquipmentBook.frame)
-Toggle:SetFrameRef("aCombatStyle", CombatStylePanel)
-
-Toggle:SetAttribute("_onclick", [=[
-    local uSpellBook     = self:GetFrameRef("uSpellBook")
-    local uPrayerBook    = self:GetFrameRef("uPrayerBook")
-    local uEquipmentBook = self:GetFrameRef("uEquipmentBook")
-    local aCombatStyle   = self:GetFrameRef("aCombatStyle")
-
-    local isShown = uEquipmentBook:GetAttribute("userToggle")
-    if isShown then
-        uEquipmentBook:SetAttribute("userToggle", nil)
-        uEquipmentBook:Hide()
-    else
-        if uSpellBook and uSpellBook:IsShown() then
-            uSpellBook:Hide()
-            uSpellBook:SetAttribute("userToggle", nil)
-        end
-        if uPrayerBook and uPrayerBook:IsShown() then
-            uPrayerBook:Hide()
-            uPrayerBook:SetAttribute("userToggle", nil)
-        end
-        if aCombatStyle and aCombatStyle:IsShown() then aCombatStyle:Hide() end
-
-        uEquipmentBook:SetAttribute("userToggle", true)
-        uEquipmentBook:Show()
-    end
-]=])
-
-Toggle:SetScript("OnMouseUp", function(self)
-    Backpack:Hide()
-    WORS_U_SkillsBook.frame:Hide()
-    WORS_U_EmoteBookFrame:Hide()
-    if IsShiftKeyDown() and not InCombatLockdown() then
-        ResetMicroMenuPOSByAspect(WORS_U_EquipmentBook.frame)
-        print("|cff00ff00[MicroMenu]|r position reset.")
-    end
-end)
-
-Toggle:SetScript("OnEnter", function(self)
-    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-    GameTooltip:SetText("Equipment", 1, 1, 1, 1, true)
-    GameTooltip:AddLine("Open equipment menu", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
-    GameTooltip:Show()
-end)
-Toggle:SetScript("OnLeave", GameTooltip_Hide)
 
 local closeButton = CreateFrame("Button", nil, WORS_U_EquipmentBook.frame, "SecureHandlerClickTemplate")
 closeButton:SetSize(16, 16)

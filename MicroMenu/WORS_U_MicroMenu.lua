@@ -11,16 +11,6 @@ local function HookABackpack()
         Backpack:SetPoint(pos.point, ref, pos.relativePoint, pos.xOfs, pos.yOfs)
     end
 
-    -- Backpack:HookScript("OnShow", function()
-        -- WORS_U_EmoteBook.frame:Hide()
-		-- WORS_U_SkillsBook.frame:Hide()
-        -- if InCombatLockdown() then return end
-        -- CombatStylePanel:Hide()
-        -- WORS_U_SpellBook.frame:Hide();     WORS_U_SpellBook.frame:SetAttribute("userToggle", nil)
-        -- WORS_U_PrayBook.frame:Hide();      WORS_U_PrayBook.frame:SetAttribute("userToggle", nil)
-        -- WORS_U_EquipmentBook.frame:Hide(); WORS_U_EquipmentBook.frame:SetAttribute("userToggle", nil)
-    -- end)
-
     hooksecurefunc(Backpack, "StopMovingOrSizing", SaveFramePosition)
     aBackpackHooked = true
 	-- print("aBackpackHooked truess")
@@ -36,16 +26,6 @@ local function HookACombatStylePanel()
         CombatStylePanel:ClearAllPoints()
         CombatStylePanel:SetPoint(pos.point, ref, pos.relativePoint, pos.xOfs, pos.yOfs)
     end
-
-    -- CombatStylePanel:HookScript("OnShow", function()
-        -- WORS_U_EmoteBook.frame:Hide()
-		-- WORS_U_SkillsBook.frame:Hide()
-        -- Backpack:Hide()
-        -- if InCombatLockdown() then return end
-        -- WORS_U_SpellBook.frame:Hide();     WORS_U_SpellBook.frame:SetAttribute("userToggle", nil)
-        -- WORS_U_PrayBook.frame:Hide();      WORS_U_PrayBook.frame:SetAttribute("userToggle", nil)
-        -- WORS_U_EquipmentBook.frame:Hide(); WORS_U_EquipmentBook.frame:SetAttribute("userToggle", nil)
-    -- end)	
 
     CombatStylePanel:HookScript("OnDragStop", SaveFramePosition)
     aCombatStyleHooked = true

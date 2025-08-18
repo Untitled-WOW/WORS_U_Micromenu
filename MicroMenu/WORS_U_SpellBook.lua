@@ -105,8 +105,6 @@ WORS_U_SpellBook.frame:SetScript("OnDragStop", function(self)
 	SaveFramePosition(self)
 end)
 
--- Keep a secure "desired visibility" attribute (no drivers; we allow in-combat show)
-WORS_U_SpellBook.frame:SetAttribute("userToggle", nil) -- hidden by default
 
 -- Hide template button to use securec
 if WORS_U_SpellBookFrame.CloseButton then WORS_U_SpellBookFrame.CloseButton:ClearAllPoints() end
@@ -159,72 +157,6 @@ end)
 -- =========================
 
 -- Secure TOGGLE overlay on the U_SpellBookMicroButtonCopy
-local Toggle = CreateFrame("Button", "WORS_USpellBook_Toggle", UIParent, "SecureHandlerClickTemplate")
---Toggle:SetAllPoints(SpellbookMicroButton)
---Toggle:SetFrameStrata("HIGH")
---Toggle:SetFrameLevel(SpellbookMicroButton:GetFrameLevel() + 1)
-
-Toggle:SetAllPoints(U_SpellMicroMenuButton)
-Toggle:SetFrameStrata("HIGH")
-Toggle:SetFrameLevel(U_SpellMicroMenuButton:GetFrameLevel() + 1)
-
-Toggle:RegisterForClicks("AnyUp")
-
--- before: after you create CombatStylePanel and WORS_U_SpellBook.frame
--- Pass references into secure environment
-Toggle:SetFrameRef("uSpellBook", WORS_U_SpellBook.frame)
-Toggle:SetFrameRef("uPrayerBook", WORS_U_PrayBook.frame)
-Toggle:SetFrameRef("uEquipmentBook", WORS_U_EquipmentBook.frame)
-
-
-Toggle:SetFrameRef("aCombatStyle", CombatStylePanel)  
-
--- Secure click snippet
-Toggle:SetAttribute("_onclick", [=[
-	local uSpellBook = self:GetFrameRef("uSpellBook")
-	local uPrayerBook = self:GetFrameRef("uPrayerBook")
-	local uEquipmentBook = self:GetFrameRef("uEquipmentBook")
-	local aCombatStyle = self:GetFrameRef("aCombatStyle")
-	
-	local isShown = uSpellBook:GetAttribute("userToggle")
-	if isShown then
-		uSpellBook:SetAttribute("userToggle", nil)
-		uSpellBook:Hide()
-	else
-		if uPrayerBook and uPrayerBook:IsShown() then 
-			uPrayerBook:Hide()
-			uPrayerBook:SetAttribute("userToggle", nil)
-		end
-		if uEquipmentBook and uEquipmentBook:IsShown() then
-			uEquipmentBook:Hide()
-			uEquipmentBook:SetAttribute("userToggle", nil)
-		end
-		if aCombatStyle and aCombatStyle:IsShown() then aCombatStyle:Hide() end
-
-		uSpellBook:SetAttribute("userToggle", true)
-		uSpellBook:Show()
-	end
-]=])
-
--- Shift+Click to reset position 
-Toggle:SetScript("OnMouseUp", function(self)
-    Backpack:Hide()
-	WORS_U_SkillsBook.frame:Hide()
-	WORS_U_EmoteBookFrame:Hide()
-	if IsShiftKeyDown() and not InCombatLockdown() then
-		ResetMicroMenuPOSByAspect(WORS_U_SpellBook.frame)
-		print("|cff00ff00[MicroMenu]|r position reset.")
-	end
-end)
-
--- Tooltip on hover
-Toggle:SetScript("OnEnter", function(self)
-    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-    GameTooltip:SetText("Magic", 1, 1, 1, 1, true)
-    GameTooltip:AddLine("Open Magic menu for spells.\nTo open WoW Spellbook click Spellbook & Abilities", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
-    GameTooltip:Show()
-end)
-Toggle:SetScript("OnLeave", function() GameTooltip:Hide() end)
 
 
 -- Secure CLOSE button inside the frame (works in combat)

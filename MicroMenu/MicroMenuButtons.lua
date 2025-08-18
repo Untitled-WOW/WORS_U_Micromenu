@@ -11,6 +11,82 @@ U_SpellMicroMenuButton.Icon:ClearAllPoints()
 U_SpellMicroMenuButton.Icon:SetPoint("CENTER", 0, 0)
 U_SpellMicroMenuButton.Icon:SetSize(24, 24)
 U_SpellMicroMenuButton.Icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+-- Keep a secure "desired visibility" attribute (no drivers; we allow in-combat show)
+WORS_U_SpellBook.frame:SetAttribute("userToggle", nil) -- hidden by default
+
+local SpellMicroMenuToggle = CreateFrame("Button", "WORS_USpellBook_Toggle", UIParent, "SecureHandlerClickTemplate")
+--SpellMicroMenuToggle:SetAllPoints(SpellbookMicroButton)
+--SpellMicroMenuToggle:SetFrameStrata("HIGH")
+--SpellMicroMenuToggle:SetFrameLevel(SpellbookMicroButton:GetFrameLevel() + 1)
+
+SpellMicroMenuToggle:SetAllPoints(U_SpellMicroMenuButton)
+SpellMicroMenuToggle:SetFrameStrata("HIGH")
+SpellMicroMenuToggle:SetFrameLevel(U_SpellMicroMenuButton:GetFrameLevel() + 1)
+
+SpellMicroMenuToggle:RegisterForClicks("AnyUp")
+
+-- before: after you create CombatStylePanel and WORS_U_SpellBook.frame
+-- Pass references into secure environment
+
+SpellMicroMenuToggle:SetFrameRef("uSpellBook", WORS_U_SpellBook.frame)
+SpellMicroMenuToggle:SetFrameRef("uPrayerBook", WORS_U_PrayBook.frame)
+SpellMicroMenuToggle:SetFrameRef("uEquipmentBook", WORS_U_EquipmentBook.frame)
+
+
+SpellMicroMenuToggle:SetFrameRef("aCombatStyle", CombatStylePanel)  
+
+-- Secure click snippet
+SpellMicroMenuToggle:SetAttribute("_onclick", [=[
+	local uSpellBook = self:GetFrameRef("uSpellBook")
+	local uPrayerBook = self:GetFrameRef("uPrayerBook")
+	local uEquipmentBook = self:GetFrameRef("uEquipmentBook")
+	local aCombatStyle = self:GetFrameRef("aCombatStyle")
+	
+	local isShown = uSpellBook:GetAttribute("userToggle")
+	if isShown then
+		uSpellBook:SetAttribute("userToggle", nil)
+		uSpellBook:Hide()
+	else
+		if uPrayerBook and uPrayerBook:IsShown() then 
+			uPrayerBook:Hide()
+			uPrayerBook:SetAttribute("userToggle", nil)
+		end
+		if uEquipmentBook and uEquipmentBook:IsShown() then
+			uEquipmentBook:Hide()
+			uEquipmentBook:SetAttribute("userToggle", nil)
+		end
+		if aCombatStyle and aCombatStyle:IsShown() then aCombatStyle:Hide() end
+
+		uSpellBook:SetAttribute("userToggle", true)
+		uSpellBook:Show()
+	end
+]=])
+
+-- Shift+Click to reset position 
+SpellMicroMenuToggle:SetScript("OnMouseUp", function(self)
+    Backpack:Hide()
+	WORS_U_SkillsBook.frame:Hide()
+	WORS_U_EmoteBookFrame:Hide()
+	if IsShiftKeyDown() and not InCombatLockdown() then
+		ResetMicroMenuPOSByAspect(WORS_U_SpellBook.frame)
+		print("|cff00ff00[MicroMenu]|r position reset.")
+	end
+end)
+
+-- Tooltip on hover
+SpellMicroMenuToggle:SetScript("OnEnter", function(self)
+    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+    GameTooltip:SetText("Magic", 1, 1, 1, 1, true)
+    GameTooltip:AddLine("Open Magic menu for spells.\nTo open WoW Spellbook click Spellbook & Abilities", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
+    GameTooltip:Show()
+end)
+SpellMicroMenuToggle:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
+
+
+
+
+
 
 ----------------------------------------------------------------
 -- === Prayer button over CompanionsMicroButton ===
@@ -26,6 +102,80 @@ U_PrayerMicroMenuButton.Icon:SetPoint("CENTER", 0, 0)
 U_PrayerMicroMenuButton.Icon:SetSize(24, 24)
 U_PrayerMicroMenuButton.Icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 
+-- SECURE TOGGLE + CLOSE UI
+-- Keep a secure "desired visibility" attribute (no drivers; we allow in-combat show)
+WORS_U_PrayBook.frame:SetAttribute("userToggle", nil) -- hidden by default
+
+-- Secure TOGGLE overlay on the SpellbookMicroButton
+local PrayerMicroMenuToggle = CreateFrame("Button", "WORS_UPrayBook_Toggle", UIParent, "SecureHandlerClickTemplate")
+-- PrayerMicroMenuToggle:SetAllPoints(PrayerMicroButton)
+-- PrayerMicroMenuToggle:SetFrameStrata("HIGH")
+-- PrayerMicroMenuToggle:SetFrameLevel(PrayerMicroButton:GetFrameLevel() + 1)
+
+PrayerMicroMenuToggle:SetAllPoints(U_PrayerMicroMenuButton)
+PrayerMicroMenuToggle:SetFrameStrata("HIGH")
+PrayerMicroMenuToggle:SetFrameLevel(U_PrayerMicroMenuButton:GetFrameLevel() + 1)
+
+PrayerMicroMenuToggle:RegisterForClicks("AnyUp")
+
+-- before: after you create CombatStylePanel and WORS_U_SpellBook.frame
+-- Pass references into secure environment
+PrayerMicroMenuToggle:SetFrameRef("uSpellBook", WORS_U_SpellBook.frame)
+PrayerMicroMenuToggle:SetFrameRef("uPrayerBook", WORS_U_PrayBook.frame)
+PrayerMicroMenuToggle:SetFrameRef("uEquipmentBook", WORS_U_EquipmentBook.frame)
+PrayerMicroMenuToggle:SetFrameRef("aCombatStyle", CombatStylePanel)  
+
+-- Secure click snippet
+PrayerMicroMenuToggle:SetAttribute("_onclick", [=[
+	local uSpellBook = self:GetFrameRef("uSpellBook")
+	local uPrayerBook = self:GetFrameRef("uPrayerBook")
+	local uEquipmentBook = self:GetFrameRef("uEquipmentBook")
+	local aCombatStyle = self:GetFrameRef("aCombatStyle")
+	
+	local isShown = uPrayerBook:GetAttribute("userToggle")
+	if isShown then
+		uPrayerBook:SetAttribute("userToggle", nil)
+		uPrayerBook:Hide()
+	else
+		if uSpellBook and uSpellBook:IsShown() then 
+			uSpellBook:Hide()
+			uSpellBook:SetAttribute("userToggle", nil)
+		end
+		if uEquipmentBook and uEquipmentBook:IsShown() then
+			uEquipmentBook:Hide()
+			uEquipmentBook:SetAttribute("userToggle", nil)
+		end
+		if aCombatStyle and aCombatStyle:IsShown() then aCombatStyle:Hide() end
+
+		uPrayerBook:SetAttribute("userToggle", true)
+		uPrayerBook:Show()
+	end
+]=])
+
+-- Shift+Click to reset position 
+PrayerMicroMenuToggle:SetScript("OnMouseUp", function(self)
+	Backpack:Hide()
+	WORS_U_SkillsBook.frame:Hide()
+	WORS_U_EmoteBookFrame:Hide()
+	if IsShiftKeyDown() and not InCombatLockdown() then
+		ResetMicroMenuPOSByAspect(WORS_U_PrayBook.frame)
+		print("|cff00ff00[MicroMenu]|r position reset.")
+	end
+end)
+
+-- Tooltip on hover
+PrayerMicroMenuToggle:SetScript("OnEnter", function(self)
+    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+    GameTooltip:SetText("Prayer", 1, 1, 1, 1, true)
+    GameTooltip:AddLine("Open Prayer menu for spells.\nTo open WoW Spellbook click Spellbook & Abilities", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
+    GameTooltip:Show()
+end)
+PrayerMicroMenuToggle:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
+
+
+
+
 ----------------------------------------------------------------
 -- === Equipment button over  CharacterMicroButton ===
 ----------------------------------------------------------------
@@ -39,6 +189,69 @@ U_EquipmentMicroMenuButton.Icon:SetTexCoord(CharacterMicroButton.Icon:GetTexCoor
 U_EquipmentMicroMenuButton.Icon:ClearAllPoints()
 U_EquipmentMicroMenuButton.Icon:SetPoint("CENTER", 0, 0)
 U_EquipmentMicroMenuButton.Icon:SetSize(28, 28)
+
+-- SECURE TOGGLE + CLOSE UI
+WORS_U_EquipmentBook.frame:SetAttribute("userToggle", nil) -- hidden by default
+
+local EquipmentMicroMenuToggle = CreateFrame("Button", "WORS_UPEquipmentBook_Toggle", UIParent, "SecureHandlerClickTemplate")
+EquipmentMicroMenuToggle:SetAllPoints(U_EquipmentMicroMenuButton)
+EquipmentMicroMenuToggle:SetFrameStrata("HIGH")
+EquipmentMicroMenuToggle:SetFrameLevel(U_EquipmentMicroMenuButton:GetFrameLevel() + 1)
+EquipmentMicroMenuToggle:RegisterForClicks("AnyUp")
+
+EquipmentMicroMenuToggle:SetFrameRef("uSpellBook", WORS_U_SpellBook.frame)
+EquipmentMicroMenuToggle:SetFrameRef("uPrayerBook", WORS_U_PrayBook.frame)
+EquipmentMicroMenuToggle:SetFrameRef("uEquipmentBook", WORS_U_EquipmentBook.frame)
+EquipmentMicroMenuToggle:SetFrameRef("aCombatStyle", CombatStylePanel)
+
+EquipmentMicroMenuToggle:SetAttribute("_onclick", [=[
+    local uSpellBook     = self:GetFrameRef("uSpellBook")
+    local uPrayerBook    = self:GetFrameRef("uPrayerBook")
+    local uEquipmentBook = self:GetFrameRef("uEquipmentBook")
+    local aCombatStyle   = self:GetFrameRef("aCombatStyle")
+
+    local isShown = uEquipmentBook:GetAttribute("userToggle")
+    if isShown then
+        uEquipmentBook:SetAttribute("userToggle", nil)
+        uEquipmentBook:Hide()
+    else
+        if uSpellBook and uSpellBook:IsShown() then
+            uSpellBook:Hide()
+            uSpellBook:SetAttribute("userToggle", nil)
+        end
+        if uPrayerBook and uPrayerBook:IsShown() then
+            uPrayerBook:Hide()
+            uPrayerBook:SetAttribute("userToggle", nil)
+        end
+        if aCombatStyle and aCombatStyle:IsShown() then aCombatStyle:Hide() end
+
+        uEquipmentBook:SetAttribute("userToggle", true)
+        uEquipmentBook:Show()
+    end
+]=])
+
+EquipmentMicroMenuToggle:SetScript("OnMouseUp", function(self)
+    Backpack:Hide()
+    WORS_U_SkillsBook.frame:Hide()
+    WORS_U_EmoteBookFrame:Hide()
+    if IsShiftKeyDown() and not InCombatLockdown() then
+        ResetMicroMenuPOSByAspect(WORS_U_EquipmentBook.frame)
+        print("|cff00ff00[MicroMenu]|r position reset.")
+    end
+end)
+
+EquipmentMicroMenuToggle:SetScript("OnEnter", function(self)
+    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+    GameTooltip:SetText("Equipment", 1, 1, 1, 1, true)
+    GameTooltip:AddLine("Open equipment menu", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
+    GameTooltip:Show()
+end)
+EquipmentMicroMenuToggle:SetScript("OnLeave", GameTooltip_Hide)
+
+
+
+
+
 
 -- ----------------------------------------------------------------
 -- -- === Emote button over  EmoteMicroButton===
@@ -238,7 +451,7 @@ U_SkillMicroMenuButton:SetScript("OnMouseUp", function(self)
 end)
 
 
----------------------
+
 ----------------------------------------------------------------
 -- Inventory Overlay InventoryMicroButton
 --------------------------------------------------------------------------------
@@ -290,6 +503,7 @@ U_InventoryMicroMenuButton:SetAttribute("_onclick", [=[
 U_InventoryMicroMenuButton:SetScript("OnMouseUp", function(self)
 	ToggleBackpack()
     WORS_U_EmoteBookFrame:Hide()
+	WORS_U_SkillsBookFrame:Hide()
     if IsShiftKeyDown() and not InCombatLockdown() then
         ResetMicroMenuPOSByAspect(Backpack)
         print("|cff00ff00[MicroMenu]|r position reset.")
@@ -354,8 +568,8 @@ U_CombatStyleMicroMenuButton:SetAttribute("_onclick", [=[
 
 U_CombatStyleMicroMenuButton:SetScript("PostClick", function(self)
 	CloseBackpack()
-	--ToggleCombatStyles()
     WORS_U_EmoteBookFrame:Hide()
+	WORS_U_SkillsBookFrame:Hide()
     if IsShiftKeyDown() and not InCombatLockdown() then
         ResetMicroMenuPOSByAspect(CombatStylePanel)
         print("|cff00ff00[MicroMenu]|r position reset.")
@@ -368,58 +582,60 @@ end)
 ---------------------------------------------------
 -- Override Backpack and Combat Style bind to click secure buttons
 ---------------------------------------------------
-local function ApplyMicroMenuOverrideBindings()
-    -- clear old overrides
-    if U_InventoryMicroMenuButton then
-        ClearOverrideBindings(U_InventoryMicroMenuButton)
-    end
-    if U_CombatStyleMicroMenuButton then
-        ClearOverrideBindings(U_CombatStyleMicroMenuButton)
-    end
 
-    -- Backpack keybinds
-    if U_InventoryMicroMenuButton then
-        local i = 1
-        while true do
-            local key = GetBindingKey("TOGGLEBACKPACK", i)
-            if not key then break end
-            SetOverrideBindingClick(
-                U_InventoryMicroMenuButton, true, key,
-                "U_InventoryMicroMenuButtonCopy", "LeftButton"
-            )
-            i = i + 1
-        end
-    end
+-- helper: bind up to 2 keys for one action id to click a secure button
+local function BindAction(bindingId, ownerButton, clickButtonName)
+    if not ownerButton or not clickButtonName then return end
+    local k1, k2 = GetBindingKey(bindingId)
+    if k1 then SetOverrideBindingClick(ownerButton, true, k1, clickButtonName, "LeftButton") end
+    if k2 then SetOverrideBindingClick(ownerButton, true, k2, clickButtonName, "LeftButton") end
+end
 
-    -- CombatStyle keybinds
-    if U_CombatStyleMicroMenuButton then
-        local i = 1
-        while true do
-            local key = GetBindingKey("TOGGLECOMBATSTYLE", i)
-            if not key then break end
-            SetOverrideBindingClick(
-                U_CombatStyleMicroMenuButton, true, key,
-                "U_CombatStyleMicroMenuButtonCopy", "LeftButton"
-            )
-            i = i + 1
-        end
+
+-- Bind every key assigned to `bindingId` to click `clickButtonName`.
+-- We use UIParent as the owner so the override is always active.
+local function BindActionAll(bindingId, clickButtonName)
+    if not clickButtonName then return end
+    local i = 1
+    while true do
+        local key = GetBindingKey(bindingId, i)
+        if not key then break end
+        SetOverrideBindingClick(UIParent, true, key, clickButtonName, "LeftButton")
+        i = i + 1
     end
 end
 
----------------------------------------------------
--- Event driver
----------------------------------------------------
+-- Re-apply Blizzard micro binds
+local function ApplyMicroMenuOverrideBindings()
+    -- Do NOT ClearOverrideBindings(UIParent) (would wipe everything).
+    BindActionAll("TOGGLEBACKPACK",    "U_InventoryMicroMenuButtonCopy")
+    BindActionAll("TOGGLECOMBATSTYLE", "U_CombatStyleMicroMenuButtonCopy")
+end
+
+-- Re-apply your custom binds
+local function ApplyCustomMenuOverrideBindings()
+    BindActionAll("TOGGLEMAGIC",     "WORS_USpellBook_Toggle")
+    BindActionAll("TOGGLEPRAYER",    "WORS_UPrayBook_Toggle")
+    BindActionAll("TOGGLEEQUIPMENT", "WORS_UPEquipmentBook_Toggle")
+    BindActionAll("TOGGLESKILLS",    "U_SkillBookMicroButtonCopy")
+	BindActionAll("TOGGLEEMOTE", 	 "U_EmoteBookMicroButtonCopy")
+end
+
+
+local function RebindAll()
+  ApplyMicroMenuOverrideBindings()
+  ApplyCustomMenuOverrideBindings()
+end
+
 local kb = CreateFrame("Frame")
 kb:RegisterEvent("PLAYER_LOGIN")
 kb:RegisterEvent("UPDATE_BINDINGS")
-kb:RegisterEvent("PLAYER_REGEN_ENABLED") -- re-apply if blocked in combat
-
+kb:RegisterEvent("PLAYER_REGEN_ENABLED")
 kb:SetScript("OnEvent", function(self, event)
-    if InCombatLockdown() then
-        self.needUpdate = true
-        return
-    end
-    if event == "PLAYER_REGEN_ENABLED" and not self.needUpdate then return end
-    self.needUpdate = nil
-    ApplyMicroMenuOverrideBindings()
+  if InCombatLockdown() then self.needUpdate = true return end
+  if event == "PLAYER_REGEN_ENABLED" and not self.needUpdate then return end
+  self.needUpdate = nil
+
+  -- Defer one frame so your secure buttons are created
+  C_Timer.After(0, RebindAll)
 end)

@@ -6,6 +6,8 @@
 ## Dependencies: WORS_Backpack WORS_SkillGuide
 ## SavedVariables: WORS_U_MicroMenuSettings
 ## DefaultState: disabled
+## Bindings: Bindings.xml
+Bindings.lua
 
 # Main
 WORS_U_MicroMenuData.lua

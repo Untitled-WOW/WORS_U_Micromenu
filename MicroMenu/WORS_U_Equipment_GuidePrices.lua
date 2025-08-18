@@ -1,10 +1,10 @@
 -- WORS_U_Equipment_GuidePrices.lua
 
-local EB = WORS_U_EquipmentBook
+local WORS_U_EquipmentBook = WORS_U_EquipmentBook
 
 -- ========== Guide Prices Frame ==========
-EB.guidePricesFrame = CreateFrame("Frame", "WORS_U_EquipmentBookGuidePricesFrame", UIParent, "BackdropTemplate")
-local frame = EB.guidePricesFrame
+WORS_U_EquipmentBook.guidePricesFrame = CreateFrame("Frame", "WORS_U_EquipmentBookGuidePricesFrame", UIParent, "BackdropTemplate")
+local frame = WORS_U_EquipmentBook.guidePricesFrame
 frame:SetSize(500, 400)
 frame:SetPoint("CENTER")
 frame:SetBackdrop({
@@ -18,6 +18,7 @@ frame:SetMovable(true)
 frame:RegisterForDrag("LeftButton")
 frame:SetScript("OnDragStart", frame.StartMoving)
 frame:SetScript("OnDragStop",  frame.StopMovingOrSizing)
+tinsert(UISpecialFrames, "WORS_U_EquipmentBookGuidePricesFrame")
 frame:Hide()
 
 -- Title
@@ -80,21 +81,21 @@ local function CreateSidebarToggleButton(parent, key, anchor, label, onClick)
     return btn
 end
 
-EB.useVendorValue = true
-EB.useGEValue = false
+WORS_U_EquipmentBook.useVendorValue = true
+WORS_U_EquipmentBook.useGEValue = false
 
 -- Create Vendor button
 side.vendorBtn = CreateSidebarToggleButton(side, "vendorBtn", side.totalLabel, "Use Vendor Value", function(btn)
-    EB.useVendorValue = not EB.useVendorValue
-    btn.bg:SetShown(EB.useVendorValue)
-    EB:UpdateGuidePricesFrame()
+    WORS_U_EquipmentBook.useVendorValue = not WORS_U_EquipmentBook.useVendorValue
+    btn.bg:SetShown(WORS_U_EquipmentBook.useVendorValue)
+    WORS_U_EquipmentBook:UpdateGuidePricesFrame()
 end)
-if EB.useVendorValue then side.vendorBtn.bg:Show() end
+if WORS_U_EquipmentBook.useVendorValue then side.vendorBtn.bg:Show() end
 
 -- Create GE button (disabled logic)
 side.geBtn = CreateSidebarToggleButton(side, "geBtn", side.vendorBtn, "Use GE Value", function(btn)
     -- Do NOT toggle highlight
-    -- Do NOT change EB.useGEValue
+    -- Do NOT change WORS_U_EquipmentBook.useGEValue
     print("|cffff0000[GuidePrices]|r Grand Exchange values are not available yet.")
 end)
 
@@ -143,7 +144,7 @@ content:SetSize(1, 1)
 scroll:SetScrollChild(content)
 
 -- ========== Update Function ==========
-function EB:UpdateGuidePricesFrame()
+function WORS_U_EquipmentBook:UpdateGuidePricesFrame()
     local items = self:GatherAllItems()
     table.sort(items, function(a, b) return a.price * a.count > b.price * b.count end)
 
