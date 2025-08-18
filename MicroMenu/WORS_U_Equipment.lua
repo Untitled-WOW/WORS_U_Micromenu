@@ -24,13 +24,13 @@ local slotData = {
 
     { id=2,  row=2, col=2, hover="Neck",   tex="Neck_slot" },
     { id=3,  row=2, col=3, hover="Arrows", tex="Ammo_slot" },
-    { id=15, row=2, col=1, hover="Cape",   tex="Cape_slot" },
+    { id=15, row=2, col=1, hover="Back",   tex="Cape_slot" },
 
     -- Row 3 now has 4 buttons, but layout should center as if 3.
     { id=16, row=3, col=1, hover="Main Hand",  tex="Weapon_slot" },
     { id=5,  row=3, col=2, hover="Chest",      tex="Body_slot"   },
     { id=17, row=3, col=3, hover="Off Hand",   tex="Shield_slot" },
-    { id=18, row=3, col=4, hover="Range Hand", tex="Ranged_slot" }, -- placed to the right of id=16
+    { id=18, row=3, col=4, hover="Ranged", tex="Ranged_slot" }, -- placed to the right of id=16
 
     { id=4,  row=4, col=1, hover="Shirt",  tex="Shirt_slot"  },
     { id=6,  row=4, col=2, hover="Waist",  tex="Belt_slot"   },
