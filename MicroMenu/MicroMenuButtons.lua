@@ -623,8 +623,9 @@ end
 
 
 local function RebindAll()
-  ApplyMicroMenuOverrideBindings()
-  ApplyCustomMenuOverrideBindings()
+	-- if InCombatLockdown() then return end
+	ApplyMicroMenuOverrideBindings()
+	ApplyCustomMenuOverrideBindings()
 end
 
 local kb = CreateFrame("Frame")
@@ -632,10 +633,16 @@ kb:RegisterEvent("PLAYER_LOGIN")
 kb:RegisterEvent("UPDATE_BINDINGS")
 kb:RegisterEvent("PLAYER_REGEN_ENABLED")
 kb:SetScript("OnEvent", function(self, event)
-  if InCombatLockdown() then self.needUpdate = true return end
-  if event == "PLAYER_REGEN_ENABLED" and not self.needUpdate then return end
-  self.needUpdate = nil
-
-  -- Defer one frame so your secure buttons are created
-  C_Timer.After(0, RebindAll)
+	if event == "PLAYER_LOGIN" and InCombatLockdown() then
+		self.needUpdate = true
+		return
+	elseif event == "UPDATE_BINDINGS" and InCombatLockdown() then 
+		return
+	elseif event == "PLAYER_REGEN_ENABLED" and self.needUpdate then 
+		RebindAll()
+		self.needUpdate = nil
+	else
+		RebindAll()
+		self.needUpdate = nil
+	end
 end)
