@@ -136,6 +136,7 @@ local function GetIconForSkill(factionID)
 	return "Interface\\Icons\\INV_Misc_QuestionMark"
 end
 
+
 local function OpenSkillGuideSafe(factionID)
     if not IsAddOnLoaded("WORS_SkillGuide") then
         local ok = LoadAddOn("WORS_SkillGuide")
@@ -275,7 +276,7 @@ function WORS_U_SkillsBook:RefreshConfig()
 			icon:SetTexture(GetIconForSkill(factionID))
 			btn.Icon = icon
 
-			-- Current level (top-right)
+			-- Buffed level (top-right)
 			local curFS = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 			curFS:SetPoint("TOPRIGHT", -20, -3)
 			curFS:SetTextColor(1, 1, 0)
@@ -285,7 +286,7 @@ function WORS_U_SkillsBook:RefreshConfig()
 			local capFS = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 			capFS:SetPoint("BOTTOMRIGHT", -4, 3)
 			capFS:SetTextColor(1, 1, 0)
-			capFS:SetText(tostring(CAP))
+			--capFS:SetText(tostring(CAP))
 			btn.CapFS = capFS
 
 			-- Slash texture between current and cap
@@ -316,7 +317,7 @@ function WORS_U_SkillsBook:RefreshConfig()
 				GameTooltip:SetOwner(selfBtn, "ANCHOR_RIGHT")
 
 				-- Pull clean stats (keeps working at 99)
-				local name, _, currentLevel, _, totalXP, nextLevelAtXP = WORSSkillsUtil.GetSkillInfo(factionID)
+				local name, _, currentLevelBuffed, currentLevel, totalXP, nextLevelAtXP = WORSSkillsUtil.GetSkillInfo(factionID)
 				name     = name or "Skill"
 				currentLevel = currentLevel or 0
 				totalXP  = totalXP or 0
@@ -338,14 +339,24 @@ function WORS_U_SkillsBook:RefreshConfig()
 					-- "Remaining XP: <xp needed to level>"
 					GameTooltip:AddLine(("Remaining XP: |cFFFFFFFF%s|r"):format(BreakUpLargeNumbers(remaining)), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
 				end
+				
+				-- 📝 Add usage hint line
+				local cleanSkillName = (GetFactionInfoByID(factionID) or ""):match("([^|]+)$"):match("(%S+)$")
+				if cleanSkillName and WORS_SkillCraftUI[cleanSkillName] then
+					GameTooltip:AddLine("Left: Crafting UI",  0, 1, 0)
+					GameTooltip:AddLine("Right: Skill Guide", 0, 1, 0)
+				else
+					GameTooltip:AddLine("Click: Skill Guide", 0, 1, 0)
+				end
 
 				GameTooltip:Show()
 			end)
 			btn:SetScript("OnLeave", GameTooltip_Hide)
 
 			-- Initial level text
-			local _, _, lvl2 = WORSSkillsUtil.GetSkillInfo(factionID)
-			btn.CurFS:SetText(lvl2 or 0)
+			local _, _, buffedLevel, currentLevel = WORSSkillsUtil.GetSkillInfo(factionID)
+			btn.CurFS:SetText(buffedLevel or 0)
+			btn.CapFS:SetText(currentLevel or 0)
 
 			table.insert(self._skillButtons, { btn = btn, id = factionID })
 
@@ -356,27 +367,46 @@ function WORS_U_SkillsBook:RefreshConfig()
 	end
 end
 
--- Update levels/icons quickly (called when frame opens)
 function WORS_U_SkillsBook:RefreshValues()
-	if not self._skillButtons then return end
+    if not self._skillButtons then return end
 
-	for _, e in ipairs(self._skillButtons) do
-		if e.id == "__TOTAL__" then
-			if self.totalBox and self.totalBox.Label then
-				local totalLevel = 0
-				local totalXP = 0
-				local ok, lvl, xp = pcall(WORSSkillsUtil.GetTotalLevel)
-				if ok and lvl then totalLevel = lvl end
-				if ok and xp  then totalXP   = xp  end
-				self.totalBox.Label:SetText(("Total level:\n %d"):format(totalLevel or 0))
-			end
-		else
-			local _, _, lvl = WORSSkillsUtil.GetSkillInfo(e.id)
-			if e.btn.CurFS then e.btn.CurFS:SetText(lvl or 0) end
-			if e.btn.Icon  then e.btn.Icon:SetTexture(GetIconForSkill(e.id)) end
-		end
-	end
+    for _, e in ipairs(self._skillButtons) do
+        if e.id == "__TOTAL__" then
+            if self.totalBox and self.totalBox.Label then
+                local totalLevel = 0
+                local ok, lvl = pcall(WORSSkillsUtil.GetTotalLevel)
+                if ok and lvl then totalLevel = lvl end
+                self.totalBox.Label:SetText(("Total level:\n %d"):format(totalLevel or 0))
+            end
+
+        else
+            -- 🩺 Hitpoints: show current / max HP
+            if e.id == ResolveSkillID("Hitpoints") then
+                local hp, hpMax = UnitHealth("player"), UnitHealthMax("player")
+                if e.btn.CurFS then e.btn.CurFS:SetText(hp or 0) end
+                if e.btn.CapFS then e.btn.CapFS:SetText(hpMax or 0) end
+
+            -- 💙 Prayer: show current / max mana (in thousands)
+            elseif e.id == ResolveSkillID("Prayer") then
+                local mp, mpMax = UnitPower("player", 0), UnitPowerMax("player", 0)
+                local mpK    = math.ceil((mp or 0) / 1000)
+                local mpMaxK = math.ceil((mpMax or 0) / 1000)
+                if e.btn.CurFS then e.btn.CurFS:SetText(mpK or 0) end
+                if e.btn.CapFS then e.btn.CapFS:SetText(mpMaxK or 0) end
+
+            -- 🟡 Default: all other skills from WORSSkillsUtil
+            else
+                local _, _, buffedLevel, currentLevel = WORSSkillsUtil.GetSkillInfo(e.id)
+                if e.btn.CurFS then e.btn.CurFS:SetText(buffedLevel or 0) end
+                if e.btn.CapFS then e.btn.CapFS:SetText(currentLevel or 0) end
+                if e.btn.Icon  then e.btn.Icon:SetTexture(GetIconForSkill(e.id)) end
+            end
+        end
+    end
 end
+
+
+
 
 -- Build on first open; then refresh values on every open
 WORS_U_SkillsBook.frame:HookScript("OnShow", function()
@@ -426,6 +456,9 @@ end
 local skillsEvt = CreateFrame("Frame")
 skillsEvt:RegisterEvent("PLAYER_ENTERING_WORLD")           -- prime once
 skillsEvt:RegisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")  -- combat rep spam
+skillsEvt:RegisterEvent("UNIT_HEALTH")
+skillsEvt:RegisterEvent("UNIT_MANA")
+skillsEvt:RegisterEvent("UNIT_AURA")
 skillsEvt:SetScript("OnEvent", function()
 	RefreshSkillsAndTooltip()
 end)
