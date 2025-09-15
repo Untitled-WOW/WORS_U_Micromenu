@@ -81,19 +81,9 @@ local function UpdateButtonCounts()
     end
 end
 
+
 function SetupEquipmentButtons()
     if InCombatLockdown() then return end
-
-    -- clear existing
-    if WORS_U_EquipmentBook.buttons then
-        for _, button in pairs(WORS_U_EquipmentBook.buttons) do
-            button:Hide()
-            button:SetParent(nil)
-        end
-        wipe(WORS_U_EquipmentBook.buttons)
-    else
-        WORS_U_EquipmentBook.buttons = {}
-    end
 
     local frame  = WORS_U_EquipmentBook.frame
     local frameW = frame:GetWidth()
@@ -104,31 +94,85 @@ function SetupEquipmentButtons()
         rowCounts[d.row] = (rowCounts[d.row] or 0) + 1
     end
 
-    -- keep handles so we can position ranged (id=18) to the right of id=16
+    -- ensure storage table exists
+    if not WORS_U_EquipmentBook.buttons then
+        WORS_U_EquipmentBook.buttons = {}
+    end
+
     local btnRow3Col1, btnRanged
 
     for _, d in ipairs(slotData) do
         local id, row, col, texKey, hover = d.id, d.row, d.col, d.tex, d.hover
+        local btn = WORS_U_EquipmentBook.buttons[id]
 
-        -- base anchor frame (always one per slotData entry)
-        local btn = CreateFrame("Frame", "WORS_U_EquipSlotBtn"..id, frame, "OldSchoolButtonTemplate")
-        btn:SetSize(BUTTON_SIZE, BUTTON_SIZE)
-        btn:SetID(id)
+        -- ✅ create button only if it doesn't exist yet
+        if not btn then
+            btn = CreateFrame("Frame", "WORS_U_EquipSlotBtn"..id, frame, "OldSchoolButtonTemplate")
+            btn:SetSize(BUTTON_SIZE, BUTTON_SIZE)
+            btn:SetID(id)
 
-        -- position (center each row)
-        local padH   = (row == 1 or row == 2) and H_PAD_ROW2 or H_PAD
+            -- background icon (slot art)
+            local bgIcon = btn:CreateTexture(nil, "ARTWORK")
+            bgIcon:SetPoint("TOPLEFT", 3, -3)
+            bgIcon:SetPoint("BOTTOMRIGHT", -3, 3)
+            bgIcon:SetVertexColor(1,1,1,1)
+            bgIcon:SetTexture(BASE_TEX_PATH .. (texById[id] or "Weapon_slot") .. ".blp")
+            CropSlotTex(bgIcon)
+            btn.bgIcon = bgIcon
 
-        -- For row 3, we want to lay out as if only 3 buttons (cols 1-3).
+            -- overlay for counts
+            local overlay = CreateFrame("Frame", nil, btn)
+            overlay:SetAllPoints()
+            overlay:SetFrameLevel(btn:GetFrameLevel() + 5)
+            local countText = overlay:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+            countText:SetPoint("TOPLEFT", 2, -1)
+            btn.countText = countText
+
+            -- normal clickable slot
+            local sbtn = CreateFrame("Button", nil, btn, "SecureActionButtonTemplate")
+            sbtn:SetAllPoints(btn)
+            sbtn:RegisterForClicks("AnyUp")
+            sbtn:SetAttribute("type2", "item")
+            sbtn:SetAttribute("item2", id)
+
+            sbtn.icon = sbtn:CreateTexture(nil, "OVERLAY")
+            sbtn.icon:SetAllPoints(btn.bgIcon)
+            ResetTex(sbtn.icon)
+
+            sbtn:SetScript("OnEnter", function(self)
+                GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                GameTooltip:SetInventoryItem("player", id)
+                if GameTooltip:NumLines() == 0 then
+                    GameTooltip:SetText(hover or "")
+                end
+                GameTooltip:Show()
+            end)
+            sbtn:SetScript("OnLeave", GameTooltip_Hide)
+
+            sbtn:RegisterForDrag("LeftButton")
+            sbtn:SetScript("OnDragStart", function()
+                if not InCombatLockdown() then PickupInventoryItem(id) end
+            end)
+            sbtn:SetScript("PostClick", function(self, button)
+                if button ~= "LeftButton" then return end
+                PickupInventoryItem(id)
+                if CursorHasItem() then PutItemInBackpack() ClearCursor() end
+            end)
+
+            btn._singleSlot = sbtn
+            WORS_U_EquipmentBook.buttons[id] = btn
+        end
+
+        -- positioning (recalculate every time)
+        local padH = (row == 1 or row == 2) and H_PAD_ROW2 or H_PAD
         local countUsed = rowCounts[row]
         if row == 3 then countUsed = 3 end
-
-        local rowW   = countUsed * BUTTON_SIZE + (countUsed - 1) * padH
+        local rowW = countUsed * BUTTON_SIZE + (countUsed - 1) * padH
         local leftGap = (frameW - rowW) / 2
 
         local idx = 0
         for _, dd in ipairs(slotData) do
             if dd.row == row and dd.col < col then
-                -- when pretending row 3 has 3 items, ignore col 4 for idx of others
                 if not (row == 3 and dd.col == 4) then
                     idx = idx + 1
                 end
@@ -136,7 +180,6 @@ function SetupEquipmentButtons()
         end
 
         local x = leftGap + idx * (BUTTON_SIZE + padH) + GRID_OFFSET_X
-
         local y = TOP_OFFSET
         if row >= 2 then
             y = y + BUTTON_SIZE + V_PAD_ROW2
@@ -144,66 +187,17 @@ function SetupEquipmentButtons()
                 y = y + (row - 2) * (BUTTON_SIZE + V_PAD)
             end
         end
+        btn:ClearAllPoints()
         btn:SetPoint("TOPLEFT", frame, "TOPLEFT", x, -(y + GRID_OFFSET_Y))
 
-        -- background icon (slot art)
-        local bgIcon = btn:CreateTexture(nil, "ARTWORK")
-        bgIcon:SetPoint("TOPLEFT", 3, -3)
-        bgIcon:SetPoint("BOTTOMRIGHT", -3, 3)
-        bgIcon:SetVertexColor(1,1,1,1)
-        bgIcon:SetTexture(BASE_TEX_PATH .. (texById[id] or "Weapon_slot") .. ".blp")
-        CropSlotTex(bgIcon)
-        btn.bgIcon = bgIcon
-
-        -- overlay for counts
-        local overlay = CreateFrame("Frame", nil, btn)
-        overlay:SetAllPoints()
-        overlay:SetFrameLevel(btn:GetFrameLevel() + 5)
-        local countText = overlay:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        countText:SetPoint("TOPLEFT", 2, -1)
-        countText:SetText("")
-        btn.countText = countText
-
-        -- normal clickable slot
-        local sbtn = CreateFrame("Button", nil, btn, "SecureActionButtonTemplate")
-        sbtn:SetAllPoints(btn)
-        sbtn:RegisterForClicks("AnyUp")
-        sbtn:SetAttribute("type2", "item")
-        sbtn:SetAttribute("item2", id)
-
-        sbtn.icon = sbtn:CreateTexture(nil, "OVERLAY")
-        sbtn.icon:SetAllPoints(btn.bgIcon)
-        ResetTex(sbtn.icon)
-
-        sbtn:SetScript("OnEnter", function(self)
-            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-            GameTooltip:SetInventoryItem("player", id)
-            if GameTooltip:NumLines() == 0 then
-                GameTooltip:SetText(hover or "")
-            end
-            GameTooltip:Show()
-        end)
-        sbtn:SetScript("OnLeave", GameTooltip_Hide)
-
-        sbtn:RegisterForDrag("LeftButton")
-        sbtn:SetScript("OnDragStart", function()
-            if not InCombatLockdown() then PickupInventoryItem(id) end
-        end)
-        sbtn:SetScript("PostClick", function(self, button)
-            if button ~= "LeftButton" then return end
-            PickupInventoryItem(id)
-            if CursorHasItem() then PutItemInBackpack() ClearCursor() end
-        end)
-
-        btn._singleSlot = sbtn
-        WORS_U_EquipmentBook.buttons[id] = btn
-
-        -- keep references for row 3 special positioning
+        -- keep handles for row 3 special positioning
         if row == 3 and col == 1 then btnRow3Col1 = btn end
         if id == 18 then btnRanged = btn end
+
+        btn:Show()
     end
 
-    -- Now place the ranged slot (id=18) to the right of id=16, without affecting centering.
+    -- place ranged slot to the right of mainhand (row3 col1)
     if btnRow3Col1 and btnRanged then
         btnRanged:ClearAllPoints()
         btnRanged:SetPoint("TOPLEFT", btnRow3Col1, "TOPRIGHT", -1, 0)
@@ -211,6 +205,7 @@ function SetupEquipmentButtons()
 
     UpdateButtonCounts()
 end
+
 
 function UpdateEquipmentButtons()
     if not WORS_U_EquipmentBook.buttons then return end

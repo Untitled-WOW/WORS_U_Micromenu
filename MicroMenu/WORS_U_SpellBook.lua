@@ -6,19 +6,10 @@ end
 
 local magicButtons = {}
 
--- Function to set up magic buttons dynamically
-local function SetupMagicButtons()
-    if InCombatLockdown() then
-        -- can't create/modify secure children in combat
-        return
-    end
 
-    -- Clear existing buttons before creating new ones
-    for _, button in pairs(magicButtons) do
-        button:Hide()
-        button:SetParent(nil)
-    end
-    wipe(magicButtons)
+-- Function to set up magic buttons  
+local function SetupMagicButtons()
+    if InCombatLockdown() then return end
 
     local buttonSize = 20
     local padding    = 5          -- space between buttons
@@ -26,54 +17,72 @@ local function SetupMagicButtons()
     local columns    = 7
 
     for i, spellData in ipairs(WORS_U_SpellBook.spells) do
-        local spellID = spellData.id
+        local spellID       = spellData.id
         local requiredLevel = spellData.level
         local spellName, _, spellIcon = GetSpellInfo(spellID)
 
-        local spellButton = CreateFrame("Button", nil, WORS_U_SpellBook.frame, "SecureActionButtonTemplate")
-        spellButton:SetSize(buttonSize, buttonSize)
+        -- ✅ Reuse button if it exists, otherwise create it once
+        local spellButton = magicButtons[i]
+        if not spellButton then
+            spellButton = CreateFrame("Button", nil, WORS_U_SpellBook.frame, "SecureActionButtonTemplate")
+            spellButton:SetSize(buttonSize, buttonSize)
 
-        -- Calculate position
-        local row = math.floor((i - 1) / columns)
+            -- Create and store icon texture
+            spellButton.icon = spellButton:CreateTexture(nil, "BACKGROUND")
+            spellButton.icon:SetAllPoints()
+
+            -- Tooltip handlers
+            spellButton:SetScript("OnEnter", function(self)
+                GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                if self.spellID then
+                    GameTooltip:SetSpellByID(self.spellID)
+                end
+                GameTooltip:Show()
+            end)
+            spellButton:SetScript("OnLeave", GameTooltip_Hide)
+
+            magicButtons[i] = spellButton
+        end
+
+        -- Update secure attributes
+        spellButton.spellID = spellID
+        spellButton:SetAttribute("type", "spell")
+        spellButton:SetAttribute("spell", spellID)
+
+        -- Update icon
+        spellButton.icon:SetTexture(spellIcon or "Interface\\Icons\\INV_Misc_QuestionMark")
+
+        -- Position
+        local row    = math.floor((i - 1) / columns)
         local column = (i - 1) % columns
+        spellButton:ClearAllPoints()
         spellButton:SetPoint(
             "TOPLEFT", WORS_U_SpellBook.frame, "TOPLEFT",
             margin + (buttonSize + padding) * column,
             -margin - (buttonSize + padding) * row
         )
 
-        local icon = spellButton:CreateTexture(nil, "BACKGROUND")
-        icon:SetAllPoints()
-        icon:SetTexture(spellIcon)
-
-        -- Check Magic level and Rune requirements and set icon color
+        -- Update color based on requirements
         if magicLevel < requiredLevel then
-            icon:SetVertexColor(0.1, 0.1, 0.1) -- No magic level: Dark Gray
+            spellButton.icon:SetVertexColor(0.1, 0.1, 0.1) -- No magic level: Dark Gray
+        elseif WORS_U_SpellBook:HasRequiredRunes(spellData.runes) then
+            spellButton.icon:SetVertexColor(1, 1, 1)       -- Can cast
         else
-            local hasRunes = WORS_U_SpellBook:HasRequiredRunes(spellData.runes)
-            if hasRunes then
-                icon:SetVertexColor(1, 1, 1)   -- Can cast: Normal icon
-            else
-                icon:SetVertexColor(0.25, 0.25, 0.25) -- No runes: Gray
-            end
+            spellButton.icon:SetVertexColor(0.25, 0.25, 0.25) -- No runes
         end
-		
-        -- Set up secure attributes for spell button
-        spellButton:SetAttribute("type", "spell")
-        spellButton:SetAttribute("spell", spellID)
 
-        spellButton:SetScript("OnEnter", function()
-            GameTooltip:SetOwner(spellButton, "ANCHOR_RIGHT")
-            GameTooltip:SetSpellByID(spellID)
-            GameTooltip:Show()
-        end)
-        spellButton:SetScript("OnLeave", function()
-            GameTooltip:Hide()
-        end)
+        spellButton:Show()
+    end
 
-        table.insert(magicButtons, spellButton)
+    -- ✅ Hide any leftover buttons if the spell list shrinks
+    for i = #WORS_U_SpellBook.spells + 1, #magicButtons do
+        if magicButtons[i] then
+            magicButtons[i]:Hide()
+        end
     end
 end
+
+
 
 -- ===========================
 -- SECURE WRAPPER + VISIBILITY

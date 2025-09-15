@@ -50,41 +50,48 @@ local buttonContainer = CreateFrame("Frame", nil, scrollFrame)
 buttonContainer:SetSize(180, 330)  -- Same size as scroll frame to avoid clipping
 scrollFrame:SetScrollChild(buttonContainer)
 
--- Initialize emote buttons
 local emoteButtons = {}
 
 local function SetupEmoteButtons(XOffset, YOffset)
-    -- Clear existing buttons before creating new ones
-    for _, button in pairs(emoteButtons) do
-        button:Hide()
-        button:SetParent(nil)
-    end
-    wipe(emoteButtons)
-
     local buttonWidth, buttonHeight = 40, 80
     local padding, columns = 5, 4
     local startX, startY = 2, -10
 
     for i, emoteData in ipairs(WORS_U_EmoteBook.emotes) do
-        local btn = CreateFrame("Button", nil, buttonContainer, "UIPanelButtonTemplate")
-        btn:SetSize(buttonWidth, buttonHeight)
-        btn:SetBackdrop({ bgFile = emoteData.icon })
-        btn:SetNormalTexture(nil)
-        btn:SetPushedTexture(nil)
-        btn:SetHighlightTexture(nil)
+        local btn = emoteButtons[i]
 
-        -- compute row & col
+        -- ✅ create button only once
+        if not btn then
+            btn = CreateFrame("Button", nil, buttonContainer, "UIPanelButtonTemplate")
+            btn:SetSize(buttonWidth, buttonHeight)
+            btn:SetNormalTexture(nil)
+            btn:SetPushedTexture(nil)
+            btn:SetHighlightTexture(nil)
+
+            btn:SetScript("OnEnter", function(self)
+                GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                GameTooltip:ClearLines()
+                GameTooltip:SetText(emoteData.name, 1, 1, 1)
+                GameTooltip:Show()
+            end)
+            btn:SetScript("OnLeave", GameTooltip_Hide)
+
+            emoteButtons[i] = btn
+        end
+
+        -- update position each call
         local row = math.floor((i - 1) / columns)
         local col = (i - 1) % columns
-
-        -- apply X/Y offsets
         local x = XOffset + startX + (buttonWidth + padding) * col
         local y = startY - YOffset - (buttonHeight + padding) * row
-
+        btn:ClearAllPoints()
         btn:SetPoint("TOPLEFT", buttonContainer, "TOPLEFT", x, y)
 
+        -- update background and click logic
+        btn:SetBackdrop({ bgFile = emoteData.icon })
         if not emoteData.command or emoteData.command == "" then
             btn:SetBackdropColor(0.247, 0.220, 0.153, 1)
+            btn:SetScript("OnClick", nil)
         else
             btn:SetBackdropColor(1, 1, 1, 1)
             btn:SetScript("OnClick", function()
@@ -96,18 +103,18 @@ local function SetupEmoteButtons(XOffset, YOffset)
             end)
         end
 
-        btn:SetScript("OnEnter", function(self)
-            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-            GameTooltip:ClearLines()
-            GameTooltip:SetText(emoteData.name, 1, 1, 1)
-            GameTooltip:Show()
-        end)
-        btn:SetScript("OnLeave", GameTooltip_Hide)
+        btn:Show()
+    end
 
-        table.insert(emoteButtons, btn)
+    -- hide leftover buttons if emote list shrinks
+    for j = #WORS_U_EmoteBook.emotes + 1, #emoteButtons do
+        if emoteButtons[j] then emoteButtons[j]:Hide() end
     end
 end
-SetupEmoteButtons(-8, -10)
+
+WORS_U_EmoteBook.frame:HookScript("OnShow", function()
+    SetupEmoteButtons(-8, -10)
+end)
 
 --Function to update the button's background color
 local function UpdateButtonBackground()

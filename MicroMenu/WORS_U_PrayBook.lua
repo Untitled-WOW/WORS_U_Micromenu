@@ -6,68 +6,101 @@ end
 
 local prayerButtons = {}
 
--- Function to set up magic buttons dynamically
+-- Function to set up prayer buttons  
 local function SetupPrayerButtons()
     if InCombatLockdown() then
         -- can't create/modify secure children in combat
         return
     end
 
-    -- Clear existing buttons before creating new ones
-    for _, button in pairs(prayerButtons) do
-        button:Hide()
-        button:SetParent(nil)
-    end
-    wipe(prayerButtons)
-
     local buttonSize = 35
     local padding    = 2          -- space between buttons
-    local margin     = 5         -- space from frame edge
+    local margin     = 5           -- space from frame edge
     local columns    = 5
-	for i, prayerData in ipairs(WORS_U_PrayBook.prayers) do
-        local prayerID = prayerData.id
-        local requiredLevel = prayerData.level
-        local prayerName, _, prayerIcon = GetSpellInfo(prayerID)
-        local prayerButton = CreateFrame("Button", nil, WORS_U_PrayBook.frame, "SecureActionButtonTemplate")
-        prayerButton:SetSize(buttonSize, buttonSize)
-        -- Calculate position
-		local row = math.floor((i - 1) / columns)
-        local column = (i - 1) % columns
-        prayerButton:SetPoint("TOPLEFT", margin + (buttonSize + padding) * column, -margin - (buttonSize + padding) * row)
-        local icon = prayerButton:CreateTexture(nil, "BACKGROUND")
-        icon:SetAllPoints()
-        icon:SetTexture(prayerIcon)
-		-- Check prayer level and set icon color
-        if prayerLevel < requiredLevel then
-			icon:SetVertexColor(0.2, 0.2, 0.2) -- No magic level: Dark Gray
-        else
-			icon:SetVertexColor(1, 1, 1) -- Normal icon
-        end
-	
-		-- one-time setup 
-		prayerButton:RegisterForClicks("AnyUp")
-		prayerButton:SetAttribute("type", "spell")                        -- Left click = cast
-		prayerButton:SetAttribute("spell", prayerName)
-        prayerButton:SetAttribute("checkselfcast", true)     -- honor self-cast logic safely
 
-        prayerButton:SetScript("OnEnter", function()
-            GameTooltip:SetOwner(prayerButton, "ANCHOR_RIGHT")
-            GameTooltip:SetSpellByID(prayerID)
-            GameTooltip:Show()
-        end)
-        prayerButton:SetScript("OnLeave", function()
-            GameTooltip:Hide()
-        end)
-        prayerButton:SetScript("OnUpdate", function(self)
-            if UnitBuff("player", prayerName) then
-                icon:SetTexture(prayerData.buffIcon)
-            else
-                icon:SetTexture(prayerIcon)
-            end
-        end)
-        table.insert(prayerButtons, prayerButton)
-	end
+    for i, prayerData in ipairs(WORS_U_PrayBook.prayers) do
+        local prayerID       = prayerData.id
+        local requiredLevel  = prayerData.level
+        local prayerName, _, prayerIcon = GetSpellInfo(prayerID)
+
+        -- ✅ Reuse button if it exists, otherwise create it once
+        local prayerButton = prayerButtons[i]
+        if not prayerButton then
+            prayerButton = CreateFrame("Button", nil, WORS_U_PrayBook.frame, "SecureActionButtonTemplate")
+            prayerButton:SetSize(buttonSize, buttonSize)
+
+            -- Create and store icon texture
+            prayerButton.icon = prayerButton:CreateTexture(nil, "BACKGROUND")
+            prayerButton.icon:SetAllPoints()
+
+            -- One-time setup
+            prayerButton:RegisterForClicks("AnyUp")
+            prayerButton:SetAttribute("type", "spell")
+            prayerButton:SetAttribute("checkselfcast", true)
+
+            -- Tooltip
+            prayerButton:SetScript("OnEnter", function(self)
+                GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                if self.prayerID then
+                    GameTooltip:SetSpellByID(self.prayerID)
+                end
+                GameTooltip:Show()
+            end)
+            prayerButton:SetScript("OnLeave", GameTooltip_Hide)
+
+            -- Buff check updater (just swaps icon if buff active)
+            prayerButton:SetScript("OnUpdate", function(self)
+                if self.prayerName and self.prayerData and self.prayerData.buffIcon then
+                    if UnitBuff("player", self.prayerName) then
+                        self.icon:SetTexture(self.prayerData.buffIcon)
+                    else
+                        self.icon:SetTexture(self.prayerIcon or "Interface\\Icons\\INV_Misc_QuestionMark")
+                    end
+                end
+            end)
+
+            prayerButtons[i] = prayerButton
+        end
+
+        -- Update spell data references
+        prayerButton.prayerID   = prayerID
+        prayerButton.prayerName = prayerName
+        prayerButton.prayerData = prayerData
+        prayerButton.prayerIcon = prayerIcon
+
+        prayerButton:SetAttribute("spell", prayerName)
+
+        -- Update icon + color
+        prayerButton.icon:SetTexture(prayerIcon or "Interface\\Icons\\INV_Misc_QuestionMark")
+        if prayerLevel < requiredLevel then
+            prayerButton.icon:SetVertexColor(0.2, 0.2, 0.2) -- not high enough level
+        else
+            prayerButton.icon:SetVertexColor(1, 1, 1)
+        end
+
+        -- Reposition
+        local row    = math.floor((i - 1) / columns)
+        local column = (i - 1) % columns
+        prayerButton:ClearAllPoints()
+        prayerButton:SetPoint(
+            "TOPLEFT", WORS_U_PrayBook.frame, "TOPLEFT",
+            margin + (buttonSize + padding) * column,
+            -margin - (buttonSize + padding) * row
+        )
+
+        prayerButton:Show()
+    end
+
+    -- ✅ Hide leftover buttons if prayer list shrinks
+    for i = #WORS_U_PrayBook.prayers + 1, #prayerButtons do
+        if prayerButtons[i] then
+            prayerButtons[i]:Hide()
+        end
+    end
 end
+
+
+
 
 -- ===========================
 -- SECURE WRAPPER + VISIBILITY
