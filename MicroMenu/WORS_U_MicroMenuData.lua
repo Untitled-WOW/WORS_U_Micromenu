@@ -270,6 +270,16 @@ WORS_U_SkillsBook.frame = CreateFrame("Frame", "WORS_U_SkillsBookFrame", UIParen
 
 
 function ResetMicroMenuPOSByAspect(frame)
+	local sideBarShiftX, sideBarShiftY
+	if MySidebarDock and MySidebarDock:IsShown() then
+		sideBarShiftX, sideBarShiftY= 40, -20
+		if MySidebarPanel and MySidebarPanel:IsShown() then
+			sideBarShiftX, sideBarShiftY = 290, 0
+		end
+	else
+		sideBarShiftX, sideBarShiftY = 0, 0
+	end
+	
     local res = GetCVar("gxResolution") 
     local w, h = res:match("(%d+)x(%d+)")
     w, h = tonumber(w), tonumber(h)
@@ -277,12 +287,12 @@ function ResetMicroMenuPOSByAspect(frame)
     local aspect = w / h
     frame:ClearAllPoints()
     if aspect > 1.5 then -- Widescreen        
-        frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -20, 90)
+        frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -20 - sideBarShiftX, 90 - sideBarShiftY)
     else -- 4:3 Standard  
 		if MultiBarRight:IsShown() then
-			frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -95, 155)
+			frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -95 - sideBarShiftX, 155)
 		else
-			frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -95, 15)
+			frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -95 - sideBarShiftX, 15)
 		end
     end
 	SaveFramePosition(frame)
