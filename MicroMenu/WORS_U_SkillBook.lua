@@ -21,31 +21,30 @@ local WORS_SkillCraftUI = {
 
 -- Explicit icon paths per skill
 local WORS_SkillIcons = {
-    ["Attack"]        = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\attack",
-    ["Hitpoints"]     = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\hitpoints",
-    ["Mining"]        = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\mining",
-    ["Strength"]      = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\strength",
-    ["Agility"]       = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\agility",
-    ["Smithing"]      = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\smithing",
-    ["Defence"]       = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\defence",
-    ["Herblore"]      = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\herblore",
-    ["Fishing"]       = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\fishing",
-    ["Ranged"]        = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\ranged",
-    ["Thieving"]      = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\thieving",
-    ["Cooking"]       = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\cooking",
-    ["Prayer"]        = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\prayer",
-    ["Crafting"]      = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\crafting",
-    ["Firemaking"]    = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\firemaking",
-    ["Magic"]         = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\magic",
-    ["Fletching"]     = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\fletching",
-    ["Woodcutting"]   = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\woodcutting",
-    ["Runecrafting"]  = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\runecraft",
-    ["Slayer"]        = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\slayer",
-    ["Farming"]       = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\farming",
-    ["Construction"]  = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\construction",
-    ["Hunter"]        = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\hunter",
-   -- ["Dungeoneering"] = "Interface\\Icons\\dungeoneering",
-    ["Dungeoneering"] = "Interface\\AddOns\\MicroMenu\\Textures\\SkillsIcon\\dungeoneering",
+    ["Attack"]        = "Interface\\Icons\\Skills\\Attackicon",
+    ["Hitpoints"]     = "Interface\\Icons\\Skills\\Hitpointsicon",
+    ["Mining"]        = "Interface\\Icons\\Skills\\Miningicon",
+    ["Strength"]      = "Interface\\Icons\\Skills\\Strengthicon",
+    ["Agility"]       = "Interface\\Icons\\Skills\\Agilityicon",
+    ["Smithing"]      = "Interface\\Icons\\Skills\\Smithingicon",
+    ["Defence"]       = "Interface\\Icons\\Skills\\Defenceicon",
+    ["Herblore"]      = "Interface\\Icons\\Skills\\Herbloreicon",
+    ["Fishing"]       = "Interface\\Icons\\Skills\\Fishingicon",
+    ["Ranged"]        = "Interface\\Icons\\Skills\\Rangedicon",
+    ["Thieving"]      = "Interface\\Icons\\Skills\\Thievingicon",
+    ["Cooking"]       = "Interface\\Icons\\Skills\\Cookingicon",
+    ["Prayer"]        = "Interface\\Icons\\Skills\\Prayericon",
+    ["Crafting"]      = "Interface\\Icons\\Skills\\Craftingicon",
+    ["Firemaking"]    = "Interface\\Icons\\Skills\\Firemakingicon",
+    ["Magic"]         = "Interface\\Icons\\Skills\\Magicicon",
+    ["Fletching"]     = "Interface\\Icons\\Skills\\Fletchingicon",
+    ["Woodcutting"]   = "Interface\\Icons\\Skills\\Woodcuttingicon",
+    ["Runecrafting"]  = "Interface\\Icons\\Skills\\Runecrafticon",
+    ["Slayer"]        = "Interface\\Icons\\Skills\\Slayericon",
+    ["Farming"]       = "Interface\\Icons\\Skills\\Farmingicon",
+    ["Construction"]  = "Interface\\Icons\\Skills\\Constructionicon",
+    ["Hunter"]        = "Interface\\Icons\\Skills\\Huntericon",
+    ["Dungeoneering"] = "Interface\\Icons\\Skills\\Dungeoneeringicon",
 }
 -- ===================================================================
 
@@ -258,7 +257,7 @@ function WORS_U_SkillsBook:RefreshConfig()
                 btn:SetSize(BUTTON_W, BUTTON_H)
 
                 local icon = btn:CreateTexture(nil, "ARTWORK")
-                icon:SetSize(28, 28)
+                icon:SetSize(25, 25)
                 icon:SetPoint("LEFT", 1, 0)
                 btn.Icon = icon
 

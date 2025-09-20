@@ -4,7 +4,7 @@
 ## Author: Untitled - Discord@Llama69420
 ## Version: 3.0
 ## Dependencies: WORS_Backpack WORS_SkillGuide
-## SavedVariables: WORS_U_MicroMenuSettings
+## SavedVariables: WORS_U_MicroMenuSettings WORS_U_SpellBookSettings WORS_U_PrayerBookSettings
 ## DefaultState: disabled
 ## Bindings: Bindings.xml
 Bindings.lua

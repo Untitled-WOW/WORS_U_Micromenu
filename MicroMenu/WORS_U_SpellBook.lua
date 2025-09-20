@@ -1,84 +1,153 @@
--- Function to initialize Prayer level from rep
+-- =========================
+-- WORS_U_SpellBook.lua
+-- =========================
+if not WORS_U_SpellBookSettings then
+    WORS_U_SpellBookSettings = {}
+end
+
+if not WORS_U_SpellBookSettings.activeFilters then
+    WORS_U_SpellBookSettings.activeFilters = {
+        Combat = true,
+        Teleport = true,
+        Utility = true,
+    }
+end
+
+if WORS_U_SpellBookSettings.hideAboveLevel == nil then
+    WORS_U_SpellBookSettings.hideAboveLevel = false
+end
+
+if WORS_U_SpellBookSettings.scaleButtons == nil then
+    WORS_U_SpellBookSettings.scaleButtons = true
+end
+
+local function GetSpellCategory(spellID)
+    for group, ids in pairs(WORS_U_SpellBook.filterGroups) do
+        for _, id in ipairs(ids) do
+            if id == spellID then
+                return group
+            end
+        end
+    end
+    return "Combat"
+end
+
 local magicLevel = 1
 local function InitializeMagicLevel()
 	_, _, magicLevel, _, _, _ = WORSSkillsUtil.GetSkillInfo(Enum.WORSSkills.Magic)
 end
 
+-- Return: buttonSize, colPadding, rowPadding, margin, columns
+local function GetLayoutForCount(count)
+    if not WORS_U_SpellBookSettings.scaleButtons then
+		return 20, 5, 5, 10, 7	
+	elseif count <= 4 then
+		return 80, 10, 10, 10, 2
+	elseif count <= 8 then	
+        return 60, 20, 10, 10, 2
+    elseif count <= 15 then
+        return 50, 6, 2, 10, 3
+    elseif count <= 25 then
+        return 38, 6, 2, 10, 4	
+    elseif count <= 40 then
+        return 30, 6, 2, 10, 5			
+	elseif count <= 48 then
+        return 25, 5, 2, 10, 6				
+	else
+        return 20, 5, 5, 10, 7
+    end
+end
+
+
+
 local magicButtons = {}
 
-
--- Function to set up magic buttons  
 local function SetupMagicButtons()
     if InCombatLockdown() then return end
 
-    local buttonSize = 20
-    local padding    = 5          -- space between buttons
-    local margin     = 10         -- space from frame edge
-    local columns    = 7
+    -- Build a filtered list of visible spells
+    local visible = {}
+    for _, data in ipairs(WORS_U_SpellBook.spells) do
+        local cat = GetSpellCategory(data.id)
+		if (WORS_U_SpellBookSettings.activeFilters[cat]) 
+		and (not WORS_U_SpellBookSettings.hideAboveLevel or magicLevel >= data.level) then
+			table.insert(visible, data)
+		end
 
-    for i, spellData in ipairs(WORS_U_SpellBook.spells) do
-        local spellID       = spellData.id
-        local requiredLevel = spellData.level
-        local spellName, _, spellIcon = GetSpellInfo(spellID)
+    end
 
-        -- ✅ Reuse button if it exists, otherwise create it once
-        local spellButton = magicButtons[i]
-        if not spellButton then
-            spellButton = CreateFrame("Button", nil, WORS_U_SpellBook.frame, "SecureActionButtonTemplate")
-            spellButton:SetSize(buttonSize, buttonSize)
+    local count = #visible
+    -- Get layout values: buttonSize, colPad, rowPad, margin, columns
+    local buttonSize, colPad, rowPad, margin, columns = GetLayoutForCount(count)
 
-            -- Create and store icon texture
-            spellButton.icon = spellButton:CreateTexture(nil, "BACKGROUND")
-            spellButton.icon:SetAllPoints()
+    -- Calculate total grid width for centering the block
+    local frameWidth = WORS_U_SpellBook.frame:GetWidth()
+    local totalGridWidth = columns * buttonSize + (columns - 1) * colPad
+    local startX = (frameWidth - totalGridWidth) / 2
 
-            -- Tooltip handlers
-            spellButton:SetScript("OnEnter", function(self)
+    for i, data in ipairs(visible) do
+        local spellID = data.id
+        local requiredLevel = data.level
+        local _, _, icon = GetSpellInfo(spellID)
+
+        local btn = magicButtons[i]
+        if not btn then
+            btn = CreateFrame("Button", nil, WORS_U_SpellBook.frame, "SecureActionButtonTemplate")
+            btn:RegisterForDrag("LeftButton")
+            btn:SetScript("OnDragStart", function(self)
+                if self.spellID and IsSpellKnown(self.spellID) then
+                    local name = GetSpellInfo(self.spellID)
+                    if name then PickupSpell(name) end
+                end
+            end)
+            btn.icon = btn:CreateTexture(nil, "BACKGROUND")
+            btn.icon:SetAllPoints()
+            btn:SetScript("OnEnter", function(self)
                 GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
                 if self.spellID then
                     GameTooltip:SetSpellByID(self.spellID)
+                    local sd = WORS_U_SpellBook.spells[self.index]
+                    if sd and magicLevel < sd.level then
+                        GameTooltip:AddLine("Requires Magic Level " .. sd.level, 1, 0, 0, true)
+                        GameTooltip:Show()
+                    end
                 end
-                GameTooltip:Show()
             end)
-            spellButton:SetScript("OnLeave", GameTooltip_Hide)
-
-            magicButtons[i] = spellButton
+            btn:SetScript("OnLeave", GameTooltip_Hide)
+            magicButtons[i] = btn
         end
 
-        -- Update secure attributes
-        spellButton.spellID = spellID
-        spellButton:SetAttribute("type", "spell")
-        spellButton:SetAttribute("spell", spellID)
+        btn:SetSize(buttonSize, buttonSize)
+        btn.index = i
+        btn.spellID = spellID
+        btn:SetAttribute("type","spell")
+        btn:SetAttribute("spell",spellID)
+        btn.icon:SetTexture(icon or "Interface\\Icons\\INV_Misc_QuestionMark")
 
-        -- Update icon
-        spellButton.icon:SetTexture(spellIcon or "Interface\\Icons\\INV_Misc_QuestionMark")
+        local row = math.floor((i-1)/columns)
+        local col = (i-1)%columns
 
-        -- Position
-        local row    = math.floor((i - 1) / columns)
-        local column = (i - 1) % columns
-        spellButton:ClearAllPoints()
-        spellButton:SetPoint(
+        btn:ClearAllPoints()
+        btn:SetPoint(
             "TOPLEFT", WORS_U_SpellBook.frame, "TOPLEFT",
-            margin + (buttonSize + padding) * column,
-            -margin - (buttonSize + padding) * row
+            startX + col*(buttonSize+colPad),
+            -margin - row*(buttonSize+rowPad)
         )
 
-        -- Update color based on requirements
         if magicLevel < requiredLevel then
-            spellButton.icon:SetVertexColor(0.1, 0.1, 0.1) -- No magic level: Dark Gray
-        elseif WORS_U_SpellBook:HasRequiredRunes(spellData.runes) then
-            spellButton.icon:SetVertexColor(1, 1, 1)       -- Can cast
+            btn.icon:SetVertexColor(0.1,0.1,0.1)
+        elseif WORS_U_SpellBook:HasRequiredRunes(data.runes) then
+            btn.icon:SetVertexColor(1,1,1)
         else
-            spellButton.icon:SetVertexColor(0.25, 0.25, 0.25) -- No runes
+            btn.icon:SetVertexColor(0.25,0.25,0.25)
         end
 
-        spellButton:Show()
+        btn:Show()
     end
 
-    -- ✅ Hide any leftover buttons if the spell list shrinks
-    for i = #WORS_U_SpellBook.spells + 1, #magicButtons do
-        if magicButtons[i] then
-            magicButtons[i]:Hide()
-        end
+    -- Hide leftover buttons
+    for i = count+1, #magicButtons do
+        if magicButtons[i] then magicButtons[i]:Hide() end
     end
 end
 
@@ -87,10 +156,6 @@ end
 -- ===========================
 -- SECURE WRAPPER + VISIBILITY
 -- ===========================
-
--- Create the main frame as a secure handler so it can Show/Hide in combat
---WORS_U_SpellBook.frame = CreateFrame("Frame", "WORS_U_SpellBookFrame", UIParent, "SecureHandlerStateTemplate,OldSchoolFrameTemplate")
-
 WORS_U_SpellBook.frame:SetSize(192, 304)
 WORS_U_SpellBook.frame:SetFrameStrata("LOW")
 WORS_U_SpellBook.frame:SetFrameLevel(10)
@@ -107,68 +172,56 @@ WORS_U_SpellBook.frame:SetMovable(true)
 WORS_U_SpellBook.frame:EnableMouse(true)
 WORS_U_SpellBook.frame:RegisterForDrag("LeftButton")
 WORS_U_SpellBook.frame:SetClampedToScreen(true)
-
 WORS_U_SpellBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
-WORS_U_SpellBook.frame:SetScript("OnDragStop", function(self) 
-	self:StopMovingOrSizing() 
-	SaveFramePosition(self)
+WORS_U_SpellBook.frame:SetScript("OnDragStop", function(self)
+    self:StopMovingOrSizing()
+    SaveFramePosition(self)
 end)
 
-
--- Hide template button to use securec
 if WORS_U_SpellBookFrame.CloseButton then WORS_U_SpellBookFrame.CloseButton:ClearAllPoints() end
 
--- Update micro button tint on show/hide
 local function UpdateButtonBackground()
     if WORS_U_SpellBook.frame:IsShown() then
-        --SpellbookMicroButton:GetNormalTexture():SetVertexColor(1, 0, 0) -- red when open
-		U_SpellMicroMenuButton:SetButtonState("PUSHED", true)
+        U_SpellMicroMenuButton:SetButtonState("PUSHED", true)
     else
-        --SpellbookMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- default
-		U_SpellMicroMenuButton:SetButtonState("NORMAL", true)
+        U_SpellMicroMenuButton:SetButtonState("NORMAL", true)
     end
 end
 WORS_U_SpellBook.frame:SetScript("OnShow", UpdateButtonBackground)
 WORS_U_SpellBook.frame:SetScript("OnHide", UpdateButtonBackground)
 
 -- =========================================
--- EVENTS: keep icons up-to-date 
+-- EVENTS
 -- =========================================
 local eventFrame = CreateFrame("Frame")
 eventFrame:RegisterEvent("BAG_UPDATE")
-eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED") 
+eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
 eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
---eventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 eventFrame:SetScript("OnEvent", function(self, event)
-	if event == "PLAYER_ENTERING_WORLD" then
-		if InCombatLockdown() then return end
-		local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
-		if pos then
-			local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
-			WORS_U_SpellBook.frame:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
-		else
-			ResetMicroMenuPOSByAspect(WORS_U_SpellBook.frame)
-		end	
-		InitializeMagicLevel()
-		SetupMagicButtons()	
-	elseif event == "PLAYER_REGEN_ENABLED" then
-		InitializeMagicLevel()
-		SetupMagicButtons()
-	elseif event == "BAG_UPDATE" then
-		if InCombatLockdown() then return end
-		InitializeMagicLevel()
-		SetupMagicButtons()
-	end
+    if event == "PLAYER_ENTERING_WORLD" then
+        if InCombatLockdown() then return end
+        local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
+        if pos then
+            local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
+            WORS_U_SpellBook.frame:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
+        else
+            ResetMicroMenuPOSByAspect(WORS_U_SpellBook.frame)
+        end
+        InitializeMagicLevel()
+        SetupMagicButtons()
+    elseif event == "PLAYER_REGEN_ENABLED" then
+        InitializeMagicLevel()
+        SetupMagicButtons()
+    elseif event == "BAG_UPDATE" then
+        if InCombatLockdown() then return end
+        InitializeMagicLevel()
+        SetupMagicButtons()
+    end
 end)
 
 -- =========================
--- SECURE TOGGLE + CLOSE UI
+-- SECURE CLOSE BUTTON
 -- =========================
-
--- Secure TOGGLE overlay on the U_SpellBookMicroButtonCopy
-
-
--- Secure CLOSE button inside the frame (works in combat)
 local closeButton = CreateFrame("Button", nil, WORS_U_SpellBook.frame, "SecureHandlerClickTemplate")
 closeButton:SetSize(16, 16)
 closeButton:SetPoint("TOPRIGHT", WORS_U_SpellBook.frame, "TOPRIGHT", 4, 4)
@@ -176,7 +229,6 @@ WORS_U_SpellBook.closeButton = closeButton
 closeButton:SetNormalTexture("Interface\\WORS\\OldSchool-CloseButton-Up.blp")
 closeButton:SetHighlightTexture("Interface\\WORS\\OldSchool-CloseButton-Highlight.blp", "ADD")
 closeButton:SetPushedTexture("Interface\\WORS\\OldSchool-CloseButton-Down.blp")
-
 closeButton:SetFrameRef("uSpellBook", WORS_U_SpellBook.frame)
 closeButton:SetAttribute("_onclick", [=[
   local uSpellBook = self:GetFrameRef("uSpellBook")
@@ -184,6 +236,111 @@ closeButton:SetAttribute("_onclick", [=[
   uSpellBook:Hide()
 ]=])
 
+-- =========================
+-- FILTER MENU UI
+-- =========================
+local filterMenu = CreateFrame("Frame", "WORS_U_SpellBookFilterMenu", WORS_U_SpellBook.frame, "OldSchoolFrameTemplate")
+filterMenu:SetSize(160, 215)
+filterMenu:SetPoint("CENTER", WORS_U_SpellBook.frame, "CENTER", 0, 0) -- open over spellbook
+filterMenu:Hide()
+filterMenu:SetFrameStrata("TOOLTIP")
 
+-- Allow closing with Escape like normal frames
+tinsert(UISpecialFrames, filterMenu:GetName())
+
+-- Background texture (like spellbook frame)
+local bg = filterMenu:CreateTexture(nil, "BACKGROUND")
+filterMenu.Background = bg
+bg:SetTexture("Interface\\WORS\\OldSchoolBackground1")
+bg:SetAllPoints(filterMenu)
+bg:SetHorizTile(true)
+bg:SetVertTile(true)
+
+-- =========================
+-- HELPER: Create toggle buttons
+-- =========================
+local function CreateToggleButton(parent, key, label, anchor, isSetting)
+    local btn = parent[key] or CreateFrame("Button", nil, parent, "OldSchoolButtonTemplate")
+    parent[key] = btn
+    btn:SetSize(120, 30)
+
+    if anchor then
+        btn:SetPoint("TOP", anchor, "BOTTOM", 0, -10)
+    else
+        btn:SetPoint("TOP", parent, "TOP", 0, -12)
+    end
+
+    btn:SetText(label)
+    btn.Text:SetTextColor(1, 0.5, 0) -- orange text
+
+    btn:SetScript("OnClick", function(self)
+        if isSetting then
+            -- toggle boolean setting
+            WORS_U_SpellBookSettings[key] = not WORS_U_SpellBookSettings[key]
+            self:SetSelected(WORS_U_SpellBookSettings[key])
+        else
+            -- toggle filter
+            WORS_U_SpellBookSettings.activeFilters[key] = not WORS_U_SpellBookSettings.activeFilters[key]
+            self:SetSelected(WORS_U_SpellBookSettings.activeFilters[key])
+        end
+        SetupMagicButtons()
+    end)
+
+    -- set initial visual state
+    if isSetting then
+        btn:SetSelected(WORS_U_SpellBookSettings[key])
+    else
+        btn:SetSelected(WORS_U_SpellBookSettings.activeFilters[key])
+    end
+
+    return btn
+end
+
+-- =========================
+-- BUILD FILTER BUTTONS
+-- =========================
+local btnCombat   = CreateToggleButton(filterMenu, "Combat",   "Show Combat Spells")
+local btnTeleport = CreateToggleButton(filterMenu, "Teleport", "Show Teleport Spells", btnCombat)
+local btnUtility  = CreateToggleButton(filterMenu, "Utility",  "Show Utility Spells",  btnTeleport)
+
+local btnHideAbove = CreateToggleButton(filterMenu, "hideAboveLevel", "Hide Above Level", btnUtility, true)
+local btnScale     = CreateToggleButton(filterMenu, "scaleButtons",   "Scale Buttons",   btnHideAbove, true)
+
+-- =========================
+-- TOGGLE BUTTON (on Spellbook frame)
+-- =========================
+local filterToggle = CreateFrame("Button", nil, WORS_U_SpellBook.frame, "OldSchoolButtonTemplate")
+filterToggle:SetSize(50, 20)
+filterToggle:SetPoint("BOTTOM", WORS_U_SpellBook.frame, "BOTTOM", 0, 10)
+filterToggle:SetText("Filters")
+filterToggle.Text:SetTextColor(1, 0.5, 0) -- orange
+
+-- Keep the toggle's visual state in sync with the menu
+filterMenu:HookScript("OnShow", function()
+    btnCombat:SetSelected(WORS_U_SpellBookSettings.activeFilters.Combat)
+    btnTeleport:SetSelected(WORS_U_SpellBookSettings.activeFilters.Teleport)
+    btnUtility:SetSelected(WORS_U_SpellBookSettings.activeFilters.Utility)
+    btnHideAbove:SetSelected(WORS_U_SpellBookSettings.hideAboveLevel)
+    btnScale:SetSelected(WORS_U_SpellBookSettings.scaleButtons)
+end)
+filterMenu:HookScript("OnHide", function()
+    if filterToggle.SetSelected then
+        filterToggle:SetSelected(false)
+    end
+end)
+filterToggle:SetScript("OnClick", function(self)
+    if filterMenu:IsShown() then
+        filterMenu:Hide()
+        -- OnHide hook will clear selection
+    else
+        filterMenu:Show()
+        -- OnShow hook will set selection
+    end
+end)
+WORS_U_SpellBook.frame:HookScript("OnHide", function()
+    if filterMenu:IsShown() then
+        filterMenu:Hide()
+    end
+end)
 
 

@@ -94,10 +94,6 @@ WORS_U_SpellBook.spells = {
  -- {level = 90, name = "Earth Surge", id = 79544, runes = {["Earth Rune"] = 7, ["Death Rune"] = 1}},
  -- {level = 93, name = "Lvl-7 Enchant", id = nil, runes = {["Cosmic Rune"] = 1, ["Soul Rune"] = 20}},
  -- {level = 95, name = "Fire Surge", id = 79549, runes = {["Fire Rune"] = 10, ["Death Rune"] = 1}},
- -- {level = 102, name = "Wind Surge", id = 79534, runes = {["Air Rune"] = 7, ["Death Rune"] = 1}},
- -- {level = 103, name = "Water Surge", id = 79539, runes = {["Water Rune"] = 7, ["Death Rune"] = 1}},
- -- {level = 104, name = "Earth Surge", id = 79544, runes = {["Earth Rune"] = 7, ["Death Rune"] = 1}},
- -- {level = 105, name = "Fire Surge", id = 79549, runes = {["Fire Rune"] = 10, ["Death Rune"] = 1}},
 }
 WORS_U_SpellBook.runeInfo = {
     ["Air Rune"]    = { itemID = 90120, staffIDs = {90838, 90404} },
@@ -114,13 +110,17 @@ WORS_U_SpellBook.runeInfo = {
     ["Law Rune"]    = { itemID = 90139, staffIDs = {} },
     ["Soul Rune"]   = { itemID = 566, staffIDs = {} },
     ["Astral Rune"] = { itemID = 90123, staffIDs = {} },
-    ["Wrath Rune"]  = { itemID = 90109, staffIDs = {} },
-	
+    ["Wrath Rune"]  = { itemID = 90109, staffIDs = {} },	
 	["Bones"] = { itemID = 90039, staffIDs = {} },
 	--["Monkey Bones"] = { itemID = 90109, staffIDs = {} },
 	["Big Bones"] = { itemID = 90036, staffIDs = {} },
 	["Unpowered Orb"] = { itemID = 69420, staffIDs = {} },
 }
+WORS_U_SpellBook.filterGroups = {
+	["Teleport"] = { 99561, 114193, 114196, 114194, 114197, 114198, 114200, 114199,},
+	["Utility"] = {460022, 99313, 114135, 460023, 114134, 1812, 99318, 460024, 200090, 99233, 460025, 99234, 99235, 99236, 460026,},
+} 
+
 
 function WORS_U_SpellBook:HasRequiredRunes(runeTable)
     if runeTable == nil then
@@ -255,7 +255,7 @@ WORS_U_EmoteBook.emotes = {
     { name = "Uri Transform",     					command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\46_Uri_transform_emote_icon" },
     { name = "Smooth Dance", 		--[[*_custom*]]	command = "_smoothdance",		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\47_Smooth_dance_emote_icon" },
     { name = "Crazy Dance",  		--[[*_custom*]]	command = "_crazydance",		icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\48_Crazy_dance_emote_icon" },
-    { name = "Premier Shield", 		--[[*_custom*]]	command = "_premiershield", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\49_Premier_Shield_emote_icon" },
+    { name = "Premier Shield", 		--[[*_custom*]]	command = "", 	icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\49_Premier_Shield_emote_icon" },
     { name = "Explore",         	  				command = "",					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\50_Explore_emote_icon" },
     { name = "Relic Unlock",    	  				command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\51_Relic_unlock_emote_icon" },
     { name = "Party",           	  				command = "", 					icon = "Interface\\AddOns\\MicroMenu\\Textures\\EmoteIcon\\52_Party_emote_icon" },

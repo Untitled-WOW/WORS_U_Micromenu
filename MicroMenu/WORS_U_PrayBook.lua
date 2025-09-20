@@ -7,33 +7,43 @@ end
 local prayerButtons = {}
 
 -- Function to set up prayer buttons  
+
 local function SetupPrayerButtons()
     if InCombatLockdown() then
-        -- can't create/modify secure children in combat
         return
     end
 
     local buttonSize = 35
-    local padding    = 2          -- space between buttons
-    local margin     = 5           -- space from frame edge
+    local padding    = 1
+    local margin     = 5
     local columns    = 5
+	local extraYOffset = 5  -- move all buttons down by 20 pixels	
 
     for i, prayerData in ipairs(WORS_U_PrayBook.prayers) do
         local prayerID       = prayerData.id
         local requiredLevel  = prayerData.level
         local prayerName, _, prayerIcon = GetSpellInfo(prayerID)
 
-        -- ✅ Reuse button if it exists, otherwise create it once
         local prayerButton = prayerButtons[i]
         if not prayerButton then
             prayerButton = CreateFrame("Button", nil, WORS_U_PrayBook.frame, "SecureActionButtonTemplate")
             prayerButton:SetSize(buttonSize, buttonSize)
 
-            -- Create and store icon texture
+            -- ✅ drag to action bars
+            prayerButton:RegisterForDrag("LeftButton")
+            prayerButton:SetScript("OnDragStart", function(self)
+                if not self.prayerID then return end
+                local name = GetSpellInfo(self.prayerID)
+                if name and IsSpellKnown(self.prayerID) then
+                    PickupSpell(name)
+                end
+            end)
+
+            -- Icon
             prayerButton.icon = prayerButton:CreateTexture(nil, "BACKGROUND")
             prayerButton.icon:SetAllPoints()
 
-            -- One-time setup
+            -- One-time secure settings
             prayerButton:RegisterForClicks("AnyUp")
             prayerButton:SetAttribute("type", "spell")
             prayerButton:SetAttribute("checkselfcast", true)
@@ -43,12 +53,16 @@ local function SetupPrayerButtons()
                 GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
                 if self.prayerID then
                     GameTooltip:SetSpellByID(self.prayerID)
+                    local pd = WORS_U_PrayBook.prayers[self.index]
+                    if pd and prayerLevel < pd.level then
+                        GameTooltip:AddLine("Requires Prayer Level " .. pd.level, 1, 0, 0, true)
+                        GameTooltip:Show()
+                    end
                 end
-                GameTooltip:Show()
             end)
             prayerButton:SetScript("OnLeave", GameTooltip_Hide)
 
-            -- Buff check updater (just swaps icon if buff active)
+            -- Buff check updater (swap icon if buff active)
             prayerButton:SetScript("OnUpdate", function(self)
                 if self.prayerName and self.prayerData and self.prayerData.buffIcon then
                     if UnitBuff("player", self.prayerName) then
@@ -62,7 +76,8 @@ local function SetupPrayerButtons()
             prayerButtons[i] = prayerButton
         end
 
-        -- Update spell data references
+        -- Update data
+        prayerButton.index      = i
         prayerButton.prayerID   = prayerID
         prayerButton.prayerName = prayerName
         prayerButton.prayerData = prayerData
@@ -70,28 +85,28 @@ local function SetupPrayerButtons()
 
         prayerButton:SetAttribute("spell", prayerName)
 
-        -- Update icon + color
+        -- Update icon + tint
         prayerButton.icon:SetTexture(prayerIcon or "Interface\\Icons\\INV_Misc_QuestionMark")
         if prayerLevel < requiredLevel then
-            prayerButton.icon:SetVertexColor(0.2, 0.2, 0.2) -- not high enough level
+            prayerButton.icon:SetVertexColor(0.2, 0.2, 0.2)
         else
             prayerButton.icon:SetVertexColor(1, 1, 1)
         end
 
-        -- Reposition
+        -- Position
         local row    = math.floor((i - 1) / columns)
         local column = (i - 1) % columns
         prayerButton:ClearAllPoints()
-        prayerButton:SetPoint(
-            "TOPLEFT", WORS_U_PrayBook.frame, "TOPLEFT",
-            margin + (buttonSize + padding) * column,
-            -margin - (buttonSize + padding) * row
-        )
+		prayerButton:SetPoint(
+			"TOPLEFT", WORS_U_PrayBook.frame, "TOPLEFT",
+			margin + (buttonSize + padding) * column,
+			-margin - extraYOffset - (buttonSize + padding) * row
+		)
 
         prayerButton:Show()
     end
 
-    -- ✅ Hide leftover buttons if prayer list shrinks
+    -- Hide leftover buttons
     for i = #WORS_U_PrayBook.prayers + 1, #prayerButtons do
         if prayerButtons[i] then
             prayerButtons[i]:Hide()
