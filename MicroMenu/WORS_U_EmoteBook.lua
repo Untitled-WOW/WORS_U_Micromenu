@@ -1,7 +1,7 @@
 -- Create the main frame for the custom emote book
 --WORS_U_EmoteBook.frame = CreateFrame("Frame", "WORS_U_EmoteBookFrame", UIParent, "OldSchoolFrameTemplate")
 WORS_U_EmoteBook.frame:SetSize(192, 304)
-
+tinsert(UISpecialFrames, "WORS_U_EmoteBookFrame")
 WORS_U_EmoteBook.frame:SetFrameStrata("LOW")
 WORS_U_EmoteBook.frame:SetFrameLevel(5)
 
@@ -18,7 +18,6 @@ WORS_U_EmoteBook.frame:EnableMouse(true)
 WORS_U_EmoteBook.frame:RegisterForDrag("LeftButton")
 WORS_U_EmoteBook.frame:SetClampedToScreen(true)
 --WORS_U_EmoteBook.frame:SetUserPlaced(false)
---tinsert(UISpecialFrames, "WORS_U_EmoteBookFrame")
 
 WORS_U_EmoteBook.frame:SetScript("OnDragStart", function(self) 
 	self:StartMoving() 

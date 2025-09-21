@@ -247,7 +247,6 @@ end
 WORS_U_EquipmentBook.frame:SetSize(192, 304)
 WORS_U_EquipmentBook.frame:SetFrameStrata("LOW")
 WORS_U_EquipmentBook.frame:SetFrameLevel(10)
-
 local bg = WORS_U_EquipmentBook.frame:CreateTexture(nil, "LOW")
 WORS_U_EquipmentBook.frame.Background = bg
 bg:SetTexture("Interface\\WORS\\OldSchoolBackground1")

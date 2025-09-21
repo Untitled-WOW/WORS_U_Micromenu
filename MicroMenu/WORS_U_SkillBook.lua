@@ -1,3 +1,7 @@
+-- WORS Skills Book with Quest Points (full file)
+-- Adds a "Quest Points" black box in the black row (1st column), filler in 2nd, Total in 3rd.
+-- Currency ID used for Quest Points: 201883
+
 -- === Configure order and icons here (IDs or Names) ==================
 local WORS_SkillOrder = {
 	"Attack","Hitpoints","Mining",
@@ -17,7 +21,6 @@ local WORS_SkillCraftUI = {
 	Herblore  = 2108,
 	Smithing  = 3273,
 }
-
 
 -- Explicit icon paths per skill
 local WORS_SkillIcons = {
@@ -48,9 +51,12 @@ local WORS_SkillIcons = {
 }
 -- ===================================================================
 
--- WORS_U_SkillsBook = WORS_U_SkillsBook or {}
--- WORS_U_SkillsBook.frame = CreateFrame("Frame", "WORS_U_SkillsBookFrame", UIParent, "OldSchoolFrameTemplate")
+-- Ensure main table exists
+WORS_U_SkillsBook = WORS_U_SkillsBook or {}
+WORS_U_SkillsBook.frame = WORS_U_SkillsBook.frame or CreateFrame("Frame", "WORS_U_SkillsBookFrame", UIParent, "OldSchoolFrameTemplate")
+
 WORS_U_SkillsBook.frame:SetSize(192, 304)
+tinsert(UISpecialFrames, "WORS_U_SkillsBookFrame")
 WORS_U_SkillsBook.frame:SetFrameStrata("LOW")
 WORS_U_SkillsBook.frame:SetFrameLevel(5)
 
@@ -70,11 +76,13 @@ WORS_U_SkillsBook.frame:SetClampedToScreen(true)
 WORS_U_SkillsBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
 WORS_U_SkillsBook.frame:SetScript("OnDragStop", function(self)
 	self:StopMovingOrSizing()
-	SaveFramePosition(self) 
+	if SaveFramePosition then pcall(SaveFramePosition, self) end
 end)
 
-WORS_U_SkillsBook.frame.CloseButton:ClearAllPoints()
-WORS_U_SkillsBook.frame.CloseButton:SetPoint("TOPRIGHT", WORS_U_SkillsBook.frame, "TOPRIGHT", 4, 4)
+if WORS_U_SkillsBook.frame.CloseButton then
+    WORS_U_SkillsBook.frame.CloseButton:ClearAllPoints()
+    WORS_U_SkillsBook.frame.CloseButton:SetPoint("TOPRIGHT", WORS_U_SkillsBook.frame, "TOPRIGHT", 4, 4)
+end
 
 -- ---------- Layout constants ----------
 local CAP      = 99
@@ -86,6 +94,10 @@ local START_X  = 7
 local START_Y  = -10
 -- --------------------------------------
 
+-- Quest Points currency id helper
+function WORS_GetQuestPoints()
+    return GetItemCount(201883)  -- e.g. if they store QP as an item
+end
 -- Resolve a skill ID if given a name
 local function ResolveSkillID(v)
 	if type(v) == "number" then return v end
@@ -104,9 +116,11 @@ local function BuildResolvedOrder()
 		end
 	else
 		local tmp = {}
-		for _, id in pairs(Enum.WORSSkills) do table.insert(tmp, id) end
-		table.sort(tmp)
-		order = tmp
+		if Enum and Enum.WORSSkills then
+			for _, id in pairs(Enum.WORSSkills) do table.insert(tmp, id) end
+			table.sort(tmp)
+			order = tmp
+		end
 	end
 	return order
 end
@@ -127,14 +141,15 @@ local function GetIconForSkill(factionID)
 		end
 	end
 	-- embedded icon in faction name (|T...|t Name)
-	local name = GetFactionInfoByID(factionID)
-	if name then
-		local embedded = name:match("|T([^:|]+):")
-		if embedded then return embedded end
+	if GetFactionInfoByID then
+		local name = GetFactionInfoByID(factionID)
+		if name then
+			local embedded = name:match("|T([^:|]+):")
+			if embedded then return embedded end
+		end
 	end
 	return "Interface\\Icons\\INV_Misc_QuestionMark"
 end
-
 
 local function OpenSkillGuideSafe(factionID)
     if not IsAddOnLoaded("WORS_SkillGuide") then
@@ -177,31 +192,147 @@ local function OpenSkillGuideSafe(factionID)
     UIErrorsFrame:AddMessage("No SkillGuide data available for this skill.", 1, 0, 0, 1)
 end
 
-
--- Create/rebuild buttons in chosen order (+ inject TOTAL box after skipping 2 slots)
+-- Create/rebuild buttons in chosen order (+ inject QUESTPOINTS + filler + TOTAL row)
 function WORS_U_SkillsBook:RefreshConfig()
-    -- Create table on first run
     if not self._skillButtons then self._skillButtons = {} end
 
     local ids = BuildResolvedOrder()
-    table.insert(ids, "__SKIP__")
-    table.insert(ids, "__SKIP__")
+
+    -- Inject the special row items so the black row shows: [QuestPoints] [Filler] [Total]
+    table.insert(ids, "__QUESTPOINTS__")
+    table.insert(ids, "__SLAYER__")
     table.insert(ids, "__TOTAL__")
 
     local row, col = 0, 0
     local index = 1
 
     for _, entry in ipairs(ids) do
-        if entry == "__SKIP__" then
+        if entry == "__FILLER__" then
+            -- filler: just advance column (creates empty black box visually because we don't create anything special)
             col = col + 1
             if col >= COLS then col = 0; row = row + 1 end
+
+        elseif entry == "__QUESTPOINTS__" then
+            local btnData = self._skillButtons[index]
+            local btn = btnData and btnData.btn
+            if not btn then
+                btn = CreateFrame("Button", nil, self.frame, "OldSchoolButtonTemplate")
+                btn:SetSize(BUTTON_W*0.99, BUTTON_H*0.99)
+
+                local x = START_X + (BUTTON_W + PADDING) * col
+                local y = START_Y - (BUTTON_H + PADDING) * row
+                btn:SetPoint("TOPLEFT", self.frame, "TOPLEFT", x, y)
+
+                -- strip default visuals
+                btn:SetNormalTexture(nil)
+                btn:SetPushedTexture(nil)
+                btn:SetHighlightTexture(nil)
+                for _, r in ipairs({ btn:GetRegions() }) do
+                    if r and r.GetObjectType and r:GetObjectType() == "Texture" then
+                        r:SetTexture(nil)
+                    end
+                end
+
+                -- black fill
+                local fill = btn:CreateTexture(nil, "BORDER")
+                fill:SetAllPoints()
+                fill:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
+                fill:SetVertexColor(0, 0, 0, 0.95)
+                btn._fill = fill
+
+                -- label
+                local fs = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+                fs:SetPoint("CENTER", 0, 0)
+                fs:SetTextColor(1, 1, 0)
+                btn.Label = fs
+
+                -- tooltip
+                btn:SetScript("OnEnter", function(selfBtn)
+                    GameTooltip:SetOwner(selfBtn, "ANCHOR_RIGHT")
+                    local qp = GetItemCount(201883) or 0
+                    GameTooltip:SetText("Quest Points", 1, 1, 1)
+                    GameTooltip:AddLine(("Quest Points: |cFFFFFFFF%d|r"):format(qp), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+                    GameTooltip:Show()
+                end)
+                btn:SetScript("OnLeave", GameTooltip_Hide)
+            end
+
+            self.questBox = btn
+            self._skillButtons[index] = { btn = btn, id = "__QUESTPOINTS__" }
+
+            local qp = GetItemCount(201883) or 0
+            btn.Label:SetText(("QP: %d"):format(qp))
+
+            col = col + 1
+            if col >= COLS then col = 0; row = row + 1 end
+            index = index + 1
+
+        elseif entry == "__SLAYER__" then
+            local btnData = self._skillButtons[index]
+            local btn = btnData and btnData.btn
+            if not btn then
+                btn = CreateFrame("Button", nil, self.frame, "OldSchoolButtonTemplate")
+                btn:SetSize(BUTTON_W*0.99, BUTTON_H*0.99)
+
+                local x = START_X + (BUTTON_W + PADDING) * col
+                local y = START_Y - (BUTTON_H + PADDING) * row
+                btn:SetPoint("TOPLEFT", self.frame, "TOPLEFT", x, y)
+
+                -- strip default visuals
+                btn:SetNormalTexture(nil)
+                btn:SetPushedTexture(nil)
+                btn:SetHighlightTexture(nil)
+                for _, r in ipairs({ btn:GetRegions() }) do
+                    if r and r.GetObjectType and r:GetObjectType() == "Texture" then
+                        r:SetTexture(nil)
+                    end
+                end
+
+                -- black fill
+                local fill = btn:CreateTexture(nil, "BORDER")
+                fill:SetAllPoints()
+                fill:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
+                fill:SetVertexColor(0, 0, 0, 0.95)
+                btn._fill = fill
+
+                -- label
+                local fs = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+                fs:SetPoint("CENTER", 0, 0)
+                fs:SetTextColor(1, 1, 0)
+                btn.Label = fs
+
+                -- tooltip
+                btn:SetScript("OnEnter", function(selfBtn)
+                    GameTooltip:SetOwner(selfBtn, "ANCHOR_RIGHT")
+                    local sp = GetItemCount(40753) or 0
+                    local ss = GetItemCount(201901) or 0					
+                    GameTooltip:SetText("Slayer Points", 1, 1, 1)
+                    GameTooltip:AddLine(("Slayer Points: |cFFFFFFFF%d|r"):format(sp), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+					GameTooltip:AddLine(("Slayer Streak: |cFFFFFFFF%d|r"):format(ss), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+                    GameTooltip:Show()
+                end)
+                btn:SetScript("OnLeave", GameTooltip_Hide)
+            end
+
+            self.questBox = btn
+            self._skillButtons[index] = { btn = btn, id = "__SLAYER__" }
+
+            local sp = GetItemCount(40753) or 0
+            btn.Label:SetText(("SP: %d"):format(sp))
+
+            col = col + 1
+            if col >= COLS then col = 0; row = row + 1 end
+            index = index + 1
+
+
+
 
         elseif entry == "__TOTAL__" then
             local btnData = self._skillButtons[index]
             local btn = btnData and btnData.btn
             if not btn then
                 btn = CreateFrame("Button", nil, self.frame, "OldSchoolButtonTemplate")
-                btn:SetSize(BUTTON_W, BUTTON_H)
+                btn:SetSize(BUTTON_W * 0.99, BUTTON_H*0.99)
 
                 local x = START_X + (BUTTON_W + PADDING) * col
                 local y = START_Y - (BUTTON_H + PADDING) * row
@@ -229,26 +360,35 @@ function WORS_U_SkillsBook:RefreshConfig()
 
                 btn:SetScript("OnEnter", function(selfBtn)
                     GameTooltip:SetOwner(selfBtn, "ANCHOR_RIGHT")
-                    local totalLevel, totalXP = WORSSkillsUtil.GetTotalLevel()
+                    local ok, totalLevel, totalXP = pcall(function() return WORSSkillsUtil.GetTotalLevel() end)
+                    -- WORSSkillsUtil.GetTotalLevel may return totalLevel,totalXP in some implementations; keep safe
+                    local lvl = 0
+                    local xp = 0
+                    if ok and totalLevel then
+                        lvl = totalLevel
+                    end
+                    if ok and totalXP then
+                        xp = totalXP
+                    end
                     GameTooltip:SetText("Total level", 1, 1, 1)
-                    GameTooltip:SetText(("Total Level: |cFFFFFFFF%s|r"):format(BreakUpLargeNumbers(totalLevel or 0)), 1, 1, 1)
-                    GameTooltip:AddLine(("Total XP: |cFFFFFFFF%s|r"):format(BreakUpLargeNumbers(totalXP or 0)), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+                    GameTooltip:AddLine(("Total Level: |cFFFFFFFF%s|r"):format(BreakUpLargeNumbers(lvl or 0)), 1, 1, 1)
+                    if xp then
+                        GameTooltip:AddLine(("Total XP: |cFFFFFFFF%s|r"):format(BreakUpLargeNumbers(xp or 0)), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+                    end
                     GameTooltip:Show()
                 end)
                 btn:SetScript("OnLeave", GameTooltip_Hide)
             end
-
             self.totalBox = btn
             self._skillButtons[index] = { btn = btn, id = "__TOTAL__" }
-
-            local ok, lvl = pcall(WORSSkillsUtil.GetTotalLevel)
-            btn.Label:SetText(("Total level:\n %d"):format(ok and lvl or 0))
-
+            local ok, lvl = pcall(function() return WORSSkillsUtil.GetTotalLevel() end)
+            btn.Label:SetText(("Total level\n %d"):format(ok and lvl or 0))
             col = col + 1
             if col >= COLS then col = 0; row = row + 1 end
             index = index + 1
 
         else
+            -- regular skill button
             local factionID = entry
             local btnData = self._skillButtons[index]
             local btn = btnData and btnData.btn
@@ -279,9 +419,9 @@ function WORS_U_SkillsBook:RefreshConfig()
 
                 btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
                 btn:SetScript("OnClick", function(self, button)
-                    local skillName = (GetFactionInfoByID(factionID) or ""):match("([^|]+)$"):match("(%S+)$")
+                    local skillName = (GetFactionInfoByID and GetFactionInfoByID(factionID) or ""):match("([^|]+)$"):match("(%S+)$")
                     if button == "LeftButton" then
-                        local spellID = WORS_SkillCraftUI[skillName]
+                        local spellID = WORS_SkillCraftUI and WORS_SkillCraftUI[skillName]
                         if spellID then
                             CastSpellByID(spellID)
                         else
@@ -305,8 +445,8 @@ function WORS_U_SkillsBook:RefreshConfig()
                         GameTooltip:AddLine(("Next level at: |cFFFFFFFF%s|r"):format(BreakUpLargeNumbers(nextLevelAtXP)), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
                         GameTooltip:AddLine(("Remaining XP: |cFFFFFFFF%s|r"):format(BreakUpLargeNumbers(remaining)), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
                     end
-                    local cleanSkillName = (GetFactionInfoByID(factionID) or ""):match("([^|]+)$"):match("(%S+)$")
-                    if cleanSkillName and WORS_SkillCraftUI[cleanSkillName] then
+                    local cleanSkillName = (GetFactionInfoByID and GetFactionInfoByID(factionID) or ""):match("([^|]+)$"):match("(%S+)$")
+                    if cleanSkillName and WORS_SkillCraftUI and WORS_SkillCraftUI[cleanSkillName] then
                         GameTooltip:AddLine("Left: Crafting UI",  0, 1, 0)
                         GameTooltip:AddLine("Right: Skill Guide", 0, 1, 0)
                     else
@@ -325,8 +465,8 @@ function WORS_U_SkillsBook:RefreshConfig()
             btn.Icon:SetTexture(GetIconForSkill(factionID))
 
             local _, _, buffedLevel, currentLevel = WORSSkillsUtil.GetSkillInfo(factionID)
-            btn.CurFS:SetText(buffedLevel or 0)
-            btn.CapFS:SetText(currentLevel or 0)
+            if btn.CurFS then btn.CurFS:SetText(buffedLevel or 0) end
+            if btn.CapFS then btn.CapFS:SetText(currentLevel or 0) end
 
             self._skillButtons[index] = { btn = btn, id = factionID }
 
@@ -344,8 +484,6 @@ function WORS_U_SkillsBook:RefreshConfig()
     end
 end
 
-
-
 function WORS_U_SkillsBook:RefreshValues()
     if not self._skillButtons then return end
 
@@ -353,39 +491,47 @@ function WORS_U_SkillsBook:RefreshValues()
         if e.id == "__TOTAL__" then
             if self.totalBox and self.totalBox.Label then
                 local totalLevel = 0
-                local ok, lvl = pcall(WORSSkillsUtil.GetTotalLevel)
+                local ok, lvl = pcall(function() return WORSSkillsUtil.GetTotalLevel() end)
                 if ok and lvl then totalLevel = lvl end
                 self.totalBox.Label:SetText(("Total level:\n %d"):format(totalLevel or 0))
             end
 
+        elseif e.id == "__QUESTPOINTS__" then
+            if self.questBox and self.questBox.Label then
+                local qp = GetItemCount(201883) or 0
+                self.questBox.Label:SetText(("QP %d"):format(qp))
+            end
+			
+		elseif e.id == "__SLAYER__" then
+            if self.questBox and self.questBox.Label then
+                local sp = GetItemCount(40753) or 0
+                self.questBox.Label:SetText(("SP %d"):format(sp))
+            end
+			
+
+        elseif e.id == ResolveSkillID("Hitpoints") then
+            local hp, hpMax = UnitHealth("player"), UnitHealthMax("player")
+            if e.btn and e.btn.CurFS then e.btn.CurFS:SetText(hp or 0) end
+            if e.btn and e.btn.CapFS then e.btn.CapFS:SetText(hpMax or 0) end
+
+        elseif e.id == ResolveSkillID("Prayer") then
+            local mp, mpMax = UnitPower("player", 0), UnitPowerMax("player", 0)
+            local mpK    = math.ceil((mp or 0) / 1000)
+            local mpMaxK = math.ceil((mpMax or 0) / 1000)
+            if e.btn and e.btn.CurFS then e.btn.CurFS:SetText(mpK or 0) end
+            if e.btn and e.btn.CapFS then e.btn.CapFS:SetText(mpMaxK or 0) end
+
         else
-            -- 🩺 Hitpoints: show current / max HP
-            if e.id == ResolveSkillID("Hitpoints") then
-                local hp, hpMax = UnitHealth("player"), UnitHealthMax("player")
-                if e.btn.CurFS then e.btn.CurFS:SetText(hp or 0) end
-                if e.btn.CapFS then e.btn.CapFS:SetText(hpMax or 0) end
-
-            -- 💙 Prayer: show current / max mana (in thousands)
-            elseif e.id == ResolveSkillID("Prayer") then
-                local mp, mpMax = UnitPower("player", 0), UnitPowerMax("player", 0)
-                local mpK    = math.ceil((mp or 0) / 1000)
-                local mpMaxK = math.ceil((mpMax or 0) / 1000)
-                if e.btn.CurFS then e.btn.CurFS:SetText(mpK or 0) end
-                if e.btn.CapFS then e.btn.CapFS:SetText(mpMaxK or 0) end
-
-            -- 🟡 Default: all other skills from WORSSkillsUtil
-            else
-                local _, _, buffedLevel, currentLevel = WORSSkillsUtil.GetSkillInfo(e.id)
-                if e.btn.CurFS then e.btn.CurFS:SetText(buffedLevel or 0) end
-                if e.btn.CapFS then e.btn.CapFS:SetText(currentLevel or 0) end
-                if e.btn.Icon  then e.btn.Icon:SetTexture(GetIconForSkill(e.id)) end
+            -- default: fetch from WORSSkillsUtil
+            local ok, info1, info2, buffedLevel, currentLevel = pcall(WORSSkillsUtil.GetSkillInfo, e.id)
+            if ok then
+                if e.btn and e.btn.CurFS then e.btn.CurFS:SetText(buffedLevel or 0) end
+                if e.btn and e.btn.CapFS then e.btn.CapFS:SetText(currentLevel or 0) end
+                if e.btn and e.btn.Icon then e.btn.Icon:SetTexture(GetIconForSkill(e.id)) end
             end
         end
     end
 end
-
-
-
 
 -- Build on first open; then refresh values on every open
 WORS_U_SkillsBook.frame:HookScript("OnShow", function()
@@ -396,40 +542,37 @@ WORS_U_SkillsBook.frame:HookScript("OnShow", function()
 	WORS_U_SkillsBook:RefreshValues()
 end)
 
-
 -- keep micro state in sync (same as your other frames)
 local function UpdateSkillsMicroVisual()
 	if WORS_U_SkillsBook.frame:IsShown() then
-		SkillsMicroButton:SetButtonState("PUSHED", true)
+		if SkillsMicroButton and SkillsMicroButton.SetButtonState then SkillsMicroButton:SetButtonState("PUSHED", true) end
 	else
-		SkillsMicroButton:SetButtonState("NORMAL")
+		if SkillsMicroButton and SkillsMicroButton.SetButtonState then SkillsMicroButton:SetButtonState("NORMAL") end
 	end
 end
 WORS_U_SkillsBook.frame:HookScript("OnShow", UpdateSkillsMicroVisual)
 WORS_U_SkillsBook.frame:HookScript("OnHide", UpdateSkillsMicroVisual)
 
-
 hooksecurefunc("UpdateMicroButtons", function()
 	UpdateSkillsMicroVisual()
 end)
 
-
--- === Live updates when reputation changes (drives skills) ===
+-- === Live updates when reputation/health/auras/etc change (drives skills) ===
 local function RefreshSkillsAndTooltip()
-	-- Update numbers/icons
-	if WORS_U_SkillsBook and WORS_U_SkillsBook.RefreshValues then
-		WORS_U_SkillsBook:RefreshValues()
-	end
+    -- Update numbers/icons
+    if WORS_U_SkillsBook and WORS_U_SkillsBook.RefreshValues then
+        WORS_U_SkillsBook:RefreshValues()
+    end
 
-	-- If user is hovering a skill/total button, rebuild that tooltip live
-	local owner = GameTooltip and GameTooltip:GetOwner()
-	if owner then
-		-- Try to re-fire the button's OnEnter if it has one
-		local onEnter = owner:GetScript("OnEnter")
-		if type(onEnter) == "function" then
-			onEnter(owner)
-		end
-	end
+    -- If user is hovering a skill/total/quest button, rebuild that tooltip live
+    local owner = GameTooltip and GameTooltip:GetOwner()
+    if owner then
+        -- Try to re-fire the button's OnEnter if it has one
+        local onEnter = (owner.GetScript and owner:GetScript("OnEnter"))
+        if type(onEnter) == "function" then
+            onEnter(owner)
+        end
+    end
 end
 
 local skillsEvt = CreateFrame("Frame")
@@ -441,3 +584,5 @@ skillsEvt:RegisterEvent("UNIT_AURA")
 skillsEvt:SetScript("OnEvent", function()
 	RefreshSkillsAndTooltip()
 end)
+
+-- End of file

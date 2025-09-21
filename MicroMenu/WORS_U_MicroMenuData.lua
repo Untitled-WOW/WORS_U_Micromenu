@@ -174,18 +174,17 @@ WORS_U_PrayBook.prayers = {
     {level = 10, id = 79503, buffIcon = "Interface\\Icons\\active_rockskin.blp"},  -- Rock Skin
     {level = 13, id = 79505, buffIcon = "Interface\\Icons\\active_superhumanstrength.blp"},  -- Superhuman Strength
     {level = 16, id = 79509, buffIcon = "Interface\\Icons\\active_improvedreflexes.blp"},  -- Improved Reflexes
-	-- ***************CHANGE TO RESTORE CURRENTLY ***rapidheal***
-    {level = 19, id = 79521, buffIcon = "Interface\\Icons\\active_rapidrestore.blp"},    -- Rapid Restore  CHANGE TO RESTORE CURRENTLY DOUBLE HEAL
+    {level = 19, id = 80019, buffIcon = "Interface\\Icons\\active_rapidrestore.blp"},    -- Rapid Restore
     {level = 22, id = 79521, buffIcon = "Interface\\Icons\\active_rapidheal.blp"},    -- Rapid Heal
-    {level = 25, id = 114131, buffIcon = "Interface\\Icons\\active_protectitem.blp"},    -- Protect Item
+    {level = 25, id = 114131, category = "Protection", buffIcon = "Interface\\Icons\\active_protectitem.blp"},    -- Protect Item
     {level = 26, id = 79511, buffIcon = "Interface\\Icons\\active_hawkeye.blp"},    -- Hawk Eye
     {level = 27, id = 79516, buffIcon = "Interface\\Icons\\active_mysticlore.blp"},    -- Mystic Lore
     {level = 28, id = 79504, buffIcon = "Interface\\Icons\\active_steelskin.blp"},    -- Steel Skin
     {level = 31, id = 79507, buffIcon = "Interface\\Icons\\active_ultimatestrength.blp"},    -- Ultimate Strength
     {level = 34, id = 79510, buffIcon = "Interface\\Icons\\active_incrediblereflexes.blp"},    -- Incredible Reflexes
-    {level = 37, id = 79501, buffIcon = "Interface\\Icons\\active_magicpray.blp"},    -- Protect from Magic
-    {level = 40, id = 79500, buffIcon = "Interface\\Icons\\active_rangepray.blp"},    -- Protect from Missiles
-    {level = 43, id = 465, buffIcon = "Interface\\Icons\\active_meleepray.blp"},    -- Protect from Melee
+    {level = 37, id = 79501, category = "Protection", buffIcon = "Interface\\Icons\\active_magicpray.blp"},    -- Protect from Magic
+    {level = 40, id = 79500, category = "Protection", buffIcon = "Interface\\Icons\\active_rangepray.blp"},    -- Protect from Missiles
+    {level = 43, id = 465, category = "Protection", buffIcon = "Interface\\Icons\\active_meleepray.blp"},    -- Protect from Melee
     {level = 44, id = 79513, buffIcon = "Interface\\Icons\\active_eagleeye.blp"},    -- Eagle Eye
     {level = 45, id = 79515, buffIcon = "Interface\\Icons\\active_mysticmight.blp"},    -- Mystic Might
     --{level = 46, id = nil, buffIcon = "Interface\\Icons\\active_.blp"},    -- Retribution
@@ -196,8 +195,11 @@ WORS_U_PrayBook.prayers = {
     --{level = 70, id = 79518, buffIcon = "Interface\\Icons\\active_piety.blp"},    -- Piety
     --{level = 74, id = 79519, buffIcon = "Interface\\Icons\\active_rigour.blp"},    -- Rigour
     --{level = 77, id = 79520, buffIcon = "Interface\\Icons\\active_augury.blp"},    -- Augury
-	
 }
+
+WORS_U_PrayBook.filterGroups = {
+	["Protection"] = { 114131, 79501, 79500, 465,},
+} 
 
 WORS_U_EquipmentBook = {}
 WORS_U_EquipmentBook.frame = CreateFrame("Frame", "WORS_U_EquipmentBookFrame", UIParent, "SecureHandlerStateTemplate,OldSchoolFrameTemplate")

@@ -159,7 +159,6 @@ end
 WORS_U_SpellBook.frame:SetSize(192, 304)
 WORS_U_SpellBook.frame:SetFrameStrata("LOW")
 WORS_U_SpellBook.frame:SetFrameLevel(10)
-
 local bg = WORS_U_SpellBook.frame:CreateTexture(nil, "LOW")
 WORS_U_SpellBook.frame.Background = bg
 bg:SetTexture("Interface\\WORS\\OldSchoolBackground1")

@@ -1,3 +1,13 @@
+if not WORS_U_PrayerBookSettings then WORS_U_PrayerBookSettings = {} end
+if WORS_U_PrayerBookSettings.hideAboveLevel == nil then WORS_U_PrayerBookSettings.hideAboveLevel = false end
+if WORS_U_PrayerBookSettings.scaleButtons == nil then WORS_U_PrayerBookSettings.scaleButtons = true end
+if not WORS_U_PrayerBookSettings.activeFilters then
+    WORS_U_PrayerBookSettings.activeFilters = {
+        Protection = true,
+        Other = true,
+    }
+end
+
 -- Function to initialize Prayer level from rep
 local prayerLevel = 1
 local function InitializePrayerLevel()
@@ -6,20 +16,47 @@ end
 
 local prayerButtons = {}
 
--- Function to set up prayer buttons  
+local function GetPrayerLayoutForCount(count)
+    if not WORS_U_PrayerBookSettings.scaleButtons then
+        return 35, 1, 5, 5 -- buttonSize, padding, margin, columns
+    elseif count <= 4 then
+        return 80, 10, 10, 2
+    elseif count <= 8 then
+        return 60, 10, 10, 2
+    elseif count <= 15 then
+        return 50, 6, 10, 3
+    elseif count <= 25 then
+        return 38, 6, 10, 4
+    elseif count <= 40 then
+        return 30, 6, 10, 5
+    elseif count <= 48 then
+        return 25, 5, 10, 6
+    else
+        return 20, 5, 10, 7
+    end
+end
 
 local function SetupPrayerButtons()
-    if InCombatLockdown() then
-        return
-    end
+    if InCombatLockdown() then return end
 
-    local buttonSize = 35
-    local padding    = 1
-    local margin     = 5
-    local columns    = 5
-	local extraYOffset = 5  -- move all buttons down by 20 pixels	
+	-- -- Filter visible prayers
+	local visible = {}
+	for _, data in ipairs(WORS_U_PrayBook.prayers) do
+		local cat = data.category or "Other"
+		if WORS_U_PrayerBookSettings.activeFilters[cat]
+		and (not WORS_U_PrayerBookSettings.hideAboveLevel or prayerLevel >= data.level) then
+			table.insert(visible, data)
+		end
+	end
 
-    for i, prayerData in ipairs(WORS_U_PrayBook.prayers) do
+
+
+
+    local count = #visible
+    local buttonSize, padding, margin, columns = GetPrayerLayoutForCount(count)
+    local extraYOffset = 5
+
+    for i, prayerData in ipairs(visible) do
         local prayerID       = prayerData.id
         local requiredLevel  = prayerData.level
         local prayerName, _, prayerIcon = GetSpellInfo(prayerID)
@@ -27,9 +64,6 @@ local function SetupPrayerButtons()
         local prayerButton = prayerButtons[i]
         if not prayerButton then
             prayerButton = CreateFrame("Button", nil, WORS_U_PrayBook.frame, "SecureActionButtonTemplate")
-            prayerButton:SetSize(buttonSize, buttonSize)
-
-            -- ✅ drag to action bars
             prayerButton:RegisterForDrag("LeftButton")
             prayerButton:SetScript("OnDragStart", function(self)
                 if not self.prayerID then return end
@@ -39,30 +73,25 @@ local function SetupPrayerButtons()
                 end
             end)
 
-            -- Icon
             prayerButton.icon = prayerButton:CreateTexture(nil, "BACKGROUND")
             prayerButton.icon:SetAllPoints()
 
-            -- One-time secure settings
             prayerButton:RegisterForClicks("AnyUp")
             prayerButton:SetAttribute("type", "spell")
             prayerButton:SetAttribute("checkselfcast", true)
 
-            -- Tooltip
             prayerButton:SetScript("OnEnter", function(self)
                 GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
                 if self.prayerID then
                     GameTooltip:SetSpellByID(self.prayerID)
-                    local pd = WORS_U_PrayBook.prayers[self.index]
-                    if pd and prayerLevel < pd.level then
-                        GameTooltip:AddLine("Requires Prayer Level " .. pd.level, 1, 0, 0, true)
-                        GameTooltip:Show()
+                    if prayerLevel < self.prayerData.level then
+                        GameTooltip:AddLine("Requires Prayer Level " .. self.prayerData.level, 1, 0, 0, true)
                     end
+                    GameTooltip:Show()
                 end
             end)
             prayerButton:SetScript("OnLeave", GameTooltip_Hide)
 
-            -- Buff check updater (swap icon if buff active)
             prayerButton:SetScript("OnUpdate", function(self)
                 if self.prayerName and self.prayerData and self.prayerData.buffIcon then
                     if UnitBuff("player", self.prayerName) then
@@ -76,43 +105,40 @@ local function SetupPrayerButtons()
             prayerButtons[i] = prayerButton
         end
 
-        -- Update data
         prayerButton.index      = i
         prayerButton.prayerID   = prayerID
         prayerButton.prayerName = prayerName
         prayerButton.prayerData = prayerData
         prayerButton.prayerIcon = prayerIcon
-
         prayerButton:SetAttribute("spell", prayerName)
 
-        -- Update icon + tint
+        prayerButton:SetSize(buttonSize, buttonSize)
         prayerButton.icon:SetTexture(prayerIcon or "Interface\\Icons\\INV_Misc_QuestionMark")
+
         if prayerLevel < requiredLevel then
             prayerButton.icon:SetVertexColor(0.2, 0.2, 0.2)
         else
             prayerButton.icon:SetVertexColor(1, 1, 1)
         end
 
-        -- Position
         local row    = math.floor((i - 1) / columns)
         local column = (i - 1) % columns
         prayerButton:ClearAllPoints()
-		prayerButton:SetPoint(
-			"TOPLEFT", WORS_U_PrayBook.frame, "TOPLEFT",
-			margin + (buttonSize + padding) * column,
-			-margin - extraYOffset - (buttonSize + padding) * row
-		)
+        prayerButton:SetPoint(
+            "TOPLEFT", WORS_U_PrayBook.frame, "TOPLEFT",
+            margin + (buttonSize + padding) * column,
+            -margin - extraYOffset - (buttonSize + padding) * row
+        )
 
         prayerButton:Show()
     end
 
     -- Hide leftover buttons
-    for i = #WORS_U_PrayBook.prayers + 1, #prayerButtons do
-        if prayerButtons[i] then
-            prayerButtons[i]:Hide()
-        end
+    for i = count + 1, #prayerButtons do
+        if prayerButtons[i] then prayerButtons[i]:Hide() end
     end
 end
+
 
 
 
@@ -218,3 +244,144 @@ closeButton:SetAttribute("_onclick", [=[
 ]=])
 
 
+
+-- =========================
+-- FILTER MENU UI (Prayer)
+-- =========================
+local filterMenu = CreateFrame("Frame", "WORS_U_PrayBookFilterMenu", WORS_U_PrayBook.frame, "OldSchoolFrameTemplate")
+filterMenu:SetSize(160, 215)
+filterMenu:SetPoint("CENTER", WORS_U_PrayBook.frame, "CENTER", 0, 0)
+filterMenu:Hide()
+filterMenu:SetFrameStrata("TOOLTIP")
+tinsert(UISpecialFrames, filterMenu:GetName())
+
+local bg = filterMenu:CreateTexture(nil, "BACKGROUND")
+filterMenu.Background = bg
+bg:SetTexture("Interface\\WORS\\OldSchoolBackground1")
+bg:SetAllPoints(filterMenu)
+bg:SetHorizTile(true)
+bg:SetVertTile(true)
+
+-- =========================
+-- Helper: Create toggle buttons
+-- =========================
+local function CreateToggleButton(parent, key, label, anchor, isSetting)
+    local btn = parent[key] or CreateFrame("Button", nil, parent, "OldSchoolButtonTemplate")
+    parent[key] = btn
+    btn:SetSize(130, 30)
+
+    if anchor then
+        btn:SetPoint("TOP", anchor, "BOTTOM", 0, -10)
+    else
+        btn:SetPoint("TOP", parent, "TOP", 0, -12)
+    end
+
+    btn:SetText(label)
+    btn.Text:SetTextColor(1, 0.5, 0) -- orange text
+
+    btn:SetScript("OnClick", function(self)
+        if isSetting then
+            WORS_U_PrayerBookSettings[key] = not WORS_U_PrayerBookSettings[key]
+            self:SetSelected(WORS_U_PrayerBookSettings[key])
+        else
+            WORS_U_PrayerBookSettings.activeFilters[key] = not WORS_U_PrayerBookSettings.activeFilters[key]
+            self:SetSelected(WORS_U_PrayerBookSettings.activeFilters[key])
+        end
+        SetupPrayerButtons()
+    end)
+
+    if isSetting then
+        btn:SetSelected(WORS_U_PrayerBookSettings[key])
+    else
+        btn:SetSelected(WORS_U_PrayerBookSettings.activeFilters[key])
+    end
+
+    return btn
+end
+
+-- =========================
+-- Build Filter Buttons
+-- =========================
+local btnProtection = CreateToggleButton(filterMenu, "Protection", "Show Protection Prayers")
+local btnOther      = CreateToggleButton(filterMenu, "Other", "Show Other Prayers", btnProtection)
+local btnHideAbove  = CreateToggleButton(filterMenu, "hideAboveLevel", "Hide Above Level", btnOther, true)
+local btnScale      = CreateToggleButton(filterMenu, "scaleButtons", "Scale Buttons", btnHideAbove, true)
+
+
+-- =========================
+-- Bottom bar (Prayer tracker + Filters button)
+-- =========================
+local bottomBar = CreateFrame("Frame", nil, WORS_U_PrayBook.frame)
+bottomBar:SetSize(WORS_U_PrayBook.frame:GetWidth(), 25)
+bottomBar:SetPoint("BOTTOM", WORS_U_PrayBook.frame, "BOTTOM", 0, 5)
+
+-- tweak this value to bring Prayer and Filters closer/further
+local PRAYER_FILTER_GAP = 10   -- smaller = closer, larger = more spaced
+
+-- Prayer display
+local prayerDisplay = bottomBar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+prayerDisplay:SetPoint("RIGHT", bottomBar, "CENTER", -PRAYER_FILTER_GAP, 0)
+prayerDisplay:SetTextColor(1, 0.5, 0)
+
+local function UpdatePrayerDisplay()
+    local v     = UnitPower("player", 0)       -- 0 = mana
+    local vmax  = UnitPowerMax("player", 0) or 1
+    local shown    = math.ceil((v or 0) / 1000)
+    local maxShown = math.ceil((vmax or 0) / 1000)
+
+    prayerDisplay:SetFormattedText(
+        "|TInterface\\Icons\\Skills\\Prayericon:16:16:0:0|t %d / %d |TInterface\\Icons\\Skills\\Prayericon:16:16:0:0|t",
+        shown, maxShown
+    )
+end
+
+-- update events
+local manaEvents = CreateFrame("Frame")
+manaEvents:RegisterEvent("UNIT_MANA")
+manaEvents:RegisterEvent("UNIT_MAXMANA")
+manaEvents:RegisterEvent("PLAYER_ENTERING_WORLD")
+manaEvents:SetScript("OnEvent", function(_, event, unit)
+    if unit == "player" or event == "PLAYER_ENTERING_WORLD" then
+        UpdatePrayerDisplay()
+    end
+end)
+UpdatePrayerDisplay()
+
+-- Filters button
+local filterToggle = CreateFrame("Button", nil, bottomBar, "OldSchoolButtonTemplate")
+filterToggle:SetSize(50, 20)
+filterToggle:SetPoint("LEFT", bottomBar, "CENTER", PRAYER_FILTER_GAP, 0)
+filterToggle:SetText("Filters")
+filterToggle.Text:SetTextColor(1, 0.5, 0)
+
+
+
+
+filterMenu:HookScript("OnShow", function()
+    btnProtection:SetSelected(WORS_U_PrayerBookSettings.activeFilters.Protection)
+    if btnOther then
+        btnOther:SetSelected(WORS_U_PrayerBookSettings.activeFilters.Other)
+    end
+    btnHideAbove:SetSelected(WORS_U_PrayerBookSettings.hideAboveLevel)
+    btnScale:SetSelected(WORS_U_PrayerBookSettings.scaleButtons)
+end)
+
+filterMenu:HookScript("OnHide", function()
+    if filterToggle.SetSelected then
+        filterToggle:SetSelected(false)
+    end
+end)
+
+filterToggle:SetScript("OnClick", function(self)
+    if filterMenu:IsShown() then
+        filterMenu:Hide()
+    else
+        filterMenu:Show()
+    end
+end)
+
+WORS_U_PrayBook.frame:HookScript("OnHide", function()
+    if filterMenu:IsShown() then
+        filterMenu:Hide()
+    end
+end)

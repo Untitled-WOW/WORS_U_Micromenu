@@ -578,7 +578,6 @@ end)
 
 
 
-
 ---------------------------------------------------
 -- Override Backpack and Combat Style bind to click secure buttons
 ---------------------------------------------------
