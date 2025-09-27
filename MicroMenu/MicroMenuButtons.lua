@@ -1,11 +1,11 @@
 ----------------------------------------------------------------
--- === Magic button over PrayerMicroButton ===
+-- === Magic button over SpellbookMicroButton ===
 ----------------------------------------------------------------
-U_SpellMicroMenuButton = CreateFrame("Button", "U_SpellBookMicroButtonCopy", PrayerMicroButton, "MicroMenuButtonTemplate", 1)
+U_SpellMicroMenuButton = CreateFrame("Button", "U_SpellBookMicroButtonCopy", SpellbookMicroButton, "MicroMenuButtonTemplate", 1)
 U_SpellMicroMenuButton:ClearAllPoints()
-U_SpellMicroMenuButton:SetAllPoints()  -- overlay on PrayerMicroButton
+U_SpellMicroMenuButton:SetAllPoints()  -- overlay on SpellbookMicroButton
 U_SpellMicroMenuButton:SetFrameStrata("MEDIUM")
-U_SpellMicroMenuButton:SetFrameLevel(PrayerMicroButton:GetFrameLevel() + 5)
+U_SpellMicroMenuButton:SetFrameLevel(SpellbookMicroButton:GetFrameLevel() + 5)
 U_SpellMicroMenuButton.Icon:SetTexture("Interface\\Icons\\magicicon")
 U_SpellMicroMenuButton.Icon:ClearAllPoints()
 U_SpellMicroMenuButton.Icon:SetPoint("CENTER", 0, 0)
@@ -81,19 +81,100 @@ end)
 SpellMicroMenuToggle:SetScript("OnLeave", function() GameTooltip:Hide() end)
 
 
+-- === Make Ignore look like Spellbook (atlas) ===
+local function StyleIgnoreAsSpellbook()
+    local ig = _G.IgnoreMicroButton
+    if ig and ig.Icon then
+        ig.Icon:SetAtlas("microbutton-spellbook", true)
+    end
+end
 
+-- === Secure forwarder overlay: clicks the REAL SpellbookMicroButton ===
+local function EnsureSpellbookForwarder()
+    local ig, sb = _G.IgnoreMicroButton, _G.SpellbookMicroButton
+    if not ig or not sb then return end
 
+    -- create once
+    local o = _G.U_SpellbookForwarder
+    if not o then
+        o = CreateFrame("Button", "U_SpellbookForwarder", UIParent, "SecureActionButtonTemplate")
+        o:RegisterForClicks("AnyUp")
+
+        -- tooltip
+        o:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:SetText(SPELLBOOK_ABILITIES_BUTTON, 1, 1, 1, 1, true)
+            GameTooltip:AddLine(NEWBIE_TOOLTIP_SPELLBOOK,
+                NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
+            GameTooltip:Show()
+        end)
+        o:SetScript("OnLeave", GameTooltip_Hide)
+    end
+
+    -- pin on top of Ignore (safe even in combat)
+    o:ClearAllPoints()
+    o:SetAllPoints(ig)
+    o:SetFrameStrata(ig:GetFrameStrata())
+    o:SetFrameLevel(ig:GetFrameLevel() + 5)
+
+    -- set secure click forwarding (must NOT be done in combat)
+    if not InCombatLockdown() then
+        o:SetAttribute("type", "click")
+        o:SetAttribute("clickbutton", sb)  -- forward to Blizzard Spellbook button
+    end
+end
+
+-- === Keep the pressed state in sync with the Spellbook ===
+local function SyncIgnorePressedState()
+    local ig = _G.IgnoreMicroButton
+    if not ig then return end
+    local shown = (SpellBookFrame and SpellBookFrame:IsShown())
+               or (AscensionSpellbookFrame and AscensionSpellbookFrame:IsShown())
+    if shown then
+        ig:SetButtonState("PUSHED", true)   -- lock while open
+    else
+        ig:SetButtonState("NORMAL")         -- unlock when closed
+    end
+end
+
+-- hooks to keep state synced
+if SpellBookFrame then
+    SpellBookFrame:HookScript("OnShow", SyncIgnorePressedState)
+    SpellBookFrame:HookScript("OnHide", SyncIgnorePressedState)
+end
+if AscensionSpellbookFrame then
+    AscensionSpellbookFrame:HookScript("OnShow", SyncIgnorePressedState)
+    AscensionSpellbookFrame:HookScript("OnHide", SyncIgnorePressedState)
+end
+
+-- run now and after Blizzard rebuilds the micromenu
+StyleIgnoreAsSpellbook()
+EnsureSpellbookForwarder()
+SyncIgnorePressedState()
+
+hooksecurefunc("UpdateMicroButtons", function()
+    StyleIgnoreAsSpellbook()
+    EnsureSpellbookForwarder()
+    SyncIgnorePressedState()
+end)
+
+-- also reseed the forwarder once you leave combat (if a rebuild happened during combat)
+local f = CreateFrame("Frame")
+f:RegisterEvent("PLAYER_REGEN_ENABLED")
+f:SetScript("OnEvent", function()
+    EnsureSpellbookForwarder()  -- reapply secure attributes safely out of combat
+end)
 
 
 
 ----------------------------------------------------------------
--- === Prayer button over CompanionsMicroButton ===
+-- === Prayer button over PrayerMicroButton ===
 ----------------------------------------------------------------
-U_PrayerMicroMenuButton = CreateFrame("Button", "U_PrayerBookMicroButtonCopy", CompanionsMicroButton, "MicroMenuButtonTemplate", 1)
+U_PrayerMicroMenuButton = CreateFrame("Button", "U_PrayerBookMicroButtonCopy", PrayerMicroButton, "MicroMenuButtonTemplate", 1)
 U_PrayerMicroMenuButton:ClearAllPoints()
-U_PrayerMicroMenuButton:SetAllPoints()  -- overlay on CompanionsMicroButton
+U_PrayerMicroMenuButton:SetAllPoints()  -- overlay on PrayerMicroButton
 U_PrayerMicroMenuButton:SetFrameStrata("MEDIUM")
-U_PrayerMicroMenuButton:SetFrameLevel(CompanionsMicroButton:GetFrameLevel() + 5)
+U_PrayerMicroMenuButton:SetFrameLevel(PrayerMicroButton:GetFrameLevel() + 5)
 U_PrayerMicroMenuButton.Icon:SetTexture("Interface\\Icons\\prayer")
 U_PrayerMicroMenuButton.Icon:ClearAllPoints()
 U_PrayerMicroMenuButton.Icon:SetPoint("CENTER", 0, 0)
@@ -250,14 +331,14 @@ EquipmentMicroMenuToggle:SetScript("OnLeave", GameTooltip_Hide)
 ----------------------------------------------------------------
 -- === Character Info button ===
 ----------------------------------------------------------------
-U_CharacterMicroMenuButton = CreateFrame("Button", "U_CharacterMicroMenuButton", AchievementsMicroButton:GetParent(), "MicroMenuButtonTemplate", 1)
-U_CharacterMicroMenuButton:SetScale(AchievementsMicroButton:GetScale())
-U_CharacterMicroMenuButton:SetFrameStrata(AchievementsMicroButton:GetFrameStrata())
-U_CharacterMicroMenuButton:SetFrameLevel(AchievementsMicroButton:GetFrameLevel() + 1)
+U_CharacterMicroMenuButton = CreateFrame("Button", "U_CharacterMicroMenuButton", SocialMicroButton:GetParent(), "MicroMenuButtonTemplate", 1)
+U_CharacterMicroMenuButton:SetScale(SocialMicroButton:GetScale())
+U_CharacterMicroMenuButton:SetFrameStrata(SocialMicroButton:GetFrameStrata())
+U_CharacterMicroMenuButton:SetFrameLevel(SocialMicroButton:GetFrameLevel() + 1)
 
 -- Match size and clickable area
-U_CharacterMicroMenuButton:SetSize(AchievementsMicroButton:GetWidth(), AchievementsMicroButton:GetHeight())
-local l, r, t, b = AchievementsMicroButton:GetHitRectInsets()
+U_CharacterMicroMenuButton:SetSize(SocialMicroButton:GetWidth(), SocialMicroButton:GetHeight())
+local l, r, t, b = SocialMicroButton:GetHitRectInsets()
 if l then U_CharacterMicroMenuButton:SetHitRectInsets(l, r, t, b) end
 -- === Your original icon handling (restored) ===
 U_CharacterMicroMenuButton.Icon:SetTexture("Interface\\AddOns\\MicroMenu\\Textures\\Btn\\Equipment_Stats_Icon.blp")
@@ -275,9 +356,9 @@ local function PositionCharacterMicroButton()
 	local aspect = w / h
 	U_CharacterMicroMenuButton:ClearAllPoints()
 	if aspect > 1.5 then -- Widescreen   
-		U_CharacterMicroMenuButton:SetPoint("RIGHT", AchievementsMicroButton, "LEFT", -2, 0)
+		U_CharacterMicroMenuButton:SetPoint("RIGHT", SocialMicroButton, "LEFT", -2, 0)
 	else
-		U_CharacterMicroMenuButton:SetPoint("BOTTOM", AchievementsMicroButton, "TOP", 0, 2)
+		U_CharacterMicroMenuButton:SetPoint("BOTTOM", SocialMicroButton, "TOP", 0, 2)
 	end
 end
 
