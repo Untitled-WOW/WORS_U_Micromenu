@@ -3,5 +3,4 @@
 	<Binding name="TOGGLEPRAYER"    header="WORSMICROMENU" />
 	<Binding name="TOGGLEEQUIPMENT" header="WORSMICROMENU" />
 	<Binding name="TOGGLESKILLS"    header="WORSMICROMENU" />
-	<Binding name="TOGGLEEMOTE"     header="WORSMICROMENU" />
 </Bindings>

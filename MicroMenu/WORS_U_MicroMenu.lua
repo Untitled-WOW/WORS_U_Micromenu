@@ -44,7 +44,7 @@ f:RegisterEvent("PLAYER_ENTERING_WORLD")
 f:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_ENTERING_WORLD" then
         HookAFrames()
-        ResetMicroMenuPOSByAspect(WORS_U_EmoteBook.frame)
+        ResetMicroMenuPOSByAspect(WORS_U_SpellBook.frame)
         self:UnregisterEvent("PLAYER_ENTERING_WORLD")
     elseif event == "PLAYER_REGEN_ENABLED" then
 		if aCombatStyleHooked and aBackpackHooked then

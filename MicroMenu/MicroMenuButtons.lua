@@ -31,8 +31,6 @@ SpellMicroMenuToggle:RegisterForClicks("AnyUp")
 SpellMicroMenuToggle:SetFrameRef("uSpellBook", WORS_U_SpellBook.frame)
 SpellMicroMenuToggle:SetFrameRef("uPrayerBook", WORS_U_PrayBook.frame)
 SpellMicroMenuToggle:SetFrameRef("uEquipmentBook", WORS_U_EquipmentBook.frame)
-
-
 SpellMicroMenuToggle:SetFrameRef("aCombatStyle", CombatStylePanel)  
 
 -- Secure click snippet
@@ -66,7 +64,7 @@ SpellMicroMenuToggle:SetAttribute("_onclick", [=[
 SpellMicroMenuToggle:SetScript("OnMouseUp", function(self)
     Backpack:Hide()
 	WORS_U_SkillsBook.frame:Hide()
-	WORS_U_EmoteBookFrame:Hide()
+	EmoteBookFrame:Hide()
 	if IsShiftKeyDown() and not InCombatLockdown() then
 		ResetMicroMenuPOSByAspect(WORS_U_SpellBook.frame)
 		print("|cff00ff00[MicroMenu]|r position reset.")
@@ -156,7 +154,7 @@ PrayerMicroMenuToggle:SetAttribute("_onclick", [=[
 PrayerMicroMenuToggle:SetScript("OnMouseUp", function(self)
 	Backpack:Hide()
 	WORS_U_SkillsBook.frame:Hide()
-	WORS_U_EmoteBookFrame:Hide()
+	EmoteBookFrame:Hide()
 	if IsShiftKeyDown() and not InCombatLockdown() then
 		ResetMicroMenuPOSByAspect(WORS_U_PrayBook.frame)
 		print("|cff00ff00[MicroMenu]|r position reset.")
@@ -233,7 +231,7 @@ EquipmentMicroMenuToggle:SetAttribute("_onclick", [=[
 EquipmentMicroMenuToggle:SetScript("OnMouseUp", function(self)
     Backpack:Hide()
     WORS_U_SkillsBook.frame:Hide()
-    WORS_U_EmoteBookFrame:Hide()
+    EmoteBookFrame:Hide()
     if IsShiftKeyDown() and not InCombatLockdown() then
         ResetMicroMenuPOSByAspect(WORS_U_EquipmentBook.frame)
         print("|cff00ff00[MicroMenu]|r position reset.")
@@ -247,76 +245,6 @@ EquipmentMicroMenuToggle:SetScript("OnEnter", function(self)
     GameTooltip:Show()
 end)
 EquipmentMicroMenuToggle:SetScript("OnLeave", GameTooltip_Hide)
-
-
-
-
-
-
--- ----------------------------------------------------------------
--- -- === Emote button over  EmoteMicroButton===
--- ----------------------------------------------------------------
-U_EmoteMicroMenuButton = CreateFrame("Button", "U_EmoteBookMicroButtonCopy", UIParent, "SecureActionButtonTemplate,SecureHandlerClickTemplate")
-U_EmoteMicroMenuButton:SetAllPoints(EmotesMicroButton)
-U_EmoteMicroMenuButton:SetFrameStrata(EmotesMicroButton:GetFrameStrata())
-U_EmoteMicroMenuButton:SetFrameLevel(EmotesMicroButton:GetFrameLevel() + 1)
--- Tooltip
-U_EmoteMicroMenuButton:SetScript("OnEnter", function(self)
-	GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-	GameTooltip:SetText("Emotes", 1, 1, 1, 1, true)
-	GameTooltip:AddLine("Choose different emote actions your character can preform", NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
-	GameTooltip:Show()
-end)
-U_EmoteMicroMenuButton:SetScript("OnLeave", GameTooltip_Hide)
-
--- Pass refs you want to close
-U_EmoteMicroMenuButton:SetFrameRef("uSpellBook", WORS_U_SpellBook.frame)
-U_EmoteMicroMenuButton:SetFrameRef("uPrayerBook", WORS_U_PrayBook.frame)
-U_EmoteMicroMenuButton:SetFrameRef("uEquipmentBook", WORS_U_EquipmentBook.frame)
-U_EmoteMicroMenuButton:SetFrameRef("aCombatStyle", CombatStylePanel)
-
--- Secure snippet runs on the SAME hardware click, even in combat
-U_EmoteMicroMenuButton:SetAttribute("_onclick", [=[ 
-  local uSpellBook     = self:GetFrameRef("uSpellBook")
-  local uPrayerBook    = self:GetFrameRef("uPrayerBook")
-  local uEquipmentBook = self:GetFrameRef("uEquipmentBook")
-  local aCombatStyle   = self:GetFrameRef("aCombatStyle")
-
-
-  if uSpellBook and uSpellBook:GetAttribute("userToggle") then
-    uSpellBook:SetAttribute("userToggle", nil)
-    uSpellBook:Hide()
-  end
-  if uPrayerBook and uPrayerBook:GetAttribute("userToggle") then
-    uPrayerBook:SetAttribute("userToggle", nil)
-    uPrayerBook:Hide()
-  end
-  if uEquipmentBook and uEquipmentBook:GetAttribute("userToggle") then
-    uEquipmentBook:SetAttribute("userToggle", nil)
-    uEquipmentBook:Hide()
-  end
-  if aCombatStyle and aCombatStyle:IsShown() then aCombatStyle:Hide() end
-  
-  
-]=])
-
-U_EmoteMicroMenuButton:SetScript("OnMouseUp", function(self)
-	Backpack:Hide()
-	WORS_U_SkillsBookFrame:Hide()
-	if WORS_U_EmoteBookFrame:IsShown() then 
-		WORS_U_EmoteBookFrame:Hide()
-	else
-		WORS_U_EmoteBookFrame:Show()	
-	end
-    if IsShiftKeyDown() and not InCombatLockdown() then
-        ResetMicroMenuPOSByAspect(Backpack)
-        print("|cff00ff00[MicroMenu]|r position reset.")
-    end
-end)
-
-
-
-
 
 
 ----------------------------------------------------------------
@@ -389,7 +317,7 @@ AscensionCharacterFrame:HookScript("OnShow", UpdateCharacterButtonState)
 AscensionCharacterFrame:HookScript("OnHide", UpdateCharacterButtonState)
 
 -- ----------------------------------------------------------------
--- === Skills button over SkillsMicroButton (like Emotes one) ====
+-- === Skills button over SkillsMicroButton ====
 -- ----------------------------------------------------------------
 U_SkillMicroMenuButton = CreateFrame("Button", "U_SkillBookMicroButtonCopy", UIParent, "SecureActionButtonTemplate,SecureHandlerClickTemplate")
 U_SkillMicroMenuButton:SetAllPoints(SkillsMicroButton)
@@ -438,7 +366,7 @@ U_SkillMicroMenuButton:SetAttribute("_onclick", [=[
 -- Click: toggle Skills frame; Shift+Click resets its position
 U_SkillMicroMenuButton:SetScript("OnMouseUp", function(self)
 	Backpack:Hide()
-	WORS_U_EmoteBookFrame:Hide()
+	EmoteBookFrame:Hide()
 	if WORS_U_SkillsBookFrame:IsShown() then
 		WORS_U_SkillsBookFrame:Hide()
 	else
@@ -502,7 +430,7 @@ U_InventoryMicroMenuButton:SetAttribute("_onclick", [=[
 
 U_InventoryMicroMenuButton:SetScript("OnMouseUp", function(self)
 	ToggleBackpack()
-    WORS_U_EmoteBookFrame:Hide()
+    EmoteBookFrame:Hide()
 	WORS_U_SkillsBookFrame:Hide()
     if IsShiftKeyDown() and not InCombatLockdown() then
         ResetMicroMenuPOSByAspect(Backpack)
@@ -568,7 +496,7 @@ U_CombatStyleMicroMenuButton:SetAttribute("_onclick", [=[
 
 U_CombatStyleMicroMenuButton:SetScript("PostClick", function(self)
 	CloseBackpack()
-    WORS_U_EmoteBookFrame:Hide()
+    EmoteBookFrame:Hide()
 	WORS_U_SkillsBookFrame:Hide()
     if IsShiftKeyDown() and not InCombatLockdown() then
         ResetMicroMenuPOSByAspect(CombatStylePanel)
@@ -617,7 +545,6 @@ local function ApplyCustomMenuOverrideBindings()
     BindActionAll("TOGGLEPRAYER",    "WORS_UPrayBook_Toggle")
     BindActionAll("TOGGLEEQUIPMENT", "WORS_UPEquipmentBook_Toggle")
     BindActionAll("TOGGLESKILLS",    "U_SkillBookMicroButtonCopy")
-	BindActionAll("TOGGLEEMOTE", 	 "U_EmoteBookMicroButtonCopy")
 end
 
 
