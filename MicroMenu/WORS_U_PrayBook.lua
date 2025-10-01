@@ -8,6 +8,49 @@ if not WORS_U_PrayerBookSettings.activeFilters then
     }
 end
 
+
+-- WORS_U_PrayBook Data
+WORS_U_PrayBook = {}  -- Create the main table for the PrayBook
+
+WORS_U_PrayBook.prayers = {
+    {level = 1, id = 79502, buffIcon = "Interface\\Icons\\active_thickskin.blp"},  -- Thick Skin
+    {level = 4, id = 79506, buffIcon = "Interface\\Icons\\active_burststrength.blp"},  -- Burst of Strength
+    {level = 7, id = 79508, buffIcon = "Interface\\Icons\\active_claritythought.blp"},  -- Clarity of Thought
+    {level = 8, id = 79512, buffIcon = "Interface\\Icons\\active_sharpeye.blp"},  -- Sharp Eye
+    {level = 9, id = 79514, buffIcon = "Interface\\Icons\\active_mysticwill.blp"},  -- Mystic Will
+    {level = 10, id = 79503, buffIcon = "Interface\\Icons\\active_rockskin.blp"},  -- Rock Skin
+    {level = 13, id = 79505, buffIcon = "Interface\\Icons\\active_superhumanstrength.blp"},  -- Superhuman Strength
+    {level = 16, id = 79509, buffIcon = "Interface\\Icons\\active_improvedreflexes.blp"},  -- Improved Reflexes
+    {level = 19, id = 80019, buffIcon = "Interface\\Icons\\active_rapidrestore.blp"},    -- Rapid Restore
+    {level = 22, id = 79521, buffIcon = "Interface\\Icons\\active_rapidheal.blp"},    -- Rapid Heal
+    {level = 25, id = 114131, category = "Protection", buffIcon = "Interface\\Icons\\active_protectitem.blp"},    -- Protect Item
+    {level = 26, id = 79511, buffIcon = "Interface\\Icons\\active_hawkeye.blp"},    -- Hawk Eye
+    {level = 27, id = 79516, buffIcon = "Interface\\Icons\\active_mysticlore.blp"},    -- Mystic Lore
+    {level = 28, id = 79504, buffIcon = "Interface\\Icons\\active_steelskin.blp"},    -- Steel Skin
+    {level = 31, id = 79507, buffIcon = "Interface\\Icons\\active_ultimatestrength.blp"},    -- Ultimate Strength
+    {level = 34, id = 79510, buffIcon = "Interface\\Icons\\active_incrediblereflexes.blp"},    -- Incredible Reflexes
+    {level = 37, id = 79501, category = "Protection", buffIcon = "Interface\\Icons\\active_magicpray.blp"},    -- Protect from Magic
+    {level = 40, id = 79500, category = "Protection", buffIcon = "Interface\\Icons\\active_rangepray.blp"},    -- Protect from Missiles
+    {level = 43, id = 465, category = "Protection", buffIcon = "Interface\\Icons\\active_meleepray.blp"},    -- Protect from Melee
+    {level = 44, id = 79513, buffIcon = "Interface\\Icons\\active_eagleeye.blp"},    -- Eagle Eye
+    {level = 45, id = 79515, buffIcon = "Interface\\Icons\\active_mysticmight.blp"},    -- Mystic Might
+    --{level = 46, id = nil, buffIcon = "Interface\\Icons\\active_.blp"},    -- Retribution
+    --{level = 49, id = nil, buffIcon = "Interface\\Icons\\active_.blp"},    -- Redemption
+    --{level = 52, id = nil, buffIcon = "Interface\\Icons\\active_.blp"},    -- Smite
+    --{level = 55, id = nil, buffIcon = "Interface\\Icons\\active_.blp"},    -- Preserve
+    --{level = 60, id = 79517, buffIcon = "Interface\\Icons\\active_chivalry.blp"},    -- Chivalry
+    --{level = 70, id = 79518, buffIcon = "Interface\\Icons\\active_piety.blp"},    -- Piety
+    --{level = 74, id = 79519, buffIcon = "Interface\\Icons\\active_rigour.blp"},    -- Rigour
+    --{level = 77, id = 79520, buffIcon = "Interface\\Icons\\active_augury.blp"},    -- Augury
+}
+
+WORS_U_PrayBook.filterGroups = {
+	["Protection"] = { 114131, 79501, 79500, 465,},
+} 
+
+
+
+
 -- Function to initialize Prayer level from rep
 local prayerLevel = 1
 local function InitializePrayerLevel()
@@ -48,9 +91,6 @@ local function SetupPrayerButtons()
 			table.insert(visible, data)
 		end
 	end
-
-
-
 
     local count = #visible
     local buttonSize, padding, margin, columns = GetPrayerLayoutForCount(count)
@@ -139,21 +179,19 @@ local function SetupPrayerButtons()
     end
 end
 
-
-
-
-
 -- ===========================
 -- SECURE WRAPPER + VISIBILITY
 -- ===========================
 
 -- Create the main frame as a secure handler so it can Show/Hide in combat
---WORS_U_PrayBook.frame = CreateFrame("Frame", "WORS_U_PrayBookFrame", UIParent, "SecureHandlerStateTemplate,OldSchoolFrameTemplate")
+WORS_U_PrayBook.frame = CreateFrame("Frame", "WORS_U_PrayBookFrame", UIParent, "SecureHandlerShowHideTemplate,SecureHandlerStateTemplate,OldSchoolFrameTemplate")
+--WORS_U_PrayBook.frame:SetSize(192, 304)
 
-WORS_U_PrayBook.frame:SetSize(192, 304)
+WORS_U_PrayBook.frame:SetSize(192, 355)
+tinsert(UISpecialFrames, "WORS_U_PrayBookFrame")
 
 WORS_U_PrayBook.frame:SetFrameStrata("LOW")
-WORS_U_PrayBook.frame:SetFrameLevel(10)
+WORS_U_PrayBook.frame:SetFrameLevel(20)
 
 local bg = WORS_U_PrayBook.frame:CreateTexture(nil, "LOW")
 WORS_U_PrayBook.frame.Background = bg
@@ -171,7 +209,10 @@ WORS_U_PrayBook.frame:SetClampedToScreen(true)
 WORS_U_PrayBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
 WORS_U_PrayBook.frame:SetScript("OnDragStop", function(self) 
 	self:StopMovingOrSizing() 
-	SaveFramePosition(self)
+	self:SetUserPlaced(true) 
+	-- Print out the current anchor info
+    local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
+   --print("PrayBook position:", point, relativeTo and relativeTo:GetName() or "UIParent", relativePoint, xOfs, yOfs)
 end)
 
 
@@ -189,11 +230,9 @@ end)
 -- Update micro button tint on show/hide
 local function UpdateButtonBackground()
     if WORS_U_PrayBook.frame:IsShown() then
-        --PrayerMicroButton:GetNormalTexture():SetVertexColor(1, 0, 0) -- red when open
-		U_PrayerMicroMenuButton:SetButtonState("PUSHED", true)
+		PrayerMicroButton:SetButtonState("PUSHED", true)
 	else
-        --PrayerMicroButton:GetNormalTexture():SetVertexColor(1, 1, 1) -- default
-		U_PrayerMicroMenuButton:SetButtonState("NORMAL", true)
+		PrayerMicroButton:SetButtonState("NORMAL", true)
     end
 end
 WORS_U_PrayBook.frame:SetScript("OnShow", UpdateButtonBackground)
@@ -209,14 +248,12 @@ eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 eventFrame:SetScript("OnEvent", function(self, event)
 	if event == "PLAYER_ENTERING_WORLD" then
 		if InCombatLockdown() then return end
-		local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
-		if pos then
-			local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
-			WORS_U_PrayBook.frame:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
-		else
-			ResetMicroMenuPOSByAspect(WORS_U_PrayBook.frame)
-			SaveFramePosition(WORS_U_PrayBook.frame)
-		end	
+		if WORS_U_PrayBook.frame and not WORS_U_PrayBook.frame:IsUserPlaced() then
+            WORS_U_PrayBook.frame:ClearAllPoints()
+            WORS_U_PrayBook.frame:SetPoint("RIGHT", UIParent, "RIGHT", -270, 5)
+            WORS_U_PrayBook.frame:SetUserPlaced(true)
+		end
+		
 		InitializePrayerLevel()
 		SetupPrayerButtons()	
 	elseif event == "PLAYER_REGEN_ENABLED" then
@@ -226,8 +263,9 @@ eventFrame:SetScript("OnEvent", function(self, event)
 end)
 
 
-
--- Secure CLOSE button inside the frame (works in combat)
+-- =========================
+-- SECURE CLOSE BUTTON
+-- =========================
 local closeButton = CreateFrame("Button", nil, WORS_U_PrayBook.frame, "SecureHandlerClickTemplate")
 closeButton:SetSize(16, 16)
 closeButton:SetPoint("TOPRIGHT", WORS_U_PrayBook.frame, "TOPRIGHT", 4, 4)
@@ -243,6 +281,77 @@ closeButton:SetAttribute("_onclick", [=[
   uPrayerBook:Hide()
 ]=])
 
+-- =========================
+-- Secure Toggle
+-- =========================
+local PrayerMicroMenuToggle = CreateFrame("Button", "WORS_UPrayBook_Toggle", UIParent, "SecureHandlerClickTemplate")
+if PrayerMicroButton then
+	WORS_UPrayBook_Toggle:ClearAllPoints()
+	WORS_UPrayBook_Toggle:SetParent(PrayerMicroButton)
+	WORS_UPrayBook_Toggle:SetAllPoints(PrayerMicroButton)
+	WORS_UPrayBook_Toggle:SetFrameStrata(PrayerMicroButton:GetFrameStrata())
+	WORS_UPrayBook_Toggle:SetFrameLevel(PrayerMicroButton:GetFrameLevel() + 1)
+	WORS_UPrayBook_Toggle:RegisterForClicks("AnyUp")
+	if PrayerMicroButton:GetScript("OnEnter") then
+		WORS_UPrayBook_Toggle:SetScript("OnEnter", function()
+			PrayerMicroButton:GetScript("OnEnter")(PrayerMicroButton)
+		end)
+	end
+	if PrayerMicroButton:GetScript("OnLeave") then
+		WORS_UPrayBook_Toggle:SetScript("OnLeave", function()
+			PrayerMicroButton:GetScript("OnLeave")(PrayerMicroButton)
+		end)
+	end
+end
+
+PrayerMicroMenuToggle:RegisterForClicks("AnyUp")
+PrayerMicroMenuToggle:SetFrameRef("uPrayerBook", WORS_U_PrayBook.frame)
+PrayerMicroMenuToggle:SetAttribute("_onclick", [=[
+	local f = self:GetFrameRef("uPrayerBook")
+	if not f then return end
+
+	-- Flip desired state
+	local willShow = not f:GetAttribute("userToggle")
+	f:SetAttribute("userToggle", willShow and true or nil)
+
+	-- Apply visibility to match the flag
+	if willShow then
+		f:Show()
+	else
+		f:Hide()
+	end
+]=])
+
+WORS_U_PrayBook.frame:SetAttribute("_onshow", [=[
+  self:SetAttribute("userToggle", true)
+]=])
+
+WORS_U_PrayBook.frame:SetAttribute("_onhide", [=[
+  self:SetAttribute("userToggle", nil)
+]=])
+
+-- =========================
+-- Keybind Secure Toggle 
+-- =========================
+local kb = CreateFrame("Frame")
+kb:RegisterEvent("PLAYER_LOGIN")
+kb:RegisterEvent("UPDATE_BINDINGS")
+kb:RegisterEvent("PLAYER_REGEN_ENABLED")
+kb:SetScript("OnEvent", function(self, event)
+	if InCombatLockdown() then
+		self.need = true
+		return
+	end
+
+	-- bind both keys for TOGGLEPRAYER
+	local k1, k2 = GetBindingKey("TOGGLEPRAYER")
+	if k1 then SetOverrideBindingClick(UIParent, true, k1, "WORS_UPrayBook_Toggle", "LeftButton") end
+	if k2 then SetOverrideBindingClick(UIParent, true, k2, "WORS_UPrayBook_Toggle", "LeftButton") end
+
+	if event == "PLAYER_REGEN_ENABLED" then
+		self.need = nil
+	end
+end)
 
 
 -- =========================

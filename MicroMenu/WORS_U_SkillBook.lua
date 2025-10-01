@@ -1,6 +1,3 @@
--- WORS Skills Book with Quest Points (full file)
--- Adds a "Quest Points" black box in the black row (1st column), filler in 2nd, Total in 3rd.
--- Currency ID used for Quest Points: 201883
 
 -- === Configure order and icons here (IDs or Names) ==================
 local WORS_SkillOrder = {
@@ -53,9 +50,10 @@ local WORS_SkillIcons = {
 
 -- Ensure main table exists
 WORS_U_SkillsBook = WORS_U_SkillsBook or {}
-WORS_U_SkillsBook.frame = WORS_U_SkillsBook.frame or CreateFrame("Frame", "WORS_U_SkillsBookFrame", UIParent, "OldSchoolFrameTemplate")
+WORS_U_SkillsBook.frame = WORS_U_SkillsBook.frame or CreateFrame("Frame", "WORS_U_SkillsBookFrame", UIParent, "SecureHandlerShowHideTemplate,SecureHandlerStateTemplate,OldSchoolFrameTemplate")
+--WORS_U_SkillsBook.frame:SetSize(192, 304)
 
-WORS_U_SkillsBook.frame:SetSize(192, 304)
+WORS_U_SkillsBook.frame:SetSize(192, 355)
 tinsert(UISpecialFrames, "WORS_U_SkillsBookFrame")
 WORS_U_SkillsBook.frame:SetFrameStrata("LOW")
 WORS_U_SkillsBook.frame:SetFrameLevel(5)
@@ -73,10 +71,16 @@ WORS_U_SkillsBook.frame:EnableMouse(true)
 WORS_U_SkillsBook.frame:RegisterForDrag("LeftButton")
 WORS_U_SkillsBook.frame:SetClampedToScreen(true)
 
+if WORS_U_SkillsBookFrame and WORS_U_SkillsBookFrame.CloseButton then WORS_U_SkillsBookFrame.CloseButton:ClearAllPoints() end
+
+
 WORS_U_SkillsBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
 WORS_U_SkillsBook.frame:SetScript("OnDragStop", function(self)
 	self:StopMovingOrSizing()
-	if SaveFramePosition then pcall(SaveFramePosition, self) end
+	self:SetUserPlaced(true) 
+	-- Print out the current anchor info
+    local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
+    --print("SkillBook position:", point, relativeTo and relativeTo:GetName() or "UIParent", relativePoint, xOfs, yOfs)
 end)
 
 if WORS_U_SkillsBook.frame.CloseButton then
@@ -421,14 +425,14 @@ function WORS_U_SkillsBook:RefreshConfig()
                 btn:SetScript("OnClick", function(self, button)
                     local skillName = (GetFactionInfoByID and GetFactionInfoByID(factionID) or ""):match("([^|]+)$"):match("(%S+)$")
                     if button == "LeftButton" then
-                        local spellID = WORS_SkillCraftUI and WORS_SkillCraftUI[skillName]
+                        OpenSkillGuideSafe(factionID)
+					elseif button == "RightButton" then	
+						local spellID = WORS_SkillCraftUI and WORS_SkillCraftUI[skillName]
                         if spellID then
                             CastSpellByID(spellID)
                         else
                             OpenSkillGuideSafe(factionID)
-                        end
-                    elseif button == "RightButton" then
-                        OpenSkillGuideSafe(factionID)
+                        end    
                     end
                 end)
 
@@ -447,8 +451,8 @@ function WORS_U_SkillsBook:RefreshConfig()
                     end
                     local cleanSkillName = (GetFactionInfoByID and GetFactionInfoByID(factionID) or ""):match("([^|]+)$"):match("(%S+)$")
                     if cleanSkillName and WORS_SkillCraftUI and WORS_SkillCraftUI[cleanSkillName] then
-                        GameTooltip:AddLine("Left: Crafting UI",  0, 1, 0)
-                        GameTooltip:AddLine("Right: Skill Guide", 0, 1, 0)
+                        GameTooltip:AddLine("Left: Skill Guide",  0, 1, 0)
+                        GameTooltip:AddLine("Right: Crafting UI", 0, 1, 0)
                     else
                         GameTooltip:AddLine("Click: Skill Guide", 0, 1, 0)
                     end
@@ -582,7 +586,101 @@ skillsEvt:RegisterEvent("UNIT_HEALTH")
 skillsEvt:RegisterEvent("UNIT_MANA")
 skillsEvt:RegisterEvent("UNIT_AURA")
 skillsEvt:SetScript("OnEvent", function()
-	RefreshSkillsAndTooltip()
+    if event == "PLAYER_ENTERING_WORLD" then
+        if WORS_U_SkillsBook.frame and not WORS_U_SkillsBook.frame:IsUserPlaced() then
+            WORS_U_SkillsBook.frame:ClearAllPoints()
+            WORS_U_SkillsBook.frame:SetPoint("RIGHT", UIParent, "RIGHT", -140, 48)
+            WORS_U_SkillsBook.frame:SetUserPlaced(true)
+		end
+		
+	else
+		RefreshSkillsAndTooltip()
+	end
 end)
 
--- End of file
+
+local closeButton = CreateFrame("Button", nil, WORS_U_SkillsBook.frame, "SecureHandlerClickTemplate")
+closeButton:SetSize(16, 16)
+closeButton:SetPoint("TOPRIGHT", WORS_U_SkillsBook.frame, "TOPRIGHT", 4, 4)
+WORS_U_SkillsBook.closeButton = closeButton
+closeButton:SetNormalTexture("Interface\\WORS\\OldSchool-CloseButton-Up.blp")
+closeButton:SetHighlightTexture("Interface\\WORS\\OldSchool-CloseButton-Highlight.blp", "ADD")
+closeButton:SetPushedTexture("Interface\\WORS\\OldSchool-CloseButton-Down.blp")
+closeButton:SetFrameRef("uSkillsBook", WORS_U_SkillsBook.frame)
+closeButton:SetAttribute("_onclick", [=[
+    local uSkillsBook = self:GetFrameRef("uSkillsBook")
+    uSkillsBook:SetAttribute("userToggle", nil)
+    uSkillsBook:Hide()
+]=])
+
+
+-- =========================
+-- Secure Toggle
+-- =========================
+local SkillsMicroMenuToggle = CreateFrame("Button", "WORS_USkillsBook_Toggle", UIParent, "SecureHandlerClickTemplate")
+if SkillsMicroButton then
+	WORS_USkillsBook_Toggle:ClearAllPoints()
+	WORS_USkillsBook_Toggle:SetParent(SkillsMicroButton)
+	WORS_USkillsBook_Toggle:SetAllPoints(SkillsMicroButton)
+	WORS_USkillsBook_Toggle:SetFrameStrata(SkillsMicroButton:GetFrameStrata())
+	WORS_USkillsBook_Toggle:SetFrameLevel(SkillsMicroButton:GetFrameLevel() + 1)
+	WORS_USkillsBook_Toggle:RegisterForClicks("AnyUp")
+	if SkillsMicroButton:GetScript("OnEnter") then
+		WORS_USkillsBook_Toggle:SetScript("OnEnter", function()
+			SkillsMicroButton:GetScript("OnEnter")(SkillsMicroButton)
+		end)
+	end
+	if SkillsMicroButton:GetScript("OnLeave") then
+		WORS_USkillsBook_Toggle:SetScript("OnLeave", function()
+			SkillsMicroButton:GetScript("OnLeave")(SkillsMicroButton)
+		end)
+	end
+end
+
+SkillsMicroMenuToggle:RegisterForClicks("AnyUp")
+SkillsMicroMenuToggle:SetFrameRef("uSkillsBook", WORS_U_SkillsBook.frame)
+SkillsMicroMenuToggle:SetAttribute("_onclick", [=[
+	local f = self:GetFrameRef("uSkillsBook")
+	if not f then return end
+
+	-- Flip desired state
+	local willShow = not f:GetAttribute("userToggle")
+	f:SetAttribute("userToggle", willShow and true or nil)
+
+	-- Apply visibility to match the flag
+	if willShow then
+		f:Show()
+	else
+		f:Hide()
+	end
+]=])
+
+WORS_U_SkillsBook.frame:SetAttribute("_onshow", [=[
+  self:SetAttribute("userToggle", true)
+]=])
+
+WORS_U_SkillsBook.frame:SetAttribute("_onhide", [=[
+  self:SetAttribute("userToggle", nil)
+]=])
+
+-- =========================
+-- Keybind Secure Toggle 
+-- =========================
+local kb = CreateFrame("Frame")
+kb:RegisterEvent("PLAYER_LOGIN")
+kb:RegisterEvent("UPDATE_BINDINGS")
+kb:RegisterEvent("PLAYER_REGEN_ENABLED")
+kb:SetScript("OnEvent", function(self, event)
+	if InCombatLockdown() then
+		self.need = true
+		return
+	end
+	-- bind both keys for TOGGLEMAGIC
+	local k1, k2 = GetBindingKey("TOGGLESKILLS")
+	if k1 then SetOverrideBindingClick(UIParent, true, k1, "WORS_USkillsBook_Toggle", "LeftButton") end
+	if k2 then SetOverrideBindingClick(UIParent, true, k2, "WORS_USkillsBook_Toggle", "LeftButton") end
+
+	if event == "PLAYER_REGEN_ENABLED" then
+		self.need = nil
+	end
+end)

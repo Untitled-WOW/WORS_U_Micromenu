@@ -1,16 +1,13 @@
 ## Interface: 30300
 ## Title: MicroMenu
-## Notes: Spell, Prayer, Equipment menus for for WORS.                                                                            Open by clicking the Micro Menu button.                                                               Toggle transparancy by Alt clicking Micro Menu buttons.                                                                           Open WOW Spellbook by Shift clicking button.                                                                           Send bug reports to Untitled - Llama69420 on discord.
-## Version: 3.0
+## Notes: Spell, Prayer, Equipment and Skill menus for for WORS.
+## Version: 3.2.1
 ## Dependencies: WORS_Backpack WORS_SkillGuide
 ## SavedVariables: WORS_U_MicroMenuSettings WORS_U_SpellBookSettings WORS_U_PrayerBookSettings
-## DefaultState: disabled
 ## Bindings: Bindings.xml
 Bindings.lua
 
 # Main
-WORS_U_MicroMenuData.lua
-MicroMenuButtons.lua
 WORS_U_SpellBook.lua
 WORS_U_PrayBook.lua
 WORS_U_Equipment.lua
@@ -18,4 +15,5 @@ WORS_U_Equipment_GuidePrices.lua
 WORS_U_Equipment_ItemsKeptOnDeath.lua
 WORS_U_Equipment_ValueFrame.lua
 WORS_U_SkillBook.lua
+EmoteBook.lua
 WORS_U_MicroMenu.lua

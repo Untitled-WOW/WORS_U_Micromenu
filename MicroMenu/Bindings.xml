@@ -1,6 +1,7 @@
 <Bindings>
-	<Binding name="TOGGLEMAGIC"     header="WORSMICROMENU" />
-	<Binding name="TOGGLEPRAYER"    header="WORSMICROMENU" />
-	<Binding name="TOGGLEEQUIPMENT" header="WORSMICROMENU" />
-	<Binding name="TOGGLESKILLS"    header="WORSMICROMENU" />
+	<Binding name="TOGGLEMAGIC"     header="MICROMENU" />
+	<Binding name="TOGGLEPRAYER"    header="MICROMENU" />
+	<Binding name="TOGGLEEQUIPMENT" header="MICROMENU" />
+	<Binding name="TOGGLESKILLS"    header="MICROMENU" />
+	<Binding name="TOGGLEEMOTE"     header="MICROMENU" />	
 </Bindings>

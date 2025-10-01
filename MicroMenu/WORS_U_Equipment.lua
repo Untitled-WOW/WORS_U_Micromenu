@@ -1,3 +1,7 @@
+WORS_U_EquipmentBook = {}
+WORS_U_EquipmentBook.frame = CreateFrame("Frame", "WORS_U_EquipmentBookFrame", UIParent, "SecureHandlerShowHideTemplate,SecureHandlerStateTemplate,OldSchoolFrameTemplate")
+
+
 
 -- ---------------- Configuration ----------------
 local BASE_TEX_PATH   = "Interface\\AddOns\\MicroMenu\\Textures\\EquipmentIcon\\"
@@ -244,9 +248,13 @@ end
 -- (your frame already exists)
 -- WORS_U_EquipmentBook.frame = CreateFrame("Frame", "WORS_U_EquipmentBookFrame", UIParent, "SecureHandlerStateTemplate,OldSchoolFrameTemplate")
 
-WORS_U_EquipmentBook.frame:SetSize(192, 304)
+--WORS_U_EquipmentBook.frame:SetSize(192, 304)
+WORS_U_EquipmentBook.frame:SetSize(192, 355)
+
 WORS_U_EquipmentBook.frame:SetFrameStrata("LOW")
 WORS_U_EquipmentBook.frame:SetFrameLevel(10)
+tinsert(UISpecialFrames, "WORS_U_EquipmentBookFrame")
+
 local bg = WORS_U_EquipmentBook.frame:CreateTexture(nil, "LOW")
 WORS_U_EquipmentBook.frame.Background = bg
 bg:SetTexture("Interface\\WORS\\OldSchoolBackground1")
@@ -263,22 +271,24 @@ WORS_U_EquipmentBook.frame:SetClampedToScreen(true)
 WORS_U_EquipmentBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
 WORS_U_EquipmentBook.frame:SetScript("OnDragStop", function(self)
     self:StopMovingOrSizing()
-    SaveFramePosition(self)
+	self:SetUserPlaced(true)
+    -- Print out the current anchor info
+    local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
+    --print("EquipmentBook position:", point, relativeTo and relativeTo:GetName() or "UIParent", relativePoint, xOfs, yOfs)	
 end)
 
 
-if WORS_U_EquipmentBookFrame and WORS_U_EquipmentBookFrame.CloseButton then
-    WORS_U_EquipmentBookFrame.CloseButton:ClearAllPoints()
-end
+if WORS_U_EquipmentBookFrame and WORS_U_EquipmentBookFrame.CloseButton then WORS_U_EquipmentBookFrame.CloseButton:ClearAllPoints() end
 
 -- micro button tint on show/hide
 local function UpdateButtonBackground()
     if WORS_U_EquipmentBook.frame:IsShown() then
-        U_EquipmentMicroMenuButton:SetButtonState("PUSHED", true)
+        CharacterMicroButton:SetButtonState("PUSHED", true)
     else
-        U_EquipmentMicroMenuButton:SetButtonState("NORMAL", true)
+        CharacterMicroButton:SetButtonState("NORMAL", true)
     end
 end
+
 WORS_U_EquipmentBook.frame:SetScript("OnShow", UpdateButtonBackground)
 WORS_U_EquipmentBook.frame:SetScript("OnHide", UpdateButtonBackground)
 
@@ -372,13 +382,12 @@ eventFrame:RegisterEvent("UNIT_INVENTORY_CHANGED")
 eventFrame:SetScript("OnEvent", function(self, event, arg1)
     if event == "PLAYER_ENTERING_WORLD" then
         if InCombatLockdown() then return end
-        local pos = WORS_U_MicroMenuSettings.MicroMenuPOS
-        if pos then
-            local relativeTo = pos.relativeTo and _G[pos.relativeTo] or UIParent
-            WORS_U_EquipmentBook.frame:SetPoint(pos.point, relativeTo, pos.relativePoint, pos.xOfs, pos.yOfs)
-        else
-            ResetMicroMenuPOSByAspect(WORS_U_EquipmentBook.frame)
-        end
+
+		if WORS_U_EquipmentBook.frame and not WORS_U_EquipmentBook.frame:IsUserPlaced() then
+            WORS_U_EquipmentBook.frame:ClearAllPoints()
+            WORS_U_EquipmentBook.frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -225, 15)
+            WORS_U_EquipmentBook.frame:SetUserPlaced(true)
+		end		
         SetupEquipmentButtons()
         UpdateEquipmentButtons()
         UpdateButtonCounts()
@@ -413,3 +422,76 @@ closeButton:SetAttribute("_onclick", [=[
     uEquipmentBook:SetAttribute("userToggle", nil)
     uEquipmentBook:Hide()
 ]=])
+
+
+-- =========================
+-- Secure Toggle
+-- =========================
+local EquipmentMicroMenuToggle = CreateFrame("Button", "WORS_UEquipmentBook_Toggle", UIParent, "SecureHandlerClickTemplate")
+if CharacterMicroButton then
+	EquipmentMicroMenuToggle:ClearAllPoints()
+	EquipmentMicroMenuToggle:SetParent(CharacterMicroButton)
+	EquipmentMicroMenuToggle:SetAllPoints(CharacterMicroButton)
+	EquipmentMicroMenuToggle:SetFrameStrata(CharacterMicroButton:GetFrameStrata())
+	EquipmentMicroMenuToggle:SetFrameLevel(CharacterMicroButton:GetFrameLevel() + 1)
+	EquipmentMicroMenuToggle:RegisterForClicks("AnyUp")
+	if CharacterMicroButton:GetScript("OnEnter") then
+		WORS_UEquipmentBook_Toggle:SetScript("OnEnter", function()
+			CharacterMicroButton:GetScript("OnEnter")(CharacterMicroButton)
+		end)
+	end
+	if CharacterMicroButton:GetScript("OnLeave") then
+		WORS_UEquipmentBook_Toggle:SetScript("OnLeave", function()
+			CharacterMicroButton:GetScript("OnLeave")(CharacterMicroButton)
+		end)
+	end
+end
+
+EquipmentMicroMenuToggle:RegisterForClicks("AnyUp")
+EquipmentMicroMenuToggle:SetFrameRef("uEquipmentBook", WORS_U_EquipmentBook.frame)
+EquipmentMicroMenuToggle:SetAttribute("_onclick", [=[
+	local f = self:GetFrameRef("uEquipmentBook")
+	if not f then return end
+
+	-- Flip desired state
+	local willShow = not f:GetAttribute("userToggle")
+	f:SetAttribute("userToggle", willShow and true or nil)
+
+	-- Apply visibility to match the flag
+	if willShow then
+		f:Show()
+	else
+		f:Hide()
+	end
+]=])
+
+WORS_U_EquipmentBook.frame:SetAttribute("_onshow", [=[
+  self:SetAttribute("userToggle", true)
+]=])
+
+WORS_U_EquipmentBook.frame:SetAttribute("_onhide", [=[
+  self:SetAttribute("userToggle", nil)
+]=])
+
+-- =========================
+-- Keybind Secure Toggle 
+-- =========================
+local kb = CreateFrame("Frame")
+kb:RegisterEvent("PLAYER_LOGIN")
+kb:RegisterEvent("UPDATE_BINDINGS")
+kb:RegisterEvent("PLAYER_REGEN_ENABLED")
+kb:SetScript("OnEvent", function(self, event)
+	if InCombatLockdown() then
+		self.need = true
+		return
+	end
+
+	-- bind both keys for TOGGLEEQUIPMENT
+	local k1, k2 = GetBindingKey("TOGGLEEQUIPMENT")
+	if k1 then SetOverrideBindingClick(UIParent, true, k1, "WORS_UEquipmentBook_Toggle", "LeftButton") end
+	if k2 then SetOverrideBindingClick(UIParent, true, k2, "WORS_UEquipmentBook_Toggle", "LeftButton") end
+
+	if event == "PLAYER_REGEN_ENABLED" then
+		self.need = nil
+	end
+end)
