@@ -102,6 +102,11 @@ EmoteBook.frame:SetClampedToScreen(true)
 EmoteBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
 EmoteBook.frame:SetScript("OnDragStop", function(self)
     self:StopMovingOrSizing()
+	if WORS_U_MicroMenuAutoClose.Emotes then
+		SaveMicroMenuFramePosition(self)
+	else
+		self:SetUserPlaced(true) 
+	end
 end)
 
 -- Close button: normal click hides, SHIFT-click resets position
@@ -210,10 +215,18 @@ ev:SetScript("OnEvent", function(self, event, arg1)
         SetupEmoteButtons(-8, -10)
     elseif event == "PLAYER_ENTERING_WORLD" then
 		if EmoteBook.frame and not EmoteBook.frame:IsUserPlaced() then
-            EmoteBook.frame:ClearAllPoints()
-            EmoteBook.frame:SetPoint("RIGHT", UIParent, "RIGHT", -140, 48)
-            EmoteBook.frame:SetUserPlaced(true)
+			if WORS_U_MicroMenuAutoClose and WORS_U_MicroMenuAutoClose.AutoClosePOS then
+				-- Apply saved position to all auto-close frames
+				ApplyMicroMenuSavedPosition()
+			else
+				-- Fallback to default position
+				EmoteBook.frame:ClearAllPoints()
+				EmoteBook.frame:SetPoint("RIGHT", UIParent, "RIGHT", -140, 48)
+				EmoteBook.frame:SetUserPlaced(true)
+			end
 		end
+
+		
         -- only needed once
         self:UnregisterEvent("PLAYER_ENTERING_WORLD")
     end
@@ -262,26 +275,42 @@ EmoteMicroMenuToggle:SetFrameRef("uEmoteBook", EmoteBook.frame)
 EmoteMicroMenuToggle:SetAttribute("_onclick", [=[
 	local f = self:GetFrameRef("uEmoteBook")
 	if not f then return end
-
-	-- Flip desired state
-	local willShow = not f:GetAttribute("userToggle")
-	f:SetAttribute("userToggle", willShow and true or nil)
-
-	-- Apply visibility to match the flag
-	if willShow then
+	
+	if not f:IsShown() then
 		f:Show()
 	else
 		f:Hide()
 	end
 ]=])
 
-EmoteBook.frame:SetAttribute("_onshow", [=[
-  self:SetAttribute("userToggle", true)
-]=])
+EmoteMicroMenuToggle:SetScript("PostClick", function(self, button, down)
+	if WORS_U_MicroMenuAutoClose.Emotes then	
+		if WORS_U_MicroMenuAutoClose.Backpack and Backpack and Backpack:IsShown() then
+			Backpack:Hide()
+		end
+		
+		if WORS_U_MicroMenuAutoClose.CombatStyle and CombatStylePanel and CombatStylePanel:IsShown() then
+			CombatStylePanel:Hide()
+		end	
+		
+		if WORS_U_MicroMenuAutoClose.Magic and WORS_U_SpellBookFrame and WORS_U_SpellBookFrame:IsShown() then
+			WORS_U_SpellBookFrame:Hide()
+		end
 
-EmoteBook.frame:SetAttribute("_onhide", [=[
-  self:SetAttribute("userToggle", nil)
-]=])
+		if WORS_U_MicroMenuAutoClose.Equipment and WORS_U_EquipmentBookFrame and WORS_U_EquipmentBookFrame:IsShown() then
+			WORS_U_EquipmentBookFrame:Hide()
+		end
+
+		if WORS_U_MicroMenuAutoClose.Prayer and WORS_U_PrayBookFrame and WORS_U_PrayBookFrame:IsShown() then
+			WORS_U_PrayBookFrame:Hide()
+		end
+
+		if WORS_U_MicroMenuAutoClose.Skills and WORS_U_SkillsBookFrame and WORS_U_SkillsBookFrame:IsShown() then
+			WORS_U_SkillsBookFrame:Hide()
+		end	
+
+	end
+end)
 
 -- =========================
 -- Keybind Secure Toggle 

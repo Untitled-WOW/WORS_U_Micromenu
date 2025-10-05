@@ -271,10 +271,12 @@ WORS_U_EquipmentBook.frame:SetClampedToScreen(true)
 WORS_U_EquipmentBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
 WORS_U_EquipmentBook.frame:SetScript("OnDragStop", function(self)
     self:StopMovingOrSizing()
-	self:SetUserPlaced(true)
-    -- Print out the current anchor info
-    local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
-    --print("EquipmentBook position:", point, relativeTo and relativeTo:GetName() or "UIParent", relativePoint, xOfs, yOfs)	
+	if WORS_U_MicroMenuAutoClose.Equipment then
+		SaveMicroMenuFramePosition(self)
+	else
+		self:SetUserPlaced(true) 
+	end
+
 end)
 
 
@@ -382,12 +384,18 @@ eventFrame:RegisterEvent("UNIT_INVENTORY_CHANGED")
 eventFrame:SetScript("OnEvent", function(self, event, arg1)
     if event == "PLAYER_ENTERING_WORLD" then
         if InCombatLockdown() then return end
-
 		if WORS_U_EquipmentBook.frame and not WORS_U_EquipmentBook.frame:IsUserPlaced() then
-            WORS_U_EquipmentBook.frame:ClearAllPoints()
-            WORS_U_EquipmentBook.frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -225, 15)
-            WORS_U_EquipmentBook.frame:SetUserPlaced(true)
-		end		
+			if WORS_U_MicroMenuAutoClose and WORS_U_MicroMenuAutoClose.AutoClosePOS then
+				-- Apply saved position to all auto-close frames
+				ApplyMicroMenuSavedPosition()
+			else
+				-- Fallback to default position
+				WORS_U_EquipmentBook.frame:ClearAllPoints()
+				WORS_U_EquipmentBook.frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -225, 15)
+				WORS_U_EquipmentBook.frame:SetUserPlaced(true)
+			end
+		end	
+		
         SetupEquipmentButtons()
         UpdateEquipmentButtons()
         UpdateButtonCounts()
@@ -419,7 +427,6 @@ closeButton:SetPushedTexture("Interface\\WORS\\OldSchool-CloseButton-Down.blp")
 closeButton:SetFrameRef("uEquipmentBook", WORS_U_EquipmentBook.frame)
 closeButton:SetAttribute("_onclick", [=[
     local uEquipmentBook = self:GetFrameRef("uEquipmentBook")
-    uEquipmentBook:SetAttribute("userToggle", nil)
     uEquipmentBook:Hide()
 ]=])
 
@@ -452,26 +459,41 @@ EquipmentMicroMenuToggle:SetFrameRef("uEquipmentBook", WORS_U_EquipmentBook.fram
 EquipmentMicroMenuToggle:SetAttribute("_onclick", [=[
 	local f = self:GetFrameRef("uEquipmentBook")
 	if not f then return end
-
-	-- Flip desired state
-	local willShow = not f:GetAttribute("userToggle")
-	f:SetAttribute("userToggle", willShow and true or nil)
-
-	-- Apply visibility to match the flag
-	if willShow then
+	
+	if not f:IsShown() then
 		f:Show()
 	else
 		f:Hide()
 	end
 ]=])
 
-WORS_U_EquipmentBook.frame:SetAttribute("_onshow", [=[
-  self:SetAttribute("userToggle", true)
-]=])
+EquipmentMicroMenuToggle:SetScript("PostClick", function(self, button, down)
+	if WORS_U_MicroMenuAutoClose.Equipment then 
+		if WORS_U_MicroMenuAutoClose.Backpack and Backpack and Backpack:IsShown() then
+			Backpack:Hide()
+		end
+		
+		if WORS_U_MicroMenuAutoClose.CombatStyle and CombatStylePanel and CombatStylePanel:IsShown() then
+			CombatStylePanel:Hide()
+		end	
+		
+		if WORS_U_MicroMenuAutoClose.Prayer and WORS_U_PrayBookFrame and WORS_U_PrayBookFrame:IsShown() then
+			WORS_U_PrayBookFrame:Hide()
+		end
+		
+		if WORS_U_MicroMenuAutoClose.Magic and WORS_U_SpellBookFrame and WORS_U_SpellBookFrame:IsShown() then
+			WORS_U_SpellBookFrame:Hide()
+		end
 
-WORS_U_EquipmentBook.frame:SetAttribute("_onhide", [=[
-  self:SetAttribute("userToggle", nil)
-]=])
+		if WORS_U_MicroMenuAutoClose.Skills and WORS_U_SkillsBookFrame and WORS_U_SkillsBookFrame:IsShown() then
+			WORS_U_SkillsBookFrame:Hide()
+		end
+
+		if WORS_U_MicroMenuAutoClose.Emotes and EmoteBookFrame and EmoteBookFrame:IsShown() then
+			EmoteBookFrame:Hide()
+		end
+	end
+end)
 
 -- =========================
 -- Keybind Secure Toggle 

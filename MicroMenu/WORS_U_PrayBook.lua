@@ -209,10 +209,11 @@ WORS_U_PrayBook.frame:SetClampedToScreen(true)
 WORS_U_PrayBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
 WORS_U_PrayBook.frame:SetScript("OnDragStop", function(self) 
 	self:StopMovingOrSizing() 
-	self:SetUserPlaced(true) 
-	-- Print out the current anchor info
-    local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
-   --print("PrayBook position:", point, relativeTo and relativeTo:GetName() or "UIParent", relativePoint, xOfs, yOfs)
+	if WORS_U_MicroMenuAutoClose.Prayer then
+		SaveMicroMenuFramePosition(self)
+	else
+		self:SetUserPlaced(true) 
+	end
 end)
 
 
@@ -249,10 +250,16 @@ eventFrame:SetScript("OnEvent", function(self, event)
 	if event == "PLAYER_ENTERING_WORLD" then
 		if InCombatLockdown() then return end
 		if WORS_U_PrayBook.frame and not WORS_U_PrayBook.frame:IsUserPlaced() then
-            WORS_U_PrayBook.frame:ClearAllPoints()
-            WORS_U_PrayBook.frame:SetPoint("RIGHT", UIParent, "RIGHT", -270, 5)
-            WORS_U_PrayBook.frame:SetUserPlaced(true)
+			if WORS_U_MicroMenuAutoClose and WORS_U_MicroMenuAutoClose.AutoClosePOS then
+				ApplyMicroMenuSavedPosition()
+			else
+				WORS_U_PrayBook.frame:ClearAllPoints()
+				WORS_U_PrayBook.frame:SetPoint("RIGHT", UIParent, "RIGHT", -270, 5)
+				WORS_U_PrayBook.frame:SetUserPlaced(true)
+			end
 		end
+
+		
 		
 		InitializePrayerLevel()
 		SetupPrayerButtons()	
@@ -277,7 +284,6 @@ closeButton:SetPushedTexture("Interface\\WORS\\OldSchool-CloseButton-Down.blp")
 closeButton:SetFrameRef("uPrayerBook", WORS_U_PrayBook.frame)
 closeButton:SetAttribute("_onclick", [=[
   local uPrayerBook = self:GetFrameRef("uPrayerBook")
-  uPrayerBook:SetAttribute("userToggle", nil)
   uPrayerBook:Hide()
 ]=])
 
@@ -309,26 +315,41 @@ PrayerMicroMenuToggle:SetFrameRef("uPrayerBook", WORS_U_PrayBook.frame)
 PrayerMicroMenuToggle:SetAttribute("_onclick", [=[
 	local f = self:GetFrameRef("uPrayerBook")
 	if not f then return end
-
-	-- Flip desired state
-	local willShow = not f:GetAttribute("userToggle")
-	f:SetAttribute("userToggle", willShow and true or nil)
-
-	-- Apply visibility to match the flag
-	if willShow then
+	
+	if not f:IsShown() then
 		f:Show()
 	else
 		f:Hide()
 	end
 ]=])
 
-WORS_U_PrayBook.frame:SetAttribute("_onshow", [=[
-  self:SetAttribute("userToggle", true)
-]=])
+PrayerMicroMenuToggle:SetScript("PostClick", function(self, button, down)
+	if WORS_U_MicroMenuAutoClose.Prayer then	
+		if WORS_U_MicroMenuAutoClose.Backpack and Backpack and Backpack:IsShown() then
+			Backpack:Hide()
+		end
+		
+		if WORS_U_MicroMenuAutoClose.CombatStyle and CombatStylePanel and CombatStylePanel:IsShown() then
+			CombatStylePanel:Hide()
+		end	
+		
+		if WORS_U_MicroMenuAutoClose.Magic and WORS_U_SpellBookFrame and WORS_U_SpellBookFrame:IsShown() then
+			WORS_U_SpellBookFrame:Hide()
+		end
 
-WORS_U_PrayBook.frame:SetAttribute("_onhide", [=[
-  self:SetAttribute("userToggle", nil)
-]=])
+		if WORS_U_MicroMenuAutoClose.Equipment and WORS_U_EquipmentBookFrame and WORS_U_EquipmentBookFrame:IsShown() then
+			WORS_U_EquipmentBookFrame:Hide()
+		end
+		
+		if WORS_U_MicroMenuAutoClose.Skills and WORS_U_SkillsBookFrame and WORS_U_SkillsBookFrame:IsShown() then
+			WORS_U_SkillsBookFrame:Hide()
+		end
+
+		if WORS_U_MicroMenuAutoClose.Emotes and EmoteBookFrame and EmoteBookFrame:IsShown() then
+			EmoteBookFrame:Hide()
+		end
+	end
+end)
 
 -- =========================
 -- Keybind Secure Toggle 

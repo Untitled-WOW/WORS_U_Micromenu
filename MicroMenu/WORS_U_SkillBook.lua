@@ -1,4 +1,3 @@
-
 -- === Configure order and icons here (IDs or Names) ==================
 local WORS_SkillOrder = {
 	"Attack","Hitpoints","Mining",
@@ -16,6 +15,7 @@ local WORS_SkillCraftUI = {
 	Crafting  = 2018,
 	Fletching = 2259,
 	Herblore  = 2108,
+	Thieving  = 99266,
 	Smithing  = 3273,
 }
 
@@ -51,8 +51,6 @@ local WORS_SkillIcons = {
 -- Ensure main table exists
 WORS_U_SkillsBook = WORS_U_SkillsBook or {}
 WORS_U_SkillsBook.frame = WORS_U_SkillsBook.frame or CreateFrame("Frame", "WORS_U_SkillsBookFrame", UIParent, "SecureHandlerShowHideTemplate,SecureHandlerStateTemplate,OldSchoolFrameTemplate")
---WORS_U_SkillsBook.frame:SetSize(192, 304)
-
 WORS_U_SkillsBook.frame:SetSize(192, 355)
 tinsert(UISpecialFrames, "WORS_U_SkillsBookFrame")
 WORS_U_SkillsBook.frame:SetFrameStrata("LOW")
@@ -73,14 +71,14 @@ WORS_U_SkillsBook.frame:SetClampedToScreen(true)
 
 if WORS_U_SkillsBookFrame and WORS_U_SkillsBookFrame.CloseButton then WORS_U_SkillsBookFrame.CloseButton:ClearAllPoints() end
 
-
 WORS_U_SkillsBook.frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
 WORS_U_SkillsBook.frame:SetScript("OnDragStop", function(self)
 	self:StopMovingOrSizing()
-	self:SetUserPlaced(true) 
-	-- Print out the current anchor info
-    local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
-    --print("SkillBook position:", point, relativeTo and relativeTo:GetName() or "UIParent", relativePoint, xOfs, yOfs)
+	if WORS_U_MicroMenuAutoClose.Skills then
+		SaveMicroMenuFramePosition(self)
+	else
+		self:SetUserPlaced(true) 
+	end
 end)
 
 if WORS_U_SkillsBook.frame.CloseButton then
@@ -96,12 +94,17 @@ local PADDING  = 0
 local COLS     = 3
 local START_X  = 7
 local START_Y  = -10
+-- ---- Crafting bar layout (icon-only) ----
+local CRAFT_COLS = 6
+local CRAFT_ICON = 26
+local CRAFT_PAD  = 2
 -- --------------------------------------
 
 -- Quest Points currency id helper
 function WORS_GetQuestPoints()
-    return GetItemCount(201883)  -- e.g. if they store QP as an item
+    return GetItemCount(201883)
 end
+
 -- Resolve a skill ID if given a name
 local function ResolveSkillID(v)
 	if type(v) == "number" then return v end
@@ -129,13 +132,21 @@ local function BuildResolvedOrder()
 	return order
 end
 
--- Pick icon: override table first (by id or name), else embedded icon in faction name, else question mark
+-- Craft bar order: alphabetical by skill name
+local function BuildCraftOrder()
+    local order = {}
+    for name in pairs(WORS_SkillCraftUI or {}) do
+        table.insert(order, name)
+    end
+    table.sort(order, function(a, b) return a:lower() < b:lower() end)
+    return order
+end
+
+-- Pick icon: override table first (by id or name), else embedded icon, else question mark
 local function GetIconForSkill(factionID)
-	-- direct id override
 	if WORS_SkillIcons and WORS_SkillIcons[factionID] then
 		return WORS_SkillIcons[factionID]
 	end
-	-- name override
 	if type(WORS_SkillIcons) == "table" then
 		for key, path in pairs(WORS_SkillIcons) do
 			if type(key) == "string" then
@@ -144,7 +155,6 @@ local function GetIconForSkill(factionID)
 			end
 		end
 	end
-	-- embedded icon in faction name (|T...|t Name)
 	if GetFactionInfoByID then
 		local name = GetFactionInfoByID(factionID)
 		if name then
@@ -154,6 +164,57 @@ local function GetIconForSkill(factionID)
 	end
 	return "Interface\\Icons\\INV_Misc_QuestionMark"
 end
+
+-- ===== Robust spell pickup helpers (for dragging to bars) =====
+local function FindSpellbookIndexBySpell(spellID, spellName)
+	local numTabs = GetNumSpellTabs and GetNumSpellTabs() or 0
+	for t = 1, numTabs do
+		local _, _, numSpells, off = GetSpellTabInfo(t)
+		for s = 1, (numSpells or 0) do
+			local idx = (off or 0) + s
+			local link = GetSpellLink(idx, "spell")
+			if link then
+				local id = tonumber(link:match("spell:(%d+)"))
+				if (spellID and id == spellID) or (spellName and GetSpellBookItemName and (GetSpellBookItemName(idx, "spell") == spellName)) then
+					return idx
+				end
+			end
+		end
+	end
+end
+
+local function CursorHasAny()
+	return (CursorHasSpell and CursorHasSpell())
+	    or (CursorHasItem and CursorHasItem())
+	    or (CursorHasMacro and CursorHasMacro())
+	    or (CursorHasAction and CursorHasAction())
+end
+
+local function PickupCraftSpell(spellID)
+	if not spellID then return end
+	local name = GetSpellInfo(spellID)
+
+	if C_Spell and C_Spell.PickupSpell then
+		C_Spell.PickupSpell(spellID)
+	end
+	if not CursorHasAny() and PickupSpell then
+		PickupSpell(spellID)
+	end
+	if not CursorHasAny() and name then
+		if C_Spell and C_Spell.PickupSpell then
+			C_Spell.PickupSpell(name)
+		elseif PickupSpell then
+			PickupSpell(name)
+		end
+	end
+	if not CursorHasAny() then
+		local idx = FindSpellbookIndexBySpell(spellID, name)
+		if idx and PickupSpellBookItem then
+			PickupSpellBookItem(idx, "spell")
+		end
+	end
+end
+-- ===============================================================
 
 local function OpenSkillGuideSafe(factionID)
     if not IsAddOnLoaded("WORS_SkillGuide") then
@@ -170,20 +231,17 @@ local function OpenSkillGuideSafe(factionID)
         return
     end
 
-    -- helper
     local function hasCats(id)
         local cats = DBCSkillGuide and DBCSkillGuide.GetCategoriesForSkill and DBCSkillGuide.GetCategoriesForSkill(id)
         return type(cats) == "table" and #cats > 0
     end
 
-    -- candidates: factionID, then mapped skillLineID
     local candidates = { factionID }
     local map = Enum and Enum.WORSSkillToSkillLine and Enum.WORSSkillToSkillLine[factionID]
     if map then table.insert(candidates, map) end
 
     for _, id in ipairs(candidates) do
         if hasCats(id) then
-            -- toggle logic: if guide is already showing this skill, hide it
             if guide:IsShown() and guide.skillID == id then
                 guide:Hide()
             else
@@ -196,13 +254,13 @@ local function OpenSkillGuideSafe(factionID)
     UIErrorsFrame:AddMessage("No SkillGuide data available for this skill.", 1, 0, 0, 1)
 end
 
--- Create/rebuild buttons in chosen order (+ inject QUESTPOINTS + filler + TOTAL row)
+-- Create/rebuild buttons in chosen order (+ inject QUESTPOINTS + SLAYER + TOTAL row)
 function WORS_U_SkillsBook:RefreshConfig()
     if not self._skillButtons then self._skillButtons = {} end
 
     local ids = BuildResolvedOrder()
 
-    -- Inject the special row items so the black row shows: [QuestPoints] [Filler] [Total]
+    -- Inject the special row items: [QuestPoints] [Slayer] [Total]
     table.insert(ids, "__QUESTPOINTS__")
     table.insert(ids, "__SLAYER__")
     table.insert(ids, "__TOTAL__")
@@ -212,7 +270,6 @@ function WORS_U_SkillsBook:RefreshConfig()
 
     for _, entry in ipairs(ids) do
         if entry == "__FILLER__" then
-            -- filler: just advance column (creates empty black box visually because we don't create anything special)
             col = col + 1
             if col >= COLS then col = 0; row = row + 1 end
 
@@ -227,7 +284,6 @@ function WORS_U_SkillsBook:RefreshConfig()
                 local y = START_Y - (BUTTON_H + PADDING) * row
                 btn:SetPoint("TOPLEFT", self.frame, "TOPLEFT", x, y)
 
-                -- strip default visuals
                 btn:SetNormalTexture(nil)
                 btn:SetPushedTexture(nil)
                 btn:SetHighlightTexture(nil)
@@ -237,20 +293,17 @@ function WORS_U_SkillsBook:RefreshConfig()
                     end
                 end
 
-                -- black fill
                 local fill = btn:CreateTexture(nil, "BORDER")
                 fill:SetAllPoints()
                 fill:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
                 fill:SetVertexColor(0, 0, 0, 0.95)
                 btn._fill = fill
 
-                -- label
                 local fs = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
                 fs:SetPoint("CENTER", 0, 0)
                 fs:SetTextColor(1, 1, 0)
                 btn.Label = fs
 
-                -- tooltip
                 btn:SetScript("OnEnter", function(selfBtn)
                     GameTooltip:SetOwner(selfBtn, "ANCHOR_RIGHT")
                     local qp = GetItemCount(201883) or 0
@@ -265,7 +318,7 @@ function WORS_U_SkillsBook:RefreshConfig()
             self._skillButtons[index] = { btn = btn, id = "__QUESTPOINTS__" }
 
             local qp = GetItemCount(201883) or 0
-            btn.Label:SetText(("QP: %d"):format(qp))
+            btn.Label:SetText(("|TInterface\\Icons\\questiconitem:16|t %d"):format(qp))
 
             col = col + 1
             if col >= COLS then col = 0; row = row + 1 end
@@ -282,7 +335,6 @@ function WORS_U_SkillsBook:RefreshConfig()
                 local y = START_Y - (BUTTON_H + PADDING) * row
                 btn:SetPoint("TOPLEFT", self.frame, "TOPLEFT", x, y)
 
-                -- strip default visuals
                 btn:SetNormalTexture(nil)
                 btn:SetPushedTexture(nil)
                 btn:SetHighlightTexture(nil)
@@ -292,20 +344,17 @@ function WORS_U_SkillsBook:RefreshConfig()
                     end
                 end
 
-                -- black fill
                 local fill = btn:CreateTexture(nil, "BORDER")
                 fill:SetAllPoints()
                 fill:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
                 fill:SetVertexColor(0, 0, 0, 0.95)
                 btn._fill = fill
 
-                -- label
                 local fs = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
                 fs:SetPoint("CENTER", 0, 0)
                 fs:SetTextColor(1, 1, 0)
                 btn.Label = fs
 
-                -- tooltip
                 btn:SetScript("OnEnter", function(selfBtn)
                     GameTooltip:SetOwner(selfBtn, "ANCHOR_RIGHT")
                     local sp = GetItemCount(40753) or 0
@@ -322,14 +371,11 @@ function WORS_U_SkillsBook:RefreshConfig()
             self._skillButtons[index] = { btn = btn, id = "__SLAYER__" }
 
             local sp = GetItemCount(40753) or 0
-            btn.Label:SetText(("SP: %d"):format(sp))
+			btn.Label:SetText(("|TInterface\\Icons\\Skills\\Slayericon:16|t %d"):format(sp))
 
             col = col + 1
             if col >= COLS then col = 0; row = row + 1 end
             index = index + 1
-
-
-
 
         elseif entry == "__TOTAL__" then
             local btnData = self._skillButtons[index]
@@ -365,15 +411,10 @@ function WORS_U_SkillsBook:RefreshConfig()
                 btn:SetScript("OnEnter", function(selfBtn)
                     GameTooltip:SetOwner(selfBtn, "ANCHOR_RIGHT")
                     local ok, totalLevel, totalXP = pcall(function() return WORSSkillsUtil.GetTotalLevel() end)
-                    -- WORSSkillsUtil.GetTotalLevel may return totalLevel,totalXP in some implementations; keep safe
                     local lvl = 0
                     local xp = 0
-                    if ok and totalLevel then
-                        lvl = totalLevel
-                    end
-                    if ok and totalXP then
-                        xp = totalXP
-                    end
+                    if ok and totalLevel then lvl = totalLevel end
+                    if ok and totalXP then xp = totalXP end
                     GameTooltip:SetText("Total level", 1, 1, 1)
                     GameTooltip:AddLine(("Total Level: |cFFFFFFFF%s|r"):format(BreakUpLargeNumbers(lvl or 0)), 1, 1, 1)
                     if xp then
@@ -486,6 +527,109 @@ function WORS_U_SkillsBook:RefreshConfig()
             self._skillButtons[i].btn:Hide()
         end
     end
+
+    -- ===== Crafting bar (icon-only, alphabetical, 4 per row, draggable) =====
+    if not self._craftButtons then self._craftButtons = {} end
+
+    local craftOrder = BuildCraftOrder()
+    local craftCount = #craftOrder
+
+    -- Start position: first clean row beneath the main grid
+    local mainRowsUsed = row + (col > 0 and 1 or 0)
+    local baseY        = START_Y - (BUTTON_H + PADDING) * mainRowsUsed
+
+    local craftRow, craftCol = 0, 0
+    local frameW      = self.frame:GetWidth() or 192
+    local innerW      = frameW - (START_X * 2)
+    local rowWidth    = CRAFT_COLS * CRAFT_ICON + (CRAFT_COLS - 1) * CRAFT_PAD
+    local leftover    = math.max(innerW - rowWidth, 0)
+    local rowStartX   = START_X + math.floor(leftover / 2) -- centered
+
+    local cIndex = 1
+    for _, skillName in ipairs(craftOrder) do
+        local spellID = WORS_SkillCraftUI and WORS_SkillCraftUI[skillName]
+        if spellID then
+            local cell = self._craftButtons[cIndex]
+            local btn  = cell and cell.btn
+            if not btn then
+                btn = CreateFrame("Button", nil, self.frame, "SecureActionButtonTemplate")
+                btn:SetSize(CRAFT_ICON, CRAFT_ICON)
+                btn:SetAttribute("type", "spell")
+                btn:SetAttribute("spell", spellID)
+                btn.spellID = spellID
+
+                local icon = btn:CreateTexture(nil, "ARTWORK")
+                icon:SetAllPoints()
+                local iconPath = (WORS_SkillIcons and WORS_SkillIcons[skillName]) or "Interface\\Icons\\INV_Misc_QuestionMark"
+                icon:SetTexture(iconPath)
+                btn.Icon = icon
+
+                btn:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square", "ADD")
+
+                -- Drag onto action bars (robust)
+                btn:RegisterForDrag("LeftButton")
+                btn:SetScript("OnDragStart", function(selfBtn)
+                    if InCombatLockdown() then return end
+                    PickupCraftSpell(selfBtn.spellID)
+                end)
+
+                -- Modified-click to pick up too
+                btn:SetScript("OnClick", function(selfBtn, button)
+                    if IsModifiedClick and IsModifiedClick("PICKUPACTION") then
+                        if InCombatLockdown() then return end
+                        PickupCraftSpell(selfBtn.spellID)
+                        return
+                    end
+                    CastSpellByID(selfBtn.spellID)
+                end)
+
+				-- Default spell tooltip (no custom lines)
+				btn:SetScript("OnEnter", function(selfBtn)
+					GameTooltip:SetOwner(selfBtn, "ANCHOR_RIGHT")
+					if GameTooltip.SetSpellByID then
+						GameTooltip:SetSpellByID(selfBtn.spellID)
+					else
+						-- Fallback for very old clients: show tooltip from spellbook slot
+						local idx = FindSpellbookIndexBySpell(selfBtn.spellID, GetSpellInfo(selfBtn.spellID))
+						if idx and GameTooltip.SetSpellBookItem then
+							GameTooltip:SetSpellBookItem(idx, "spell")
+						end
+					end
+					GameTooltip:Show()
+				end)
+				btn:SetScript("OnLeave", GameTooltip_Hide)
+            end
+
+            local x = rowStartX + (CRAFT_ICON + CRAFT_PAD) * craftCol
+            local y = baseY - (CRAFT_ICON + CRAFT_PAD) * craftRow
+            btn:ClearAllPoints()
+            btn:SetPoint("TOPLEFT", self.frame, "TOPLEFT", x, y)
+
+            self._craftButtons[cIndex] = { btn = btn, name = skillName, spellID = spellID }
+            btn:Show()
+
+            craftCol = craftCol + 1
+            if craftCol >= CRAFT_COLS then craftCol = 0; craftRow = craftRow + 1 end
+            cIndex = cIndex + 1
+        end
+    end
+
+    -- Hide leftover craft buttons
+    for i = cIndex, #self._craftButtons do
+        if self._craftButtons[i] and self._craftButtons[i].btn then
+            self._craftButtons[i].btn:Hide()
+        end
+    end
+
+    -- Adjust frame height to fit the craft icons
+    do
+        local craftRowsUsed = (craftCount > 0) and math.ceil(craftCount / CRAFT_COLS) or 0
+        local neededH = (-START_Y)
+                      + (BUTTON_H + PADDING) * mainRowsUsed
+                      + (CRAFT_ICON + CRAFT_PAD) * craftRowsUsed
+                      + 16
+        self.frame:SetHeight(math.max(self.frame:GetHeight() or 0, neededH))
+    end
 end
 
 function WORS_U_SkillsBook:RefreshValues()
@@ -503,15 +647,14 @@ function WORS_U_SkillsBook:RefreshValues()
         elseif e.id == "__QUESTPOINTS__" then
             if self.questBox and self.questBox.Label then
                 local qp = GetItemCount(201883) or 0
-                self.questBox.Label:SetText(("QP %d"):format(qp))
+                self.questBox.Label:SetText(("|TInterface\\Icons\\questiconitem:16|t %d"):format(qp))
             end
 			
 		elseif e.id == "__SLAYER__" then
             if self.questBox and self.questBox.Label then
                 local sp = GetItemCount(40753) or 0
-                self.questBox.Label:SetText(("SP %d"):format(sp))
+                self.questBox.Label:SetText(("|TInterface\\Icons\\Skills\\Slayericon:16|t %d"):format(sp))
             end
-			
 
         elseif e.id == ResolveSkillID("Hitpoints") then
             local hp, hpMax = UnitHealth("player"), UnitHealthMax("player")
@@ -526,7 +669,6 @@ function WORS_U_SkillsBook:RefreshValues()
             if e.btn and e.btn.CapFS then e.btn.CapFS:SetText(mpMaxK or 0) end
 
         else
-            -- default: fetch from WORSSkillsUtil
             local ok, info1, info2, buffedLevel, currentLevel = pcall(WORSSkillsUtil.GetSkillInfo, e.id)
             if ok then
                 if e.btn and e.btn.CurFS then e.btn.CurFS:SetText(buffedLevel or 0) end
@@ -542,7 +684,6 @@ WORS_U_SkillsBook.frame:HookScript("OnShow", function()
 	if not WORS_U_SkillsBook._skillButtons or #WORS_U_SkillsBook._skillButtons == 0 then
 		WORS_U_SkillsBook:RefreshConfig()
 	end
-	-- ensure totals (and icons/levels) are populated on the very first open
 	WORS_U_SkillsBook:RefreshValues()
 end)
 
@@ -563,15 +704,12 @@ end)
 
 -- === Live updates when reputation/health/auras/etc change (drives skills) ===
 local function RefreshSkillsAndTooltip()
-    -- Update numbers/icons
     if WORS_U_SkillsBook and WORS_U_SkillsBook.RefreshValues then
         WORS_U_SkillsBook:RefreshValues()
     end
 
-    -- If user is hovering a skill/total/quest button, rebuild that tooltip live
     local owner = GameTooltip and GameTooltip:GetOwner()
     if owner then
-        -- Try to re-fire the button's OnEnter if it has one
         local onEnter = (owner.GetScript and owner:GetScript("OnEnter"))
         if type(onEnter) == "function" then
             onEnter(owner)
@@ -580,24 +718,26 @@ local function RefreshSkillsAndTooltip()
 end
 
 local skillsEvt = CreateFrame("Frame")
-skillsEvt:RegisterEvent("PLAYER_ENTERING_WORLD")           -- prime once
-skillsEvt:RegisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")  -- combat rep spam
+skillsEvt:RegisterEvent("PLAYER_ENTERING_WORLD")
+skillsEvt:RegisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")
 skillsEvt:RegisterEvent("UNIT_HEALTH")
 skillsEvt:RegisterEvent("UNIT_MANA")
 skillsEvt:RegisterEvent("UNIT_AURA")
 skillsEvt:SetScript("OnEvent", function()
     if event == "PLAYER_ENTERING_WORLD" then
-        if WORS_U_SkillsBook.frame and not WORS_U_SkillsBook.frame:IsUserPlaced() then
-            WORS_U_SkillsBook.frame:ClearAllPoints()
-            WORS_U_SkillsBook.frame:SetPoint("RIGHT", UIParent, "RIGHT", -140, 48)
-            WORS_U_SkillsBook.frame:SetUserPlaced(true)
+		if WORS_U_SkillsBook.frame and not WORS_U_SkillsBook.frame:IsUserPlaced() then
+			if WORS_U_MicroMenuAutoClose and WORS_U_MicroMenuAutoClose.AutoClosePOS then
+				ApplyMicroMenuSavedPosition()
+			else
+				WORS_U_SkillsBook.frame:ClearAllPoints()
+				WORS_U_SkillsBook.frame:SetPoint("RIGHT", UIParent, "RIGHT", -140, 48)
+				WORS_U_SkillsBook.frame:SetUserPlaced(true)
+			end
 		end
-		
 	else
 		RefreshSkillsAndTooltip()
 	end
 end)
-
 
 local closeButton = CreateFrame("Button", nil, WORS_U_SkillsBook.frame, "SecureHandlerClickTemplate")
 closeButton:SetSize(16, 16)
@@ -609,10 +749,8 @@ closeButton:SetPushedTexture("Interface\\WORS\\OldSchool-CloseButton-Down.blp")
 closeButton:SetFrameRef("uSkillsBook", WORS_U_SkillsBook.frame)
 closeButton:SetAttribute("_onclick", [=[
     local uSkillsBook = self:GetFrameRef("uSkillsBook")
-    uSkillsBook:SetAttribute("userToggle", nil)
     uSkillsBook:Hide()
 ]=])
-
 
 -- =========================
 -- Secure Toggle
@@ -642,26 +780,35 @@ SkillsMicroMenuToggle:SetFrameRef("uSkillsBook", WORS_U_SkillsBook.frame)
 SkillsMicroMenuToggle:SetAttribute("_onclick", [=[
 	local f = self:GetFrameRef("uSkillsBook")
 	if not f then return end
-
-	-- Flip desired state
-	local willShow = not f:GetAttribute("userToggle")
-	f:SetAttribute("userToggle", willShow and true or nil)
-
-	-- Apply visibility to match the flag
-	if willShow then
+	if not f:IsShown() then
 		f:Show()
 	else
 		f:Hide()
 	end
 ]=])
 
-WORS_U_SkillsBook.frame:SetAttribute("_onshow", [=[
-  self:SetAttribute("userToggle", true)
-]=])
-
-WORS_U_SkillsBook.frame:SetAttribute("_onhide", [=[
-  self:SetAttribute("userToggle", nil)
-]=])
+SkillsMicroMenuToggle:SetScript("PostClick", function(self, button, down)
+	if WORS_U_MicroMenuAutoClose.Skills then
+		if WORS_U_MicroMenuAutoClose.Backpack and Backpack and Backpack:IsShown() then
+			Backpack:Hide()
+		end
+		if WORS_U_MicroMenuAutoClose.CombatStyle and CombatStylePanel and CombatStylePanel:IsShown() then
+			CombatStylePanel:Hide()
+		end
+		if WORS_U_MicroMenuAutoClose.Prayer and WORS_U_PrayBookFrame and WORS_U_PrayBookFrame:IsShown() then
+			WORS_U_PrayBookFrame:Hide()
+		end
+		if WORS_U_MicroMenuAutoClose.Magic and WORS_U_SpellBookFrame and WORS_U_SpellBookFrame:IsShown() then
+			WORS_U_SpellBookFrame:Hide()
+		end
+		if WORS_U_MicroMenuAutoClose.Equipment and WORS_U_EquipmentBookFrame and WORS_U_EquipmentBookFrame:IsShown() then
+			WORS_U_EquipmentBookFrame:Hide()
+		end
+		if WORS_U_MicroMenuAutoClose.Emotes and EmoteBookFrame and EmoteBookFrame:IsShown() then
+			EmoteBookFrame:Hide()
+		end
+	end
+end)
 
 -- =========================
 -- Keybind Secure Toggle 
@@ -675,11 +822,9 @@ kb:SetScript("OnEvent", function(self, event)
 		self.need = true
 		return
 	end
-	-- bind both keys for TOGGLEMAGIC
 	local k1, k2 = GetBindingKey("TOGGLESKILLS")
 	if k1 then SetOverrideBindingClick(UIParent, true, k1, "WORS_USkillsBook_Toggle", "LeftButton") end
 	if k2 then SetOverrideBindingClick(UIParent, true, k2, "WORS_USkillsBook_Toggle", "LeftButton") end
-
 	if event == "PLAYER_REGEN_ENABLED" then
 		self.need = nil
 	end

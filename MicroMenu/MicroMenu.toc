@@ -3,11 +3,12 @@
 ## Notes: Spell, Prayer, Equipment and Skill menus for for WORS.
 ## Version: 3.2.1
 ## Dependencies: WORS_Backpack WORS_SkillGuide
-## SavedVariables: WORS_U_MicroMenuSettings WORS_U_SpellBookSettings WORS_U_PrayerBookSettings
+## SavedVariables: WORS_U_MicroMenuAutoClose WORS_U_SpellBookSettings WORS_U_PrayerBookSettings 
 ## Bindings: Bindings.xml
 Bindings.lua
 
 # Main
+MicroMenuOptions.lua
 WORS_U_SpellBook.lua
 WORS_U_PrayBook.lua
 WORS_U_Equipment.lua
