@@ -89,7 +89,7 @@ end
 -- ---------- Layout constants ----------
 local CAP      = 99
 local BUTTON_W = 59
-local BUTTON_H = 30
+local BUTTON_H = 33
 local PADDING  = 0
 local COLS     = 3
 local START_X  = 7

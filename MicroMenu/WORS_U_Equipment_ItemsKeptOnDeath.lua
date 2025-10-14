@@ -1,18 +1,47 @@
 local slotData = {
-    Head          = { id=1,  row=1, col=2, bg="Head_slot" },
-    Neck          = { id=2,  row=2, col=2, bg="Neck_slot" },
-    Shoulder      = { id=3,  row=2, col=3, bg="Ammo_slot" },
-    Back          = { id=15, row=2, col=1, bg="Cape_slot" },
-    Chest         = { id=5,  row=3, col=2, bg="Body_slot" },
-    MainHand      = { id=16, row=3, col=1, bg="Weapon_slot" },
-    SecondaryHand = { id=17, row=3, col=3, bg="Shield_slot" },
-    Hands         = { id=10, row=4, col=1, bg="Hands_slot" },
-    Legs          = { id=7,  row=4, col=2, bg="Legs_slot" },
-    Finger0       = { id=11, row=4, col=3, bg="Ring_slot" },
-    Wrist         = { id=9,  row=5, col=1, bg="2h_slot" },
-    Feet          = { id=8,  row=5, col=2, bg="Feet_slot" },
-    Finger1       = { id=12, row=5, col=3, bg="Ring_slot" },	
+    { id=13, row=1, col=1, hover="Trinket", tex="Trinket_slot"},
+    { id=14, row=1, col=3, hover="Trinket", tex="Trinket_slot"},
+    { id=1,  row=1, col=2, hover="Head",    tex="Head_slot" },
+
+    { id=2,  row=2, col=2, hover="Neck",   tex="Neck_slot" },
+    { id=3,  row=2, col=3, hover="Arrows", tex="Ammo_slot" },
+    { id=15, row=2, col=1, hover="Back",   tex="Cape_slot" },
+
+    -- Row 3 now has 4 buttons, but layout should center as if 3.
+    { id=16, row=3, col=1, hover="Main Hand",  tex="Weapon_slot" },
+    { id=5,  row=3, col=2, hover="Chest",      tex="Body_slot"   },
+    { id=17, row=3, col=3, hover="Off Hand",   tex="Shield_slot" },
+    { id=18, row=3, col=4, hover="Ranged", tex="Ranged_slot" }, -- placed to the right of id=16
+
+    { id=4,  row=4, col=1, hover="Shirt",  tex="Shirt_slot"  },
+    { id=6,  row=4, col=2, hover="Waist",  tex="Belt_slot"   },
+    { id=19, row=4, col=3, hover="Tabard", tex="Tabard_slot" },
+
+    { id=10, row=5, col=1, hover="Hands", tex="Hands_slot" },
+    { id=7,  row=5, col=2, hover="Legs",  tex="Legs_slot"  },
+    { id=11, row=5, col=3, hover="Ring",  tex="Ring_slot"  },
+
+    { id=9,  row=6, col=1, hover="Wrist", tex="Bracer_slot" },
+    { id=8,  row=6, col=2, hover="Feet",  tex="Feet_slot"   },
+    { id=12, row=6, col=3, hover="Ring",  tex="Ring_slot2"  },
 }
+
+
+-- === Item IDs to ignore (simple numeric list) ===
+local IGNORED_ITEM_IDS = {
+    201922, 201880, 1000, 202011, 202023, 202120, 202059, 202072, 202048, 202096, 202108, 202084, 202144, 202156, 202132, 202000, 202012, 202121, 202061, 202073, 202049, 202097, 202109, 202085, 202145, 202157, 202133, 202009, 202021, 202122, 202062, 202074, 202050, 202098, 202110, 202086, 202146, 202158, 202134, 202006, 202018, 202123, 202063, 202075, 202051, 202099, 202111, 202087, 202147, 202159, 202135, 202008, 202020, 202124, 202064, 202076, 202052, 202100, 202112, 202088, 202148, 202160, 202136, 202002, 202014, 202125, 202065, 202077, 202053, 202101, 202113, 202089, 202149, 202161, 202137, 202001, 202013, 202126, 202066, 202078, 202054, 202102, 202114, 202090, 202150, 202162, 202138, 202010, 202022, 202127, 202067, 202079, 202055, 202103, 202115, 202091, 202151, 202163, 202139, 202003, 202015, 202128, 202068, 202080, 202056, 202104, 202116, 202092, 202152, 202164, 202140, 202004, 202016, 202129, 202069, 202081, 202057, 202105, 202117, 202093, 202153, 202165, 202141, 202005, 202017, 202130, 202070, 202082, 202058, 202106, 202118, 202094, 202154, 202166, 202142, 202007, 202019, 202131, 202071, 202083, 201921, 202107, 202119, 202095, 202155, 202167, 202143, 202035, 202047, 202024, 202036, 202033, 202045, 202030, 202042, 202032, 202044, 202026, 202038, 202025, 202037, 202034, 202046, 202027, 202039, 202028, 202040, 202029, 202041, 202031, 202043, 59, 62, 60
+}
+
+-- Simple membership check against the numeric list
+local function IsIgnoredItem(itemID)
+    if not itemID then return false end
+    for _, id in ipairs(IGNORED_ITEM_IDS) do
+        if id == itemID then
+            return true
+        end
+    end
+    return false
+end
 
 function formatOSRSNumber(value)
     local formattedValue
@@ -58,7 +87,7 @@ WORS_U_EquipmentBook.itemsKeptOnDeathFrame:RegisterForDrag("LeftButton")
 WORS_U_EquipmentBook.itemsKeptOnDeathFrame:SetClampedToScreen(true)
 WORS_U_EquipmentBook.itemsKeptOnDeathFrame:Hide()
 tinsert(UISpecialFrames, "WORS_U_EquipmentBookitemsKeptOnDeathFrame")
-
+WORS_U_EquipmentBook.itemsKeptOnDeathFrame:SetUserPlaced(false)
 
 local closeButton = CreateFrame("Button", nil, WORS_U_EquipmentBook.itemsKeptOnDeathFrame)
 closeButton:SetSize(16,16)
@@ -73,7 +102,7 @@ WORS_U_EquipmentBook.itemsKeptOnDeathFrame:SetScript("OnDragStop",  WORS_U_Equip
 
 WORS_U_EquipmentBook.itemsKeptOnDeathFrame.title = WORS_U_EquipmentBook.itemsKeptOnDeathFrame:CreateFontString(nil,"OVERLAY","GameFontNormalLarge")
 WORS_U_EquipmentBook.itemsKeptOnDeathFrame.title:SetPoint("TOP", WORS_U_EquipmentBook.itemsKeptOnDeathFrame, "TOP", 0, -5)
-WORS_U_EquipmentBook.itemsKeptOnDeathFrame.title:SetText("*WIP* Items kept on Death *WIP*")
+WORS_U_EquipmentBook.itemsKeptOnDeathFrame.title:SetText("Items kept on Death")
 
 -- ===== Layout constants (fixed) =====
 local OUTER_PAD     = 10   -- padding from parent edges
@@ -159,10 +188,6 @@ local function EnsureButton(key, anchor, text)
         btn = CreateFrame("Button", nil, side, "OldSchoolButtonTemplate")
         side[key] = btn
         btn:SetSize(120, 40)
-        btn.bg = btn:CreateTexture(nil, "ARTWORK")
-        btn.bg:SetAllPoints(btn)
-        btn.bg:SetColorTexture(0,1,0,0.3)
-        btn.bg:Hide()
     end
     btn:ClearAllPoints()
     btn:SetPoint("TOP", anchor, "BOTTOM", 0, -8)
@@ -174,9 +199,20 @@ local pb = EnsureButton("prayerBtn", sideLabel, "Protect item Prayer\nenabled")
 local pkb = EnsureButton("pkSkullBtn", pb, "PK Skull active")
 local kb = EnsureButton("killedBtn", pkb, "Killed by player")
 
-local function RefreshPrayerBtn() if WORS_U_EquipmentBook.prayerActive then pb.bg:Show() else pb.bg:Hide() end end
-local function RefreshPKBtn()     if WORS_U_EquipmentBook.pkSkullActive then pkb.bg:Show() else pkb.bg:Hide() end end
-local function RefreshKilledBtn() if WORS_U_EquipmentBook.killedByPlayerActive then kb.bg:Show() else kb.bg:Hide() end end
+
+local function RefreshPrayerBtn()
+    pb:SetSelected(WORS_U_EquipmentBook.prayerActive)
+end
+
+local function RefreshPKBtn()
+    pkb:SetSelected(WORS_U_EquipmentBook.pkSkullActive)
+end
+
+local function RefreshKilledBtn()
+    kb:SetSelected(WORS_U_EquipmentBook.killedByPlayerActive)
+end
+
+
 
 pb:SetScript("OnClick", function()
     WORS_U_EquipmentBook.prayerActive = not WORS_U_EquipmentBook.prayerActive
@@ -228,12 +264,17 @@ function WORS_U_EquipmentBook:GatherAllItems()
                 itemCount = GetInventoryItemCount("player", 16) or GetInventoryItemCount("player", 18)
             end
             itemCount = itemCount or 1
-            items[#items+1] = {
-                link    = itemLink or link,
-                texture = iconPath or "Interface\\Icons\\INV_Misc_QuestionMark",
-                price   = tonumber(sellPrice) or 0,
-                count   = itemCount,
-            }
+
+            -- NEW: ignore list check for equipped item
+            local itemID = tonumber(string.match(itemLink or link, "item:(%d+)"))
+            if not IsIgnoredItem(itemID) then
+                items[#items+1] = {
+                    link    = itemLink or link,
+                    texture = iconPath or "Interface\\Icons\\INV_Misc_QuestionMark",
+                    price   = tonumber(sellPrice) or 0,
+                    count   = itemCount,
+                }
+            end
         end
     end
     for bag = 0, NUM_BAG_SLOTS do
@@ -242,12 +283,17 @@ function WORS_U_EquipmentBook:GatherAllItems()
             if link then
                 local _, itemCount = GetContainerItemInfo(bag, slot)
                 local _, itemLink, _, _, _, _, _, _, _, iconPath, sellPrice = GetItemInfo(link)
-                items[#items+1] = {
-                    link    = itemLink or link,
-                    texture = iconPath or "Interface\\Icons\\INV_Misc_QuestionMark",
-                    price   = tonumber(sellPrice) or 0,
-                    count   = itemCount or 1,
-                }
+
+                -- NEW: ignore list check for bag item
+                local itemID = tonumber(string.match(itemLink or link, "item:(%d+)"))
+                if not IsIgnoredItem(itemID) then
+                    items[#items+1] = {
+                        link    = itemLink or link,
+                        texture = iconPath or "Interface\\Icons\\INV_Misc_QuestionMark",
+                        price   = tonumber(sellPrice) or 0,
+                        count   = itemCount or 1,
+                    }
+                end
             end
         end
     end

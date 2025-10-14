@@ -191,20 +191,15 @@ local function SetupEmoteButtons(XOffset, YOffset)
 end
 
 local function UpdateButtonBackground()
-	if InCombatLockdown() then return end
-    local b = _G.EmotesMicroButton
-    if not b then return end
-    if EmoteBook.frame:IsShown() then
-        b:SetButtonState("PUSHED", true)   -- lock while open
+	if EmoteBook.frame:IsShown() then
+        EmotesMicroButton:SetButtonState("PUSHED", true)
     else
-        b:SetButtonState("NORMAL")         -- unlock when closed
-    end
+        EmotesMicroButton:SetButtonState("NORMAL", true)
+    end	
 end
 
 EmoteBook.frame:HookScript("OnHide", UpdateButtonBackground)
-EmoteBook.frame:HookScript("OnShow", function()
-    UpdateButtonBackground()
-end)
+EmoteBook.frame:HookScript("OnShow", UpdateButtonBackground)
 
 -- ---- Events ----
 local ev = CreateFrame("Frame")
@@ -333,3 +328,4 @@ kb:SetScript("OnEvent", function(self, event)
 		self.need = nil
 	end
 end)
+
